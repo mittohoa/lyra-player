@@ -1,0 +1,36 @@
+<!--
+  Logo Lyra - ban goc. Sua file nay roi chay `npm run icon` de xuat lai PNG.
+
+  Hinh not moc kep dung theo ti le khac nhac that:
+  - Dau not la ellipse det (58 x 33) nghieng -25 do, khong phai hinh tron.
+  - Than not mong (19) so voi be ngang dau not (116); gan KHIT vao mep phai
+    dau not sau khi xoay - mep do nam o cx + 54.4, nen than bat dau tu cx + 35.4.
+  - Dam noi cat vuong o hai dau (song song voi than), do doc -9.5 do hoi thoai
+    hon duong noi hai dau not (-10.6 do), dung nhu ban khac nhac.
+  - Ca cum duoc day sang phai 9 va len 6 de can quang hoc vao tam khung 512.
+-->
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#4338CA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Nen bo tron kieu Windows 11 -->
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#tile)"/>
+
+  <g fill="#fff" transform="translate(9 -6)">
+    <!-- Than not, dau vuong nhu ban khac nhac -->
+    <path d="M207.4 125 h19 v179 h-19 z"/>
+    <path d="M357.4 97 h19 v179 h-19 z"/>
+    <!-- Dam noi -->
+    <path d="M207.4 125 L376.4 97 L376.4 137 L207.4 165 Z"/>
+    <!-- Dau not -->
+    <ellipse cx="172" cy="300" rx="58" ry="33" transform="rotate(-25 172 300)"/>
+    <ellipse cx="322" cy="272" rx="58" ry="33" transform="rotate(-25 322 272)"/>
+  </g>
+
+  <!-- Thanh loi: ngan va day de con doc duoc o 16px -->
+  <rect x="152" y="372" width="208" height="48" rx="24" fill="#fff"/>
+</svg>
