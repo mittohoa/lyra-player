@@ -1,0 +1,159 @@
+/* Cua so overlay: nen phai trong suot tuyet doi thi Electron moi khoet duoc nen. */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: transparent !important;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ov {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 12px;
+  /* Keo tha ca cua so bang cach ro vao vung lyric */
+  -webkit-app-region: drag;
+}
+
+.ov--locked {
+  -webkit-app-region: no-drag;
+}
+
+/* Vien mo hien khi ro chuot vao, de biet dang cham dung cua so */
+.ov::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px dashed transparent;
+  transition: border-color 0.15s, background 0.15s;
+  pointer-events: none;
+}
+.ov--hover:not(.ov--locked)::before {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.ov__lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.ov__line {
+  line-height: 1.32;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: opacity 0.25s, transform 0.25s, filter 0.25s;
+  opacity: 0.42;
+  transform: scale(0.9);
+  transform-origin: var(--ov-origin, center);
+}
+
+.ov__line--active {
+  opacity: 1;
+  transform: scale(1);
+  font-weight: 700;
+}
+
+.ov__idle {
+  opacity: 0.55;
+  font-style: italic;
+}
+
+/* Thanh cong cu noi len khi ro chuot */
+.ov__tools {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: rgba(18, 18, 24, 0.82);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s, transform 0.15s;
+  pointer-events: none;
+}
+.ov--hover .ov__tools {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.ov__tool {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.12s, color 0.12s;
+}
+.ov__tool:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+.ov__tool--on {
+  color: #c4b5fd;
+}
+.ov__tool--wide {
+  width: auto;
+  padding: 0 7px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ov__meta {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  bottom: 3px;
+  left: 10px;
+  right: 10px;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.ov--hover .ov__meta {
+  opacity: 1;
+}
+
+/* Moi dong gom loi goc va (neu co) ban dich ngay ben duoi */
+.ov__row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.ov__line--translation {
+  opacity: 0.72;
+  font-weight: 400 !important;
+}
+.ov__row--active .ov__line--translation {
+  opacity: 0.85;
+}

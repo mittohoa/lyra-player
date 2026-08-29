@@ -1,0 +1,55 @@
+{
+  "name": "lyra",
+  "version": "0.1.0",
+  "description": "Trinh nghe nhac offline + online cho Windows, kem lyric noi trong suot",
+  "main": "./out/main/index.js",
+  "author": "hoadu",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && npm run test:translate",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "icon": "electron scripts/make-icon.mjs",
+    "dist": "electron-vite build && electron-builder --win --x64",
+    "probe": "esbuild scripts/probe-sources.ts --bundle --platform=node --format=cjs --external:electron --outfile=out/probe.cjs --log-level=error && electron out/probe.cjs",
+    "dig-nct": "node scripts/dig-nct.mjs",
+    "test:download": "esbuild scripts/test-download.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-download.cjs --log-level=error && electron out/test-download.cjs",
+    "test:whisper": "esbuild scripts/test-whisper-align.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-whisper.cjs --log-level=error && electron out/test-whisper.cjs",
+    "tune:whisper": "esbuild scripts/tune-whisper.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/tune-whisper.cjs --log-level=error && electron out/tune-whisper.cjs",
+    "test:translate": "esbuild scripts/test-translate.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-translate.cjs --log-level=error && electron out/test-translate.cjs",
+    "tune:align": "esbuild scripts/tune-align.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/tune-align.cjs --log-level=error && electron out/tune-align.cjs",
+    "debug:yt": "esbuild scripts/debug-yt-download.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/debug-yt.cjs --log-level=error && electron out/debug-yt.cjs",
+    "test:external": "esbuild scripts/test-external-lyrics.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-external.cjs --log-level=error && electron out/test-external.cjs",
+    "test:subs": "esbuild scripts/test-subtitle-source.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-subs.cjs --log-level=error && electron out/test-subs.cjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
+    "music-metadata": "^11.9.0",
+    "node-id3": "^0.2.9",
+    "zod": "^4.5.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^38.4.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^5.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.3.0",
+    "zustand": "^5.0.8"
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "electron-winstaller@5.4.0": true
+  },
+  "productName": "Lyra"
+}
