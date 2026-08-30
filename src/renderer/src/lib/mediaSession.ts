@@ -69,7 +69,7 @@ export function setMediaMetadata(track: Track | null): void {
       artwork: track.artwork ? [{ src: track.artwork, sizes: '512x512' }] : []
     })
   } catch (err) {
-    logToMain('warn', 'thong tin bai hat', 'Khong dat duoc thong tin bai cho he thong', err)
+    logToMain('warn', 'thông tin bài hát', 'Không đặt được thông tin bài hát cho hệ thống', err)
   }
 }
 

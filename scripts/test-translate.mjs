@@ -26,7 +26,7 @@ const seen = []
 /** Tra ve dung so dong duoc yeu cau, tru khi `mangle` bao lam sai lech. */
 function fakeReply(body, mangle) {
   const text = body.messages[0].content
-  const count = Number(/Dich (\d+) dong/.exec(text)?.[1] ?? 0)
+  const count = Number(/Dịch (\d+) dòng/.exec(text)?.[1] ?? 0)
   let lines = Array.from({ length: count }, (_, i) => `dich ${i + 1}`)
   if (mangle === 'thieu') lines = lines.slice(0, Math.max(1, count - 2))
   if (mangle === 'thua') lines = [...lines, 'thua 1', 'thua 2']
@@ -86,7 +86,7 @@ async function main() {
   check('gui khoa API qua header x-api-key', !!req.headers['x-api-key'], 'co')
   check(
     'nhac ro so dong can tra ve',
-    /Dich 3 dong/.test(req.body.messages[0].content),
+    /Dịch 3 dòng/.test(req.body.messages[0].content),
     'co'
   )
   check(
@@ -96,7 +96,7 @@ async function main() {
   )
   check(
     'system nhac giu nguyen so dong',
-    /DUNG so dong/.test(req.body.system ?? ''),
+    /ĐÚNG số dòng/.test(req.body.system ?? ''),
     'co'
   )
 
@@ -108,7 +108,7 @@ async function main() {
   check('lyric dai: chia thanh nhieu khoi', seen.length === 3, `${seen.length} yeu cau`)
   check(
     'lyric dai: khoi cuoi chi con phan du',
-    /Dich 20 dong/.test(seen[2].body.messages[0].content),
+    /Dịch 20 dòng/.test(seen[2].body.messages[0].content),
     'khoi 3 co 20 dong'
   )
 

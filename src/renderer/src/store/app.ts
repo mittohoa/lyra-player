@@ -141,7 +141,7 @@ export const useApp = create<AppState & AppActions>((set, get) => ({
       set({ tracks })
       get().toast(`Đã quét xong: ${tracks.length} bài hát.`, 'success')
     } catch (err) {
-      get().toast(logError('thu vien', err, 'Quét thư viện thất bại.'), 'error')
+      get().toast(logError('thư viện', err, 'Quét thư viện thất bại.'), 'error')
     } finally {
       set({ scanning: false, scanProgress: null })
     }
@@ -181,7 +181,7 @@ export const useApp = create<AppState & AppActions>((set, get) => ({
       const searchResults = await window.api.sources.search(q, get().enabledSources)
       set({ searchResults })
     } catch (err) {
-      get().toast(logError('tim kiem', err, 'Tìm kiếm thất bại.'), 'error')
+      get().toast(logError('tìm kiếm', err, 'Tìm kiếm thất bại.'), 'error')
     } finally {
       set({ searching: false })
     }
@@ -199,7 +199,7 @@ export const useApp = create<AppState & AppActions>((set, get) => ({
       get().toast(`Đã thêm "${track.title}" vào hàng đợi.`, 'success')
       return track
     } catch (err) {
-      get().toast(logError('doc URL', err, 'Không đọc được đường dẫn này.'), 'error')
+      get().toast(logError('đọc URL', err, 'Không đọc được đường dẫn này.'), 'error')
       return null
     }
   },

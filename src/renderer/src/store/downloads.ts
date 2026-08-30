@@ -36,7 +36,7 @@ export const useDownloads = create<DownloadState & DownloadActions>((set, get) =
       } else if (p.phase === 'error') {
         // `p.error` da qua bang dien giai o ben kia roi, nhung van ghi lai o day
         // de trong nhat ky co ca ten bai - de lan hon la mot cau loi tro troi
-        logToMain('error', 'tai ve', `Tai "${p.title}" that bai: ${p.error ?? 'khong ro ly do'}`, p)
+        logToMain('error', 'tải về', `Tải "${p.title}" thất bại: ${p.error ?? 'không rõ lý do'}`, p)
         useApp
           .getState()
           .toast(`Tải "${p.title}" thất bại. ${p.error ?? 'Xem Cài đặt → Nhật ký.'}`, 'error')
@@ -52,7 +52,7 @@ export const useDownloads = create<DownloadState & DownloadActions>((set, get) =
       return await window.api.download.track(track)
     } catch (err) {
       // Duong tien do thuong da bao loi roi - nen chi ghi, khong toast lan hai
-      report('tai ve', err, { silent: true })
+      report('tải về', err, { silent: true })
       return null
     }
   },

@@ -108,7 +108,7 @@ async function findLyrics(
         plainFallback ??= match
       }
     } catch (err) {
-      log.debug('lyric app khac', 'LRCLIB khong tra loi duoc', err)
+      log.debug('lời ở app khác', 'LRCLIB không trả lời được', err)
     }
 
     for (const [name, source] of [
@@ -132,7 +132,7 @@ async function findLyrics(
         if (lyrics.kind === 'synced') return match
         plainFallback ??= match
       } catch (err) {
-        log.debug('lyric app khac', `${name} khong tra loi duoc`, err)
+        log.debug('lời ở app khác', `${name} không trả lời được`, err)
       }
     }
   }
@@ -173,7 +173,7 @@ async function findSubtitles(
       language: found.language
     }
   } catch (err) {
-    log.debug('phu de', 'Khong lay duoc phu de cho video nay', err)
+    log.debug('phụ đề', 'Không lấy được phụ đề cho video này', err)
     return null
   }
 }

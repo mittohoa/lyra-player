@@ -114,7 +114,7 @@ export const usePlayer = create<Store>((set, get) => {
       set({
         loading: false,
         isPlaying: false,
-        error: report('phat nhac', err, {
+        error: report('phát nhạc', err, {
           fallback: `Không phát được "${track.title}".`,
           silent: true
         })
@@ -170,7 +170,7 @@ export const usePlayer = create<Store>((set, get) => {
         } catch (err) {
           set({
             isPlaying: false,
-            error: report('phat nhac', err, {
+            error: report('phát nhạc', err, {
               fallback: `Không phát lại được "${track.title}". Đường dẫn có thể đã hết hạn.`,
               silent: true
             })
@@ -181,7 +181,7 @@ export const usePlayer = create<Store>((set, get) => {
     }
 
     const why = mediaErrorReason(audio.error)
-    logToMain('error', 'phat nhac', `Khong phat duoc "${track.title}": ${why}`, {
+    logToMain('error', 'phát nhạc', `Không phát được "${track.title}": ${why}`, {
       code: audio.error?.code,
       message: audio.error?.message,
       source: track.source
@@ -295,7 +295,7 @@ export const usePlayer = create<Store>((set, get) => {
         if (!audio.src) await load(track)
         else
           await audio.play().catch((err: Error) =>
-            set({ error: report('phat nhac', err, { silent: true }) })
+            set({ error: report('phát nhạc', err, { silent: true }) })
           )
       } else {
         audio.pause()

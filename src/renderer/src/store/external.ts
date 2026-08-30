@@ -113,7 +113,7 @@ export const useExternal = create<ExternalState & ExternalActions>((set, get) =>
       .catch((err) => {
         // Chay ngam theo nhac o app khac: nguoi dung khong bam gi ca, nen dung
         // dam toast vao mat ho moi lan doi bai. Ghi lai la du de lan ra sau.
-        report('lyric app khac', err, { silent: true })
+        report('lời ở app khác', err, { silent: true })
         if (mine === token) set({ lyrics: EMPTY, matched: null, loading: false })
       })
   }

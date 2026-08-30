@@ -152,7 +152,7 @@ async function downloadTrack(
       90_000
     )
   } catch (err) {
-    log.warn('phu de', 'yt-dlp khong tai duoc phu de', err)
+    log.warn('phụ đề', 'yt-dlp không tải được phụ đề', err)
 
     // Bi Google chan tam thoi la truong hop rieng: khong phai video thieu phu
     // de, ma la ta hoi qua nhieu. Im lang thi nguoi dung doi mai khong hieu sao

@@ -52,7 +52,7 @@ async function ensureCookie(): Promise<string> {
     cookie = raw.map((c) => c.split(';')[0]).join('; ')
     cookieAt = Date.now()
   } catch (err) {
-    log.warn('nguon nhac', 'Khong lay duoc cookie cua Zing MP3', err)
+    log.warn('nguồn nhạc', 'Không lấy được cookie của Zing MP3', err)
     cookie = ''
   }
   return cookie
@@ -114,7 +114,7 @@ function toTrack(song: ZingSong): Track {
     source: 'zing',
     sourceId: song.encodeId,
     title: song.title,
-    artist: song.artistsNames || 'Khong ro nghe si',
+    artist: song.artistsNames || 'Không rõ nghệ sĩ',
     album: song.album?.title || 'Zing MP3',
     duration: Math.round(song.duration ?? 0),
     artwork: (song.thumbnailM || song.thumbnail)?.replace('w240', 'w600'),
@@ -146,7 +146,7 @@ export const zingSource: MusicSource = {
     // Uu tien 320kbps, nhung ban VIP tra ve chuoi 'VIP' thay vi URL
     const url = [data['320'], data['128']].find((u) => u && u.startsWith('http'))
     if (!url) {
-      throw new SourceError('zing', 'Bai nay chi danh cho tai khoan VIP hoac da bi go')
+      throw new SourceError('zing', 'Bài này chỉ dành cho tài khoản VIP hoặc đã bị gỡ')
     }
     return { url, headers: { Referer: `${HOST}/` } }
   },
@@ -159,7 +159,7 @@ export const zingSource: MusicSource = {
     )
     // 320 thuong doi VIP; roi ve 128 cho tai khoan thuong
     const best = ['320', '128'].find((k) => data[k]?.startsWith('http'))
-    if (!best) throw new SourceError('zing', 'Bai nay chi danh cho tai khoan VIP hoac da bi go')
+    if (!best) throw new SourceError('zing', 'Bài này chỉ dành cho tài khoản VIP hoặc đã bị gỡ')
     return {
       url: data[best],
       headers: { Referer: `${HOST}/` },
@@ -181,7 +181,7 @@ export const zingSource: MusicSource = {
       const text = await res.text()
       return text.trim() || null
     } catch (err) {
-      log.debug('nguon nhac', 'Zing MP3 khong tra ve lyric', err)
+      log.debug('nguồn nhạc', 'Zing MP3 không trả về lời bài hát', err)
       return null
     }
   }

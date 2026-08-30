@@ -235,7 +235,7 @@ function AiSection(): JSX.Element | null {
       setStatus(await window.api.ai.install(size))
       toast('Đã cài xong. Giờ căn được mốc thời gian cho lời bài hát rồi.', 'success')
     } catch (err) {
-      report('ai', err, { fallback: 'Cài đặt bộ nhận dạng thất bại.' })
+      report('AI', err, { fallback: 'Cài đặt bộ nhận dạng thất bại.' })
     } finally {
       setInstalling(false)
       setProgress('')
@@ -398,7 +398,7 @@ function LogSection(): JSX.Element {
       await navigator.clipboard.writeText(text)
       toast(`Đã chép ${shown.length} dòng nhật ký.`, 'success')
     } catch (err) {
-      report('nhat ky', err, { fallback: 'Không chép được vào clipboard.' })
+      report('nhật ký', err, { fallback: 'Không chép được vào clipboard.' })
     }
   }
 
@@ -801,7 +801,7 @@ export function SettingsView(): JSX.Element {
 
         {/* ---- Lyric ---- */}
         <section className="card">
-          <h3>Nguon loi bài hat</h3>
+          <h3>Nguồn lời bài hát</h3>
           <p className="card__hint">
             Thu tu uu tien: bạn tự nhập → file <code>.lrc</code> canh file nhac → tag nhung trong
             file → LRCLIB (mien phi, khong can key).
@@ -824,7 +824,7 @@ export function SettingsView(): JSX.Element {
 
           <Field
             label="Trạng thái"
-            hint={ytPath ? `Dang dung: ${ytPath}` : 'Chua tim thay yt-dlp tren may'}
+            hint={ytPath ? `Dang dung: ${ytPath}` : 'Chưa tìm thấy yt-dlp trên máy'}
           >
             <span style={{ color: ytPath ? 'var(--ok)' : 'var(--warn)', fontSize: 13 }}>
               {ytPath ? 'San sang' : 'Chua co'}

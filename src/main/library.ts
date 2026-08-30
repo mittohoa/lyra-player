@@ -25,7 +25,7 @@ async function* walk(dir: string, depth = 0): AsyncGenerator<string> {
   } catch (err) {
     // Bo qua thay vi lam hong ca lan quet - nhung phai ghi lai, khong thi
     // nguoi dung thay thu muc cua ho ra 0 bai ma khong hieu tai sao
-    log.warn('thu vien', `Khong doc duoc thu muc: ${dir}`, err)
+    log.warn('thư viện', `Không đọc được thư mục: ${dir}`, err)
     return
   }
   for (const entry of entries) {
@@ -46,7 +46,7 @@ function guessFromFilename(filePath: string): { title: string; artist: string } 
   if (parts.length >= 2) {
     return { artist: parts[0].trim(), title: parts.slice(1).join(' - ').trim() }
   }
-  return { artist: 'Khong ro nghe si', title: name.trim() }
+  return { artist: 'Không rõ nghệ sĩ', title: name.trim() }
 }
 
 function pictureToDataUri(meta: IAudioMetadata): string | undefined {
@@ -102,7 +102,7 @@ export async function readTrackFromFile(filePath: string): Promise<Track | null>
         meta.common.artist?.trim() ||
         meta.common.albumartist?.trim() ||
         guess.artist,
-      album: meta.common.album?.trim() || basename(filePath.split(sep).slice(0, -1).join(sep)) || 'Khong ro album',
+      album: meta.common.album?.trim() || basename(filePath.split(sep).slice(0, -1).join(sep)) || 'Không rõ album',
       duration: Math.round(meta.format.duration ?? 0),
       year: meta.common.year,
       genre: meta.common.genre?.[0],
@@ -113,7 +113,7 @@ export async function readTrackFromFile(filePath: string): Promise<Track | null>
       addedAt: stat.mtimeMs
     }
   } catch (err) {
-    log.warn('thu vien', `Khong doc duoc ${filePath}`, err)
+    log.warn('thư viện', `Không đọc được ${filePath}`, err)
     return null
   }
 }

@@ -64,7 +64,7 @@ export function handleMediaProtocol(): void {
       const url = new URL(request.url)
       filePath = decodeURIComponent(url.pathname.replace(/^\//, ''))
     } catch {
-      return new Response('URL khong hop le', { status: 400 })
+      return new Response('URL không hợp lệ', { status: 400 })
     }
     if (!filePath) return new Response('Thieu duong dan', { status: 400 })
 
@@ -74,7 +74,7 @@ export function handleMediaProtocol(): void {
       if (!stat.isFile()) return new Response('Khong phai file', { status: 404 })
       size = stat.size
     } catch {
-      return new Response('Khong tim thay file', { status: 404 })
+      return new Response('Không tìm thấy file', { status: 404 })
     }
 
     const contentType = MIME[extname(filePath).toLowerCase()] ?? 'application/octet-stream'

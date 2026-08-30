@@ -259,7 +259,7 @@ try {
   check('co ghi ra file nhat ky', files.length > 0, files.join(', ') || 'khong co file nao')
   if (files.length) {
     const body = readFileSync(join(logDir, files[0]), 'utf8')
-    check('file nhat ky co dong khoi dong', /khoi dong/.test(body), `${body.length} ky tu`)
+    check('file nhat ky co dong khoi dong', /khởi động/.test(body), `${body.length} ky tu`)
     check('file nhat ky co ca chi tiet ky thuat', /ENOTFOUND/.test(body), 'giu duoc chuoi goc de dieu tra')
   }
 } catch (err) {

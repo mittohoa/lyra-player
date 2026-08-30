@@ -75,7 +75,7 @@ export function startSmtcWatch(): void {
       { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] }
     )
   } catch (err) {
-    notify('nhac app khac', err, {
+    notify('nhạc ở app khác', err, {
       fallback:
         'Không chạy được PowerShell nên Lyra không đọc được nhạc đang phát ở app khác.'
     })
@@ -87,7 +87,7 @@ export function startSmtcWatch(): void {
   // ban, chi co `error` - thieu nhanh nay thi that bai nay hoan toan im lang
   proc.on('error', (err) => {
     if (child === proc) child = null
-    notify('nhac app khac', err, {
+    notify('nhạc ở app khác', err, {
       fallback: 'Không chạy được cầu nối tới Windows để đọc nhạc ở app khác.'
     })
   })
@@ -109,15 +109,15 @@ export function startSmtcWatch(): void {
         latest = null
         broadcast(IPC.smtcNow, null)
       } else if (msg.type === 'error') {
-        log.error('nhac app khac', 'Cau noi Windows bao loi', msg.message)
+        log.error('nhạc ở app khác', 'Cầu nối Windows báo lỗi', msg.message)
       }
     } catch (err) {
-      log.debug('nhac app khac', 'Dong khong doc duoc tu cau noi', { line: trimmed.slice(0, 200), err: String(err) })
+      log.debug('nhạc ở app khác', 'Dòng không đọc được từ cầu nối', { line: trimmed.slice(0, 200), err: String(err) })
     }
   })
 
   proc.stderr!.on('data', (buf: Buffer) => {
-    log.warn('nhac app khac', 'PowerShell bao loi', buf.toString().trim().slice(0, 500))
+    log.warn('nhạc ở app khác', 'PowerShell báo lỗi', buf.toString().trim().slice(0, 500))
   })
 
   proc.on('exit', (code) => {
@@ -127,7 +127,7 @@ export function startSmtcWatch(): void {
     broadcast(IPC.smtcNow, null)
 
     if (!wanted) return // nguoi dung vua tat
-    log.warn('nhac app khac', `Cau noi Windows dung voi ma ${code}`)
+    log.warn('nhạc ở app khác', `Cầu nối Windows dừng với mã ${code}`)
 
     const now = Date.now()
     if (now - firstRestartAt > RESTART_WINDOW) {

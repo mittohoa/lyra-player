@@ -47,6 +47,27 @@ check('loi da co san cau tieng Viet thi giu nguyen', () => {
   assert.equal(describe(mine), 'Bài này chỉ nghe được ở Việt Nam.')
 })
 
+check('cau app tu viet duoc uu tien hon mau chung chung', () => {
+  // Cau nay chua chu "whisper" nen truoc day bi mau chung nuot mat, nguoi dung
+  // khong con biet la thieu model nao
+  const mine = new Error('Chưa tải model "small". Vào Cài đặt → AI căn mốc thời gian để tải.')
+  assert.ok(describe(mine).includes('small'), describe(mine))
+})
+
+check('duong dan tieng Viet trong loi he thong khong duoc lot ra', () => {
+  // Bay: loi cua he dieu hanh, nhung duong dan lai co dau tieng Viet - khong
+  // duoc vi the ma tuong day la cau cua app roi tra nguyen van ra man hinh
+  const os = new Error("ENOENT: no such file or directory, open 'D:\\Nhạc\\bài hát.mp3'")
+  const said = describe(os)
+  assert.ok(!said.includes('ENOENT'), said)
+  assert.ok(said.includes('Không tìm thấy file'), said)
+})
+
+check('cau tieng Viet kem ma HTTP van duoc doi thanh ly do that', () => {
+  const mine = new Error('Tải thất bại (HTTP 403)')
+  assert.ok(describe(mine).includes('từ chối'), describe(mine))
+})
+
 check('khong nhan ra thi dung cau du phong', () => {
   assert.equal(describe(new Error('kwyjibo'), 'Tải thất bại.'), 'Tải thất bại.')
   assert.equal(describe(new Error('kwyjibo')), 'Có lỗi xảy ra.')

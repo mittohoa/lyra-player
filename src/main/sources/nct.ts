@@ -88,7 +88,7 @@ function toTrack(song: NctSong): Track {
     source: 'nct',
     sourceId: song.key,
     title: song.name,
-    artist: song.artistName || 'Khong ro nghe si',
+    artist: song.artistName || 'Không rõ nghệ sĩ',
     album: song.genreName || 'NhacCuaTui',
     duration: Math.round(song.duration ?? 0),
     artwork: song.image,
@@ -137,7 +137,7 @@ export const nctSource: MusicSource = {
     const song = await call<NctSong>(`/api/v1/song/detail/${track.sourceId}`)
     const picked = pickStream(song.streamURL)
     if (!picked?.stream) {
-      throw new SourceError('nct', 'Bai nay chi danh cho tai khoan VIP hoac da bi go')
+      throw new SourceError('nct', 'Bài này chỉ dành cho tài khoản VIP hoặc đã bị gỡ')
     }
     return {
       url: picked.stream,
@@ -149,7 +149,7 @@ export const nctSource: MusicSource = {
   async downloadUrl(track: Track): Promise<DownloadTarget> {
     const song = await call<NctSong>(`/api/v1/song/detail/${track.sourceId}`)
     const picked = pickStream(song.streamURL)
-    if (!picked) throw new SourceError('nct', 'Bai nay khong tai duoc (VIP hoac da bi go)')
+    if (!picked) throw new SourceError('nct', 'Bài này không tải được (VIP hoặc đã bị gỡ)')
     // Truong `download` la link tai rieng; khong co thi dung tam link stream
     return {
       url: picked.download ?? picked.stream!,
@@ -185,7 +185,7 @@ export const nctSource: MusicSource = {
       // Khong co ban dong bo thi tra ve loi thuan
       return data.content?.trim() || null
     } catch (err) {
-      log.debug('nguon nhac', 'NhacCuaTui khong tra ve lyric', err)
+      log.debug('nguồn nhạc', 'NhacCuaTui không trả về lời bài hát', err)
       return null
     }
   }

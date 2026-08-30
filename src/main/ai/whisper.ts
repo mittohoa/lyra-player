@@ -17,9 +17,9 @@ import type { WhisperWord } from './align'
 export type ModelSize = 'tiny' | 'base' | 'small'
 
 export const MODEL_INFO: Record<ModelSize, { label: string; mb: number; note: string }> = {
-  tiny: { label: 'Tiny', mb: 74, note: 'Nhanh nhat, nghe kem - chi du de bat moc' },
-  base: { label: 'Base', mb: 141, note: 'Can bang, du dung cho viec can timestamp' },
-  small: { label: 'Small', mb: 465, note: 'Nghe tot nhat, cham hon vai lan' }
+  tiny: { label: 'Tiny', mb: 74, note: 'Nhanh nhất, nghe kém — chỉ đủ để bắt mốc' },
+  base: { label: 'Base', mb: 141, note: 'Cân bằng, đủ dùng cho việc căn mốc' },
+  small: { label: 'Small', mb: 465, note: 'Nghe tốt nhất, chậm hơn vài lần' }
 }
 
 /** Ban CPU (BLAS) - chay duoc tren moi may Windows x64, khong can card do hoa. */
@@ -74,7 +74,7 @@ export interface InstallProgress {
 async function downloadTo(url: string, dest: string, onProgress: (r: number, t: number) => void) {
   await fs.mkdir(join(dest, '..'), { recursive: true })
   const res = await fetch(url, { redirect: 'follow' })
-  if (!res.ok || !res.body) throw new Error(`Tai that bai (HTTP ${res.status})`)
+  if (!res.ok || !res.body) throw new Error(`Tải thất bại (HTTP ${res.status})`)
 
   const total = Number(res.headers.get('content-length') ?? 0)
   let received = 0
@@ -102,7 +102,7 @@ function unzip(zipPath: string, destination: string): Promise<void> {
         `Expand-Archive -LiteralPath '${zipPath}' -DestinationPath '${destination}' -Force`
       ],
       { windowsHide: true, timeout: 120_000 },
-      (err) => (err ? reject(new Error(`Giai nen that bai: ${err.message}`)) : resolve())
+      (err) => (err ? reject(new Error(`Giải nén thất bại: ${err.message}`)) : resolve())
     )
   })
 }
@@ -118,7 +118,7 @@ export async function installWhisper(onProgress: (p: InstallProgress) => void): 
     await fs.rm(zip, { force: true })
 
     if (!(await findWhisper())) {
-      throw new Error('Giai nen xong nhung khong tim thay whisper-cli.exe')
+      throw new Error('Giải nén xong nhưng không tìm thấy whisper-cli.exe')
     }
   }
 }
@@ -188,12 +188,12 @@ export async function transcribe(
   const bin = await findWhisper()
   if (!bin) {
     throw new Error(
-      'Chua tai bo nhan dang. Vao Cai dat > AI can moc thoi gian de tai (mot lan duy nhat).'
+      'Chưa tải bộ nhận dạng. Vào Cài đặt → AI căn mốc thời gian để tải (một lần duy nhất).'
     )
   }
   if (!(await hasModel(options.size))) {
     throw new Error(
-      `Chua tai model "${options.size}". Vao Cai dat > AI can moc thoi gian de tai.`
+      `Chưa tải model "${options.size}". Vào Cài đặt → AI căn mốc thời gian để tải.`
     )
   }
 
@@ -237,7 +237,7 @@ export async function transcribe(
 
     options.signal?.addEventListener('abort', () => proc.kill(), { once: true })
 
-    proc.on('error', (err) => reject(new Error(`Khong chay duoc whisper: ${err.message}`)))
+    proc.on('error', (err) => reject(new Error(`Không chạy được whisper: ${err.message}`)))
     proc.on('exit', (code) => {
       if (code === 0) resolve()
       else reject(new Error(`whisper thoat voi ma ${code}: ${stderr.trim().slice(-300)}`))

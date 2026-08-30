@@ -26,7 +26,7 @@ export function getSource(id: SourceId): MusicSource | null {
 
 export async function resolveStream(track: Track, force = false): Promise<ResolvedStream> {
   if (track.source === 'local') {
-    if (!track.filePath) throw new Error('Bai hat local thieu duong dan file')
+    if (!track.filePath) throw new Error('Bài hát trong máy thiếu đường dẫn file')
     return { url: `media://local/${encodeURIComponent(track.filePath)}` }
   }
 
@@ -34,7 +34,7 @@ export async function resolveStream(track: Track, force = false): Promise<Resolv
   if (!force && cached && (!cached.expiresAt || Date.now() < cached.expiresAt)) return cached
 
   const source = getSource(track.source)
-  if (!source?.resolve) throw new Error(`Nguon "${track.source}" khong phat truc tiep duoc`)
+  if (!source?.resolve) throw new Error(`Nguồn "${track.source}" không phát trực tiếp được`)
 
   const resolved = await source.resolve(track)
   streamCache.set(track.id, resolved)
@@ -48,7 +48,7 @@ export async function sourceLyrics(track: Track): Promise<string | null> {
   try {
     return await source.lyrics(track)
   } catch (err) {
-    log.debug('nguon nhac', `Khong lay duoc lyric tu ${track.source}`, err)
+    log.debug('nguồn nhạc', `Không lấy được lời từ ${track.source}`, err)
     return null
   }
 }
