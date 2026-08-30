@@ -24,6 +24,7 @@ import {
   broadcast,
   createMainWindow,
   createOverlayWindow,
+  destroyOverlayWindow,
   getMainWindow,
   setOverlayVisible
 } from './windows'
@@ -210,6 +211,7 @@ if (!app.requestSingleInstanceLock()) {
     // Moi buoc don dep tu bat loi rieng: mot buoc hong khong duoc chan cac buoc
     // sau, vi `flushAllStores` ma khong chay thi mat het cai dat vua doi
     for (const [what, step] of [
+      ['khung lời nổi', destroyOverlayWindow],
       ['SMTC', stopSmtcWatch],
       ['phím tắt', () => globalShortcut.unregisterAll()],
       ['lưu cài đặt', flushAllStores],
