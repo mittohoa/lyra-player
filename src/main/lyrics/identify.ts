@@ -140,6 +140,23 @@ function stripAppSuffix(text: string): string {
     .trim()
 }
 
+/**
+ * Bo tung tu rac o hai dau mot doan.
+ *
+ * "Vũ Cát Tường 4K" -> "Vũ Cát Tường". Cac nhan nay bam vao dau hoac cuoi ten
+ * ma khong co dau ngan cach nao, nen buoc loc theo doan o tren khong voi toi.
+ *
+ * Chi bo o HAI DAU, khong bo o giua: "Anh Là Video Của Em" thi chu o giua la
+ * ten bai that. Va luon chua lai it nhat mot tu, khong thi mot bai ten
+ * "Karaoke" se bi xoa sach.
+ */
+function trimNoiseWords(text: string): string {
+  let words = text.split(/\s+/).filter(Boolean)
+  while (words.length > 1 && isNoise(words[words.length - 1])) words = words.slice(0, -1)
+  while (words.length > 1 && isNoise(words[0])) words = words.slice(1)
+  return words.join(' ')
+}
+
 /** Bo cac cum rac dung roi le, va dau cau thua o hai dau. */
 function tidy(text: string): string {
   let out = text
@@ -149,11 +166,12 @@ function tidy(text: string): string {
       .filter((part) => !isNoise(part))
       .join(' | ')
   }
-  return out
+  out = out
     .replace(/^[\s\-–—|·•,.:]+/, '')
     .replace(/[\s\-–—|·•,.:]+$/, '')
     .replace(/\s+/g, ' ')
     .trim()
+  return trimNoiseWords(out)
 }
 
 /**
@@ -238,6 +256,16 @@ export function candidatesFrom(raw: RawNowPlaying): Candidate[] {
       add(tail, head, 80)
       add(head, tail, 60)
     }
+
+    // Va tra bang RIENG ten bai, khong kem nghe si.
+    //
+    // Doan sai ve nghe si khong chi vo ich ma con pha: no bi nem vao cau truy
+    // van va lam nguon tra ve thu khac han. Gap that tren may:
+    //   "Nhà Tôi Có Treo Một Lá Cờ - Noo Phước Thịnh tại Concert ... Live"
+    // ve dau la ten bai dung, nhung ve kia thanh mot chuoi rac dai lam nghe si.
+    // Tra bang mot minh ten bai thi sach, va LRCLIB tim theo ten rat kha.
+    add('', head, 55)
+    add('', tail, 50)
     break
   }
 
@@ -250,6 +278,21 @@ export function candidatesFrom(raw: RawNowPlaying): Candidate[] {
 /**
  * Do giong nhau giua hai ten (0..1), dua tren ti le tu chung.
  * Dung de cham diem ket qua tra ve co dung bai khong.
+ *
+ * Dung trung binh dieu hoa cua HAI chieu, khong chia cho ben nho hon.
+ *
+ * Ban dau ham nay chia cho ben nho hon, de "Nơi Này Có Anh" van khop tot voi
+ * "Nơi Này Có Anh (Remix)". Nhung no phan tac dung nang: BAT KY ten bai ngan
+ * nao nam lot trong mot ten video dai deu duoc cham 1.0.
+ *
+ * Da sap bay that tren dien thoai: YouTube phat
+ *   "Nhà Tôi Có Treo Một Lá Cờ - Noo Phước Thịnh tại Concert 'Tổ Quốc Trong Tim'"
+ * va app hien loi bai "Tổ Quốc Trong Tim" - do la TEN CONCERT, khong phai ten
+ * bai. Bon tu do deu nam trong ten video nen diem la 4/4 = 1.0.
+ *
+ * Trung binh dieu hoa doi hoi ca hai ben cung phu nhau:
+ *   "Nơi Này Có Anh" vs "... (Remix)"   -> 0,89  nhan
+ *   "Tổ Quốc Trong Tim" vs ten dai      -> 0,44  bo
  */
 export function titleSimilarity(a: string, b: string): number {
   const wa = new Set(normalizeForCompare(a).split(' ').filter(Boolean))
@@ -258,8 +301,9 @@ export function titleSimilarity(a: string, b: string): number {
 
   let shared = 0
   for (const w of wa) if (wb.has(w)) shared++
+  if (!shared) return 0
 
-  // Chia cho ben NHO hon: "Nơi Này Có Anh" khop tot voi
-  // "Nơi Này Có Anh (Remix)" du ben kia dai hon
-  return shared / Math.min(wa.size, wb.size)
+  const coverA = shared / wa.size
+  const coverB = shared / wb.size
+  return (2 * coverA * coverB) / (coverA + coverB)
 }

@@ -117,9 +117,27 @@ check('khong bo nham khi ten bai chinh la ten nghe si', () => {
 
 check('do giong nhau: bo qua dau va phan thua', () => {
   assert.equal(titleSimilarity('Nơi Này Có Anh', 'noi nay co anh'), 1)
-  assert.equal(titleSimilarity('Nơi Này Có Anh', 'Nơi Này Có Anh (Remix)'), 1)
+  // Ban Remix dai hon mot chut - van phai coi la cung bai
+  assert.ok(titleSimilarity('Nơi Này Có Anh', 'Nơi Này Có Anh (Remix)') > 0.85)
   assert.ok(titleSimilarity('Nơi Này Có Anh', 'Chúng Ta Của Hiện Tại') < 0.3)
   assert.equal(titleSimilarity('', 'abc'), 0)
+})
+
+check('ten ngan lot trong ten dai KHONG duoc coi la khop', () => {
+  // Bay that da sap tren dien thoai: YouTube phat mot bai, ma ten concert
+  // trong tieu de lai trung ten mot bai KHAC. Cong thuc cu chia cho ve nho
+  // hon nen cham 1.0 va app hien nham loi ca buoi.
+  const video =
+    'Nhà Tôi Có Treo Một Lá Cờ - Noo Phước Thịnh tại Concert Tổ Quốc Trong Tim Live bản đầy đủ'
+  assert.ok(
+    titleSimilarity('Tổ Quốc Trong Tim', video) < 0.6,
+    'ten concert khong duoc coi la ten bai: ' + titleSimilarity('Tổ Quốc Trong Tim', video)
+  )
+  // Con ten bai that thi van phai duoc nhan ra khi tra dung phuong an
+  assert.equal(
+    titleSimilarity('Nhà Tôi Có Treo Một Lá Cờ', 'Nhà Tôi Có Treo Một Lá Cờ'),
+    1
+  )
 })
 
 console.log(`\n${passed} kiem tra nhan dien deu dat.`)
