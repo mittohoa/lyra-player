@@ -311,12 +311,12 @@ export function registerIpc(): void {
     const target = join(dir, 'yt-dlp.exe')
 
     const res = await fetch('https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe')
-    if (!res.ok || !res.body) throw new Error(`Tai that bai (HTTP ${res.status})`)
+    if (!res.ok || !res.body) throw new Error(`Tải thất bại (HTTP ${res.status})`)
     await pipeline(Readable.fromWeb(res.body as never), createWriteStream(target))
 
     patchSettings({ ytDlpPath: target })
     if (!(await findYtDlp(true))) {
-      throw new Error('Da tai xong nhung khong chay duoc - kiem tra phan mem diet virus')
+      throw new Error('Đã tải xong nhưng không chạy được — kiểm tra phần mềm diệt virus')
     }
     return target
   })
@@ -404,7 +404,7 @@ export function registerIpc(): void {
   // Loi ben giao dien gui ve day de ghi chung mot file voi loi ben nay
   ipc.on(IPC.logFromRenderer, (_e, entry: RendererLog) => {
     const level = entry?.level ?? 'error'
-    log[level](entry?.scope || 'giao dien', entry?.message || 'Loi khong ro', entry?.detail)
+    log[level](entry?.scope || 'giao dien', entry?.message || 'Lỗi không rõ', entry?.detail)
   })
 
   // ---- Tien ich --------------------------------------------------------

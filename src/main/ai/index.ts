@@ -51,10 +51,10 @@ export async function alignTrackLyrics(
   plainLines: string[]
 ): Promise<AlignResult & { lrc: string }> {
   if (!track.filePath) {
-    throw new Error('Chi can duoc timestamp cho bai co file tren may')
+    throw new Error('Chỉ căn được mốc thời gian cho bài có file trên máy')
   }
   await fs.access(track.filePath).catch(() => {
-    throw new Error('Khong tim thay file nhac')
+    throw new Error('Không tìm thấy file nhạc')
   })
 
   const settings = getSettings()
@@ -80,15 +80,15 @@ export async function alignTrackLyrics(
 
   if (!result.lines.length || result.confidence < MIN_CONFIDENCE) {
     const percent = Math.round(result.confidence * 100)
-    log.warn('ai', `Can moc that bai: chi khop ${percent}% so tu`, {
+    log.warn('AI', `Căn mốc thất bại: chỉ khớp ${percent}% số từ`, {
       lines: result.lines.length,
       confidence: result.confidence
     })
     report({ phase: 'error', error: `Chỉ khớp ${percent}% số từ nên không đủ tin cậy.` })
     throw new Error(
-      `Chi khop duoc ${percent}% so tu voi ban phien am - khong du de can moc dang tin. ` +
-        'Nhac co nhac dem manh thi Whisper nghe rat kem; thu chon model "small" trong Cai dat, ' +
-        'hoac dat dung ngon ngu bai hat.'
+      `Chỉ khớp được ${percent}% số từ với bản phiên âm — không đủ để căn mốc đáng tin. ` +
+        'Nhạc có nhạc đệm mạnh thì Whisper nghe rất kém; thử chọn model "small" trong Cài đặt, ' +
+        'hoặc đặt đúng ngôn ngữ bài hát.'
     )
   }
 
@@ -101,7 +101,7 @@ export async function alignTrackLyrics(
   if (settings.writeLrcSidecar) {
     const target = track.filePath.replace(/\.[^.]+$/, '.lrc')
     await fs.writeFile(target, lrc, 'utf8').catch((err) => {
-      log.warn('ai', 'Khong ghi duoc file .lrc canh file nhac', err)
+      log.warn('AI', 'Không ghi được file .lrc cạnh file nhạc', err)
     })
   }
 

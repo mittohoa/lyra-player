@@ -10,7 +10,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && npm run test:translate",
+    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && npm run test:translate",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "icon": "electron scripts/make-icon.mjs",
     "dist": "electron-vite build && electron-builder --win --x64",

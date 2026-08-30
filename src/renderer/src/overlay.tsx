@@ -16,7 +16,7 @@ function log(message: string, detail: unknown): void {
   try {
     window.api.log.write({
       level: 'error',
-      scope: 'khung lyric noi',
+      scope: 'khung lời nổi',
       message,
       detail: detail instanceof Error ? detail.stack || detail.message : String(detail)
     })
@@ -35,7 +35,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
 const root = document.getElementById('root')
 if (!root) {
-  log('Khong tim thay the goc cua khung lyric noi', null)
+  log('Không tìm thấy thẻ gốc của khung lời nổi', null)
 } else {
   // Khong dung StrictMode: mount hai lan se dang ky trung listener IPC,
   // khien overlay nhan doi moi ban tin trong che do dev.

@@ -22,11 +22,11 @@ function register(accelerator: string, handler: () => void): void {
   if (!accelerator.trim()) return
   try {
     if (!globalShortcut.register(accelerator, handler)) {
-      log.warn('phim tat', `Phim tat ${accelerator} da bi app khac chiem`)
+      log.warn('phím tắt', `Phím tắt ${accelerator} đã bị app khác chiếm`)
     }
   } catch (err) {
     // Chuoi accelerator khong hop le (nguoi dung tu go) - khong duoc lam sap app
-    log.warn('phim tat', `Phim tat ${accelerator} khong hop le`, err)
+    log.warn('phím tắt', `Phím tắt ${accelerator} không hợp lệ`, err)
   }
 }
 

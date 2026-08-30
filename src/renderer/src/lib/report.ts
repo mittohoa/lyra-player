@@ -62,18 +62,18 @@ export function installGlobalErrorHandlers(): void {
     // va xay ra kha thuong xuyen - ghi nhe thoi, khong lam phien nguoi dung
     if (event.target && event.target !== window) {
       const el = event.target as HTMLElement
-      logToMain('warn', 'tai nguyen', `Khong tai duoc ${el.tagName.toLowerCase()}`, {
+      logToMain('warn', 'tài nguyên', `Không tải được ${el.tagName.toLowerCase()}`, {
         src: (el as HTMLImageElement).src ?? ''
       })
       return
     }
-    report('giao dien', event.error ?? event.message, {
+    report('giao diện', event.error ?? event.message, {
       fallback: 'Giao diện gặp lỗi. Nếu lặp lại, xin khởi động lại Lyra.'
     })
   })
 
   window.addEventListener('unhandledrejection', (event) => {
-    report('giao dien', event.reason, { fallback: 'Một tác vụ nền thất bại.' })
+    report('giao diện', event.reason, { fallback: 'Một tác vụ nền thất bại.' })
   })
 
   // Canh bao chu dong tu tien trinh chinh (loi xay ra ngoai luc nguoi dung bam)

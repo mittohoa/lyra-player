@@ -37,11 +37,11 @@ function client(): Anthropic {
 }
 
 const SYSTEM = [
-  'Ban dich loi bai hat. Quy tac bat buoc:',
-  '- Tra ve DUNG so dong nhu dau vao, theo dung thu tu. Khong gop, khong tach, khong bo dong nao.',
-  '- Dich nghia va giu duoc cam xuc, nghe tu nhien nhu loi hat - khong dich may moc tung chu.',
-  '- Dong chi co ky hieu nhac (vi du ♪) hoac dong trong thi giu nguyen y het.',
-  '- Chi tra ve ban dich, khong them chu thich hay giai thich gi.'
+  'Bạn dịch lời bài hát. Quy tắc bắt buộc:',
+  '- Trả về ĐÚNG số dòng như đầu vào, theo đúng thứ tự. Không gộp, không tách, không bỏ dòng nào.',
+  '- Dịch nghĩa và giữ được cảm xúc, nghe tự nhiên như lời hát — không dịch máy móc từng chữ.',
+  '- Dòng chỉ có ký hiệu nhạc (ví dụ ♪) hoặc dòng trống thì giữ nguyên y hệt.',
+  '- Chỉ trả về bản dịch, không thêm chú thích hay giải thích gì.'
 ].join('\n')
 
 async function translateChunk(lines: string[], targetLabel: string): Promise<string[]> {
@@ -59,13 +59,13 @@ async function translateChunk(lines: string[], targetLabel: string): Promise<str
     messages: [
       {
         role: 'user',
-        content: `Dich ${lines.length} dong loi bai hat sau sang ${targetLabel}. Tra ve dung ${lines.length} dong.\n\n${numbered}`
+        content: `Dịch ${lines.length} dòng lời bài hát sau sang ${targetLabel}. Trả về đúng ${lines.length} dòng.\n\n${numbered}`
       }
     ]
   })
 
   const parsed = response.parsed_output
-  if (!parsed) throw new Error('Mo hinh khong tra ve dung dinh dang')
+  if (!parsed) throw new Error('Mô hình không trả về đúng định dạng')
 
   // Neu so dong lech, can lai cho khop de overlay khong bi truot dong
   const out = parsed.lines.slice(0, lines.length)
@@ -107,12 +107,12 @@ export async function checkApiKey(): Promise<{ ok: boolean; error?: string }> {
     await client().messages.create({
       model: MODEL,
       max_tokens: 16,
-      messages: [{ role: 'user', content: 'Tra loi dung mot chu: ok' }]
+      messages: [{ role: 'user', content: 'Trả lời đúng một chữ: ok' }]
     })
     return { ok: true }
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError) {
-      return { ok: false, error: 'Khoa API khong dung' }
+      return { ok: false, error: 'Khoá API không đúng' }
     }
     if (err instanceof Anthropic.RateLimitError) {
       return { ok: false, error: 'Bi gioi han tan suat - thu lai sau' }

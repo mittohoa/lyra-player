@@ -49,7 +49,7 @@ export async function findYtDlp(force = false): Promise<string | null> {
 export class YtDlpMissingError extends Error {
   constructor() {
     super(
-      'Chua tim thay yt-dlp. Vao Cai dat > YouTube de cai dat, hoac tro toi file yt-dlp.exe co san.'
+      'Chưa tìm thấy yt-dlp. Vào Cài đặt → YouTube để cài đặt, hoặc trỏ tới file yt-dlp.exe có sẵn.'
     )
     this.name = 'YtDlpMissingError'
   }
@@ -76,7 +76,7 @@ export function runYtDlp(args: string[], timeoutMs = 45_000): Promise<string> {
           (err, stdout, stderr) => {
             if (err) {
               const detail = stderr?.trim().split('\n').slice(-3).join(' ') || err.message
-              return reject(new Error(`yt-dlp that bai: ${detail}`))
+              return reject(new Error(`yt-dlp thất bại: ${detail}`))
             }
             resolve(stdout)
           }
@@ -115,7 +115,7 @@ export async function runYtDlpWithProgress(
     let stderr = ''
     const timer = setTimeout(() => {
       proc.kill()
-      reject(new Error('yt-dlp chay qua lau'))
+      reject(new Error('yt-dlp chạy quá lâu'))
     }, timeoutMs)
 
     proc.stdout.on('data', (buf: Buffer) => {
@@ -128,7 +128,7 @@ export async function runYtDlpWithProgress(
 
     proc.on('error', (err) => {
       clearTimeout(timer)
-      reject(new Error(`Khong chay duoc yt-dlp: ${err.message}`))
+      reject(new Error(`Không chạy được yt-dlp: ${err.message}`))
     })
     proc.on('exit', (code) => {
       clearTimeout(timer)
@@ -142,6 +142,6 @@ export async function runYtDlpWithProgress(
 export async function runYtDlpJson<T>(args: string[], timeoutMs?: number): Promise<T> {
   const stdout = await runYtDlp([...args, '--dump-single-json'], timeoutMs)
   const trimmed = stdout.trim()
-  if (!trimmed) throw new Error('yt-dlp khong tra ve du lieu')
+  if (!trimmed) throw new Error('yt-dlp không trả về dữ liệu')
   return JSON.parse(trimmed) as T
 }

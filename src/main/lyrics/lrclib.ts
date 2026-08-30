@@ -90,7 +90,7 @@ export async function fetchBest(
     if (exact?.syncedLyrics) return { content: exact.syncedLyrics, synced: true }
     if (exact?.plainLyrics) return { content: exact.plainLyrics, synced: false }
   } catch (err) {
-    log.debug('lyric', 'LRCLIB /get that bai', err)
+    log.debug('lời bài hát', 'LRCLIB /get thất bại', err)
   }
 
   try {
@@ -103,7 +103,7 @@ export async function fetchBest(
     if (best.syncedLyrics) return { content: best.syncedLyrics, synced: true }
     if (best.plainLyrics) return { content: best.plainLyrics, synced: false }
   } catch (err) {
-    log.debug('lyric', 'LRCLIB /search that bai', err)
+    log.debug('lời bài hát', 'LRCLIB /search thất bại', err)
   }
 
   return null

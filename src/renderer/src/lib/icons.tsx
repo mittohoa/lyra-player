@@ -254,3 +254,12 @@ export const IconCheck = (p: IconProps): JSX.Element => (
     <path d="m4.5 12.5 5 5 10-11" />
   </Icon>
 )
+
+export const IconSliders = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <path d="M4 7.5h9M17.5 7.5H20" />
+    <path d="M4 16.5h3.5M12 16.5h8" />
+    <circle cx="15" cy="7.5" r="2.5" />
+    <circle cx="9.5" cy="16.5" r="2.5" />
+  </Icon>
+)

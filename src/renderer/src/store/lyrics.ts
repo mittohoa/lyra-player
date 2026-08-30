@@ -73,7 +73,7 @@ export const useLyrics = create<LyricsState & LyricsActions>((set, get) => ({
         message: `Đã căn ${result.lines.length} dòng (khớp ${Math.round(result.confidence * 100)}% số từ).`
       }
     } catch (err) {
-      return { ok: false, message: report('ai', err, { silent: true }) }
+      return { ok: false, message: report('AI', err, { silent: true }) }
     } finally {
       set({ aligning: false, alignPercent: 0 })
     }
@@ -89,7 +89,7 @@ export const useLyrics = create<LyricsState & LyricsActions>((set, get) => ({
       if (get().trackId === track.id) set({ translation })
       return { ok: true, message: `Đã dịch ${translation.length} dòng.` }
     } catch (err) {
-      return { ok: false, message: report('ai', err, { silent: true }) }
+      return { ok: false, message: report('AI', err, { silent: true }) }
     } finally {
       set({ translating: false })
     }
@@ -124,7 +124,7 @@ export const useLyrics = create<LyricsState & LyricsActions>((set, get) => ({
     } catch (err) {
       // Khong tim thay loi la chuyen thuong ngay, khong dang bao dong - nhung
       // van phai ghi lai de phan biet "bai nay khong co loi" voi "mat mang"
-      report('lyric', err, { silent: true })
+      report('lời bài hát', err, { silent: true })
       if (mine === token) set({ lyrics: EMPTY, loading: false })
     }
   },
@@ -144,7 +144,7 @@ export const useLyrics = create<LyricsState & LyricsActions>((set, get) => ({
       if (mine === token) set({ lyrics, loading: false })
     } catch (err) {
       // Nguoi dung vua chu dong bam tim lai - im lang thi nut trong nhu hong
-      report('lyric', err, { fallback: 'Không tìm lại được lời bài hát.' })
+      report('lời bài hát', err, { fallback: 'Không tìm lại được lời bài hát.' })
       if (mine === token) set({ loading: false })
     }
   },

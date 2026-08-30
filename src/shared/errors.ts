@@ -6,9 +6,25 @@
  * Mot bang duy nhat thi cung mot loi luon hien ra cung mot cau, du no phat sinh
  * o dau.
  */
+/** Chuoi co it nhat mot chu tieng Viet co dau. */
+const VIETNAMESE =
+  /[àáãạảăằắẵặẳâầấẫậẩèéẽẹẻêềếễệểìíĩịỉòóõọỏôồốỗộổơờớỡợởùúũụủưừứữựửỳýỹỵỷđ]/i
+
+/** Ma loi kieu ENOENT / EACCES - dau hieu day la cau cua he dieu hanh. */
+const ERRNO = /\bE[A-Z]{3,}\b/
+
 export function describe(err: unknown, fallback = 'Có lỗi xảy ra.'): string {
   const raw = err instanceof Error ? `${err.name}: ${err.message}` : String(err ?? '')
   const text = raw.toLowerCase()
+
+  // Cau do CHINH APP viet ra thi giu nguyen: no bao gio cung cu the hon mot
+  // muc chung chung ("Chua tai model small..." ro hon "Cong cu AI gap loi").
+  //
+  // Phai loc truoc hai truong hop de khong lot chuoi ky thuat ra man hinh:
+  // loi cua he dieu hanh vo tinh chua duong dan tieng Viet (D:\Nhạc\bài.mp3),
+  // va loi kem ma HTTP - loai do da co cau rieng noi ro hon o duoi.
+  const own = err instanceof Error ? err.message : ''
+  if (VIETNAMESE.test(own) && !ERRNO.test(own) && !/\b[45]\d\d\b/.test(own)) return own
 
   // ---- Mang -----------------------------------------------------------
   if (/enotfound|eai_again|getaddrinfo/.test(text))
@@ -53,9 +69,9 @@ export function describe(err: unknown, fallback = 'Có lỗi xảy ra.'): string
   if (/signature|incorect|incorrect sig/.test(text))
     return 'Nguồn từ chối yêu cầu. Có thể họ vừa đổi cách xác thực.'
 
-  // Loi tu chinh app - da co san cau tieng Viet thi giu nguyen
-  if (err instanceof Error && err.message && /[àáãạảăằắẵặẳâầấẫậẩèéẽẹẻêềếễệểìíĩịỉòóõọỏôồốỗộổơờớỡợởùúũụủưừứữựửỳýỹỵỷđ]/i.test(err.message))
-    return err.message
+  // Cau tieng Viet kem ma HTTP hay ma loi he thong: khong khop mau nao o tren
+  // thi den day van con hon la mot cau chung chung
+  if (VIETNAMESE.test(own)) return own
 
   return fallback
 }

@@ -30,7 +30,7 @@ async function writeCache(query: LyricsQuery, content: string): Promise<void> {
     await fs.mkdir(cacheDir, { recursive: true })
     await fs.writeFile(join(cacheDir, `${cacheKey(query)}.lrc`), content, 'utf8')
   } catch (err) {
-    log.warn('lyric', 'Khong ghi duoc bo nho dem lyric', err)
+    log.warn('lời bài hát', 'Không ghi được bộ nhớ đệm lời bài hát', err)
   }
 }
 
@@ -86,7 +86,7 @@ export async function writeLrcSidecar(filePath: string, content: string): Promis
     if (content.trim()) await fs.writeFile(target, content, 'utf8')
     else await fs.rm(target, { force: true })
   } catch (err) {
-    log.warn('lyric', 'Khong ghi duoc file .lrc canh file nhac', err)
+    log.warn('lời bài hát', 'Không ghi được file .lrc cạnh file nhạc', err)
   }
 }
 

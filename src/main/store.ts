@@ -74,7 +74,7 @@ class JsonStore<T> {
       if (!existsSync(this.file)) return structuredClone(this.fallback)
       return this.merge(JSON.parse(readFileSync(this.file, 'utf8')), this.fallback)
     } catch (err) {
-      log.warn('luu du lieu', `Khong doc duoc ${this.file} - dung gia tri mac dinh`, err)
+      log.warn('lưu dữ liệu', `Không đọc được ${this.file} — dùng giá trị mặc định`, err)
       return structuredClone(this.fallback)
     }
   }
@@ -103,7 +103,7 @@ class JsonStore<T> {
       await fs.writeFile(tmp, JSON.stringify(this.cache, null, 2), 'utf8')
       await fs.rename(tmp, this.file)
     } catch (err) {
-      log.error('luu du lieu', `Khong ghi duoc ${this.file}`, err)
+      log.error('lưu dữ liệu', `Không ghi được ${this.file}`, err)
     }
   }
 
@@ -117,7 +117,7 @@ class JsonStore<T> {
       mkdirSync(dirname(this.file), { recursive: true })
       writeFileSync(this.file, JSON.stringify(this.cache, null, 2), 'utf8')
     } catch (err) {
-      log.error('luu du lieu', `Khong ghi duoc ${this.file}`, err)
+      log.error('lưu dữ liệu', `Không ghi được ${this.file}`, err)
     }
   }
 }

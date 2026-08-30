@@ -188,7 +188,7 @@ export interface LogEntry {
   /** Epoch ms. */
   at: number
   level: LogLevel
-  /** Phan nao cua app sinh ra, vd. 'tai ve', 'lyric', 'smtc'. */
+  /** Phan nao cua app sinh ra, vd. 'tai ve', 'lyric', 'SMTC'. */
   scope: string
   /** Cau tieng Viet cho nguoi doc. */
   message: string

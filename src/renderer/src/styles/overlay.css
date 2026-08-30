@@ -157,3 +157,120 @@ body {
 .ov__row--active .ov__line--translation {
   opacity: 0.85;
 }
+
+/* ---- Bảng tinh chỉnh -----------------------------------------------------
+   Mặc định không dựng ra; bấm nút thanh trượt trên thanh công cụ mới hiện.
+   Nằm đè lên khung chứ không đẩy chữ đi, để lời vẫn chạy nguyên chỗ cũ trong
+   lúc chỉnh — có vậy mới thấy được mình đang chỉnh cái gì. */
+.ov__tune {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  top: 36px;
+  right: 6px;
+  z-index: 5;
+  width: 232px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(18, 18, 24, 0.94);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  animation: ov-tune-in 0.16s ease;
+}
+@keyframes ov-tune-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.ov__tune-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ov__tune-row > span {
+  color: rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
+}
+
+.ov__tune select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+/* Danh sách xổ ra do Windows vẽ trên nền sáng, nên chữ phải là màu tối */
+.ov__tune option {
+  background: #1c1c24;
+  color: #fff;
+}
+
+.ov__tune-slider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+.ov__tune-slider b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.ov__tune input[type='range'] {
+  flex: 1;
+  min-width: 0;
+  height: 3px;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.ov__tune input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.ov__tune-colors {
+  display: flex;
+  gap: 6px;
+}
+.ov__tune input[type='color'] {
+  width: 30px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+}
+.ov__tune input[type='color']::-webkit-color-swatch-wrapper { padding: 2px; }
+.ov__tune input[type='color']::-webkit-color-swatch { border: none; border-radius: 3px; }
+
+.ov__tune-foot {
+  margin-top: 1px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.48);
+  text-align: center;
+}

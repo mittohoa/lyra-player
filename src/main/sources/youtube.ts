@@ -103,7 +103,7 @@ export const youtubeSource: MusicSource = {
     const bin = await findYtDlp()
     return bin
       ? null
-      : 'Chua co yt-dlp. Mo Cai dat > YouTube de cai tu dong hoac chon file yt-dlp.exe.'
+      : 'Chưa có yt-dlp. Mở Cài đặt → YouTube để cài tự động hoặc chọn file yt-dlp.exe.'
   },
 
   async search(query: string, limit: number): Promise<Track[]> {
@@ -124,7 +124,7 @@ export const youtubeSource: MusicSource = {
       'bestaudio[ext=m4a]/bestaudio[acodec!=none]/best'
     ])
     const picked = pickAudioUrl(info)
-    if (!picked) throw new Error('Khong tim duoc luong audio cho video nay')
+    if (!picked) throw new Error('Không tìm được luồng âm thanh cho video này')
 
     // URL googlevideo thuong het han sau ~6 gio; het han thi phan giai lai
     return {

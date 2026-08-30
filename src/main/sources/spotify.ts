@@ -15,7 +15,7 @@ let token: { value: string; expiresAt: number } | null = null
 async function getToken(): Promise<string> {
   const { clientId, clientSecret } = getSettings().spotify
   if (!clientId || !clientSecret) {
-    throw new SourceError('spotify', 'Chua nhap Client ID / Client Secret trong Cai dat > Spotify')
+    throw new SourceError('spotify', 'Chưa nhập Client ID / Client Secret trong Cài đặt → Spotify')
   }
   if (token && Date.now() < token.expiresAt - 30_000) return token.value
 
@@ -28,7 +28,7 @@ async function getToken(): Promise<string> {
     body: 'grant_type=client_credentials'
   })
   if (!res.ok) {
-    throw new SourceError('spotify', `Xac thuc that bai (HTTP ${res.status}) - kiem tra lai key`)
+    throw new SourceError('spotify', `Xác thực thất bại (HTTP ${res.status}) — kiểm tra lại khoá`)
   }
   const body = (await res.json()) as { access_token: string; expires_in: number }
   token = { value: body.access_token, expiresAt: Date.now() + body.expires_in * 1000 }
@@ -53,7 +53,7 @@ export const spotifySource: MusicSource = {
     const { clientId, clientSecret } = getSettings().spotify
     return clientId && clientSecret
       ? null
-      : 'Chua co API key. Tao app tai developer.spotify.com roi dan Client ID/Secret vao Cai dat.'
+      : 'Chưa có khoá API. Tạo app tại developer.spotify.com rồi dán Client ID/Secret vào Cài đặt.'
   },
 
   async search(query: string, limit: number): Promise<Track[]> {

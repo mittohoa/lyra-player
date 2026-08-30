@@ -80,7 +80,7 @@ async function fetchToFile(
   }
 
   const res = await httpGet(target.url, { headers: target.headers, timeoutMs: 60_000 })
-  if (!res.ok || !res.body) throw new Error(`Tai that bai (HTTP ${res.status})`)
+  if (!res.ok || !res.body) throw new Error(`Tải thất bại (HTTP ${res.status})`)
 
   const total = Number(res.headers.get('content-length') ?? 0)
   let received = 0
@@ -123,7 +123,7 @@ async function writeTags(filePath: string, track: Track): Promise<void> {
   try {
     NodeID3.write(tags, filePath)
   } catch (err) {
-    log.warn('tai ve', 'Khong ghi duoc tag vao file, nhung file da tai xong', err)
+    log.warn('tải về', 'Không ghi được tag vào file, nhưng file đã tải xong', err)
   }
 }
 
@@ -134,7 +134,7 @@ async function writeTags(filePath: string, track: Track): Promise<void> {
 export async function downloadTrack(track: Track): Promise<string> {
   const source = getSource(track.source)
   if (!source?.downloadUrl && track.source !== 'youtube') {
-    throw new Error(`Nguon "${track.source}" khong ho tro tai ve`)
+    throw new Error(`Nguồn "${track.source}" không hỗ trợ tải về`)
   }
 
   const report = (patch: Partial<DownloadProgress>): void => {
@@ -188,7 +188,7 @@ export async function downloadTrack(track: Track): Promise<string> {
     await fs.rm(filePath, { force: true })
     report({
       phase: 'error',
-      error: reportError('tai ve', err, `Không tải được "${track.title}".`)
+      error: reportError('tải về', err, `Không tải được "${track.title}".`)
     })
     throw err
   }

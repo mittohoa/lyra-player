@@ -295,7 +295,7 @@ export default function App(): JSX.Element {
           <QueuePanel />
         </div>
 
-        <ErrorBoundary scope="thanh phat nhac" compact>
+        <ErrorBoundary scope="thanh phát nhạc" compact>
           <PlayerBar />
         </ErrorBoundary>
         <Toasts />

@@ -124,7 +124,7 @@ export async function dominantColor(artworkUrl: string): Promise<string | null> 
     cache.set(artworkUrl, hex)
     return hex
   } catch (err) {
-    log.debug('anh bia', 'Khong lay duoc mau chu dao', err)
+    log.debug('ảnh bìa', 'Không lấy được màu chủ đạo của ảnh bìa', err)
     return null
   }
 }

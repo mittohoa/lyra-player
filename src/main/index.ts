@@ -43,16 +43,16 @@ setLogBroadcaster(broadcast)
  * gi, va trong file nhat ky co du stack de lan ra nguyen nhan.
  */
 process.on('uncaughtException', (err) => {
-  notify('he thong', err, { fallback: 'Lyra gặp lỗi ngoài dự tính nhưng vẫn chạy tiếp.' })
+  notify('hệ thống', err, { fallback: 'Lyra gặp lỗi ngoài dự tính nhưng vẫn chạy tiếp.' })
 })
 
 process.on('unhandledRejection', (reason) => {
-  notify('he thong', reason, { fallback: 'Một tác vụ nền thất bại.' })
+  notify('hệ thống', reason, { fallback: 'Một tác vụ nền thất bại.' })
 })
 
 // Canh bao truoc khi het bo nho, luc van con kip lam gi do
 process.on('warning', (warn) => {
-  log.warn('he thong', warn.message, warn.stack)
+  log.warn('hệ thống', warn.message, warn.stack)
 })
 
 let tray: Tray | null = null
@@ -79,14 +79,14 @@ function createTray(): void {
   const rebuildMenu = (): void => {
     tray?.setContextMenu(
       Menu.buildFromTemplate([
-        { label: 'Mo cua so', click: showMainWindow },
+        { label: 'Mở cửa sổ', click: showMainWindow },
         { type: 'separator' },
-        { label: 'Phat / Tam dung', click: () => sendMediaKey('play-pause') },
-        { label: 'Bai truoc', click: () => sendMediaKey('prev') },
-        { label: 'Bai sau', click: () => sendMediaKey('next') },
+        { label: 'Phát / Tạm dừng', click: () => sendMediaKey('play-pause') },
+        { label: 'Bài trước', click: () => sendMediaKey('prev') },
+        { label: 'Bài sau', click: () => sendMediaKey('next') },
         { type: 'separator' },
         {
-          label: 'Lyric noi tren man hinh',
+          label: 'Lời nổi trên màn hình',
           type: 'checkbox',
           checked: getSettings().overlay.enabled,
           click: (item) => {
@@ -101,7 +101,7 @@ function createTray(): void {
         },
         { type: 'separator' },
         {
-          label: 'Thoat',
+          label: 'Thoát',
           click: () => {
             quitting = true
             app.quit()
@@ -128,7 +128,7 @@ if (!app.requestSingleInstanceLock()) {
    * chi thay cua so trong roc va khong hieu gi.
    */
   app.on('render-process-gone', (_e, contents, details) => {
-    log.error('giao dien', `Tien trinh giao dien dung: ${details.reason}`, details)
+    log.error('giao diện', `Tiến trình giao diện dừng: ${details.reason}`, details)
     if (details.reason === 'clean-exit') return
 
     const win = BrowserWindow.fromWebContents(contents)
@@ -136,19 +136,19 @@ if (!app.requestSingleInstanceLock()) {
       win.reload()
       pushNotice({
         level: 'warning',
-        scope: 'giao dien',
+        scope: 'giao diện',
         message: 'Giao diện gặp sự cố và đã được tải lại. Nhạc đang phát có thể bị dừng.'
       })
     }
   })
 
   app.on('child-process-gone', (_e, details) => {
-    log.error('tien trinh con', `${details.type} dung: ${details.reason}`, details)
+    log.error('tiến trình con', `${details.type} dừng: ${details.reason}`, details)
   })
 
   app.whenReady().then(() => {
     app.setAppUserModelId('com.mittohoa.lyra_player')
-    log.info('khoi dong', `Lyra ${app.getVersion()} tren ${process.platform} ${process.arch}`)
+    log.info('khởi động', `Lyra ${app.getVersion()} trên ${process.platform} ${process.arch}`)
 
     // Hai buoc BAT BUOC: khong co giao thuc media va khong co IPC thi cua so mo
     // ra cung chi la mot o trang - tha bao loi ro rang roi thoat con hon
@@ -157,7 +157,7 @@ if (!app.requestSingleInstanceLock()) {
       installRequestHeaderInterceptor()
       registerIpc()
     } catch (err) {
-      log.error('khoi dong', 'Khong dung duoc nen tang cua app', err)
+      log.error('khởi động', 'Không dựng được nền tảng của app', err)
       dialog.showErrorBox(
         'Lyra không khởi động được',
         `${describe(err)}\n\nNhật ký: ${logFolder()}`
@@ -173,17 +173,17 @@ if (!app.requestSingleInstanceLock()) {
     // Cac buoc con lai deu la tien ich: hong buoc nao thi mat rieng buoc do,
     // nhac van phat duoc. Nen bat rieng tung buoc thay vi mot khoi chung.
     const optional: [string, () => void][] = [
-      ['khay he thong', createTray],
-      ['phim tat toan cuc', registerGlobalShortcuts],
-      ['bat cung Windows', () => applyLaunchAtStartup(getSettings())],
-      ['theo doi nhac app khac', () => getSettings().followSystemMedia && startSmtcWatch()],
-      ['khung lyric noi', () => getSettings().overlay.enabled && createOverlayWindow()]
+      ['khay hệ thống', createTray],
+      ['phím tắt toàn cục', registerGlobalShortcuts],
+      ['bật cùng Windows', () => applyLaunchAtStartup(getSettings())],
+      ['theo dõi nhạc ở app khác', () => getSettings().followSystemMedia && startSmtcWatch()],
+      ['khung lời nổi', () => getSettings().overlay.enabled && createOverlayWindow()]
     ]
     for (const [what, step] of optional) {
       try {
         step()
       } catch (err) {
-        log.error('khoi dong', `Khong bat duoc ${what}`, err)
+        log.error('khởi động', `Không bật được ${what}`, err)
         pushNotice({
           level: 'warning',
           scope: 'khởi động',
@@ -210,15 +210,15 @@ if (!app.requestSingleInstanceLock()) {
     // Moi buoc don dep tu bat loi rieng: mot buoc hong khong duoc chan cac buoc
     // sau, vi `flushAllStores` ma khong chay thi mat het cai dat vua doi
     for (const [what, step] of [
-      ['smtc', stopSmtcWatch],
-      ['phim tat', () => globalShortcut.unregisterAll()],
-      ['luu cai dat', flushAllStores],
-      ['khay he thong', () => tray?.destroy()]
+      ['SMTC', stopSmtcWatch],
+      ['phím tắt', () => globalShortcut.unregisterAll()],
+      ['lưu cài đặt', flushAllStores],
+      ['khay hệ thống', () => tray?.destroy()]
     ] as const) {
       try {
         step()
       } catch (err) {
-        log.error('thoat', `Khong don duoc ${what}`, err)
+        log.error('thoát', `Không dọn được ${what}`, err)
       }
     }
     closeLog()

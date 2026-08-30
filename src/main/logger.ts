@@ -163,7 +163,7 @@ export function recentLogs(limit = BUFFER_SIZE): LogEntry[] {
 
 export function clearLogs(): void {
   buffer.length = 0
-  log.info('log', 'Da xoa nhat ky trong bo nho')
+  log.info('nhật ký', 'Đã xoá nhật ký trong bộ nhớ')
 }
 
 /**
