@@ -115,6 +115,13 @@ function createTray(): void {
 
 /** Chi cho phep mot ban chay; ban thu hai chi dua cua so cu len. */
 if (!app.requestSingleInstanceLock()) {
+  // Đã có một bản Lyra đang chạy: bản đó sẽ nhận `second-instance` và tự đưa
+  // cửa sổ lên, nên bản này rút lui.
+  //
+  // Phải ghi lại một dòng. Không có nó thì mở app từ dòng lệnh chỉ thấy thoát
+  // ngay với mã 0, không một lời giải thích — và nếu bản đang chạy là bản đóng
+  // gói cũ nằm ở `release/` thì càng khó ngờ tới.
+  log.info('khởi động', 'Đã có một bản Lyra đang chạy — nhường chỗ cho bản đó')
   app.quit()
 } else {
   app.on('second-instance', showMainWindow)

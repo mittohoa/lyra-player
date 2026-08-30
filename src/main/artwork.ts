@@ -47,7 +47,7 @@ function toHex(r: number, g: number, b: number): string {
 function pickDominant(bitmap: Buffer): string {
   const buckets = new Map<string, { r: number; g: number; b: number; n: number }>()
 
-  // nativeImage.getBitmap() tra ve BGRA
+  // nativeImage.toBitmap() tra ve BGRA
   for (let i = 0; i < bitmap.length; i += 4) {
     const b = bitmap[i]
     const g = bitmap[i + 1]
@@ -113,9 +113,7 @@ export async function dominantColor(artworkUrl: string): Promise<string | null> 
     const image = nativeImage.createFromBuffer(buffer).resize({ width: 32, height: 32 })
     if (image.isEmpty()) return null
 
-    // electron.d.ts khai getBitmap() tra ve void, nhung thuc te no tra ve Buffer
-    // BGRA. Day la loi trong file khai bao kieu cua Electron, khong phai o day.
-    const hex = pickDominant(image.getBitmap() as unknown as Buffer)
+    const hex = pickDominant(image.toBitmap())
 
     if (cache.size >= MAX_CACHE) {
       const oldest = cache.keys().next().value
