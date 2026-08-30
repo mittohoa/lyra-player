@@ -58,6 +58,14 @@ export function createMainWindow(opts: { show?: boolean } = {}): BrowserWindow {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+
+    // Khung lời nổi có `skipTaskbar` nên người dùng không thấy nó là một cửa
+    // sổ — nhưng Electron thì có đếm. Để nguyên thì `window-all-closed` không
+    // bao giờ bắn, app sống tiếp với đúng một khung nổi trôi giữa màn hình,
+    // không có trong taskbar, và bật click xuyên qua thì bấm X cũng không
+    // được. Đóng cửa sổ chính mà không thu xuống khay nghĩa là thoát, nên dọn
+    // luôn khung nổi để sự kiện kia bắn được.
+    if (!getSettings().minimizeToTray) destroyOverlayWindow()
   })
 
   loadPage(mainWindow, 'index')
