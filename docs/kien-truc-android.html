@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="Kiến trúc bản Android của Lyra: tính năng nào chạy được, luồng dữ liệu, phần chuyển từ bản Windows, và thứ tự làm.">
+<title>Lyra cho Android</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style>
+  :root {
+    --paper: #FBFAFD;
+    --card: #FFFFFF;
+    --ink: #17141F;
+    --ink-2: #453E55;
+    --muted: #726A83;
+    --faint: #9E97AC;
+    --line: #E6E2EE;
+    --line-2: #D3CDE0;
+    --accent: #6D28D9;
+    --accent-ink: #5B21B6;
+    --accent-wash: #F2EDFC;
+    --warn: #A9560B;
+    --warn-wash: #FDF3E7;
+    --good: #16794C;
+    --good-wash: #ECF7F1;
+    --stop: #B02A37;
+    --code-bg: #F4F1F9;
+    --code-ink: #3B3349;
+    --comment: #8E86A0;
+
+    --sans: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+    --measure: 68ch;
+    --r: 10px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #131019;
+      --card: #1B1724;
+      --ink: #F0EDF6;
+      --ink-2: #C9C2D6;
+      --muted: #9A92A9;
+      --faint: #7B7389;
+      --line: #2C2637;
+      --line-2: #3B3349;
+      --accent: #A78BFA;
+      --accent-ink: #C4B5FD;
+      --accent-wash: #241C38;
+      --warn: #E8A75C;
+      --warn-wash: #2C2113;
+      --good: #6EE7A5;
+      --good-wash: #16261F;
+      --stop: #FB7185;
+      --code-bg: #221D2E;
+      --code-ink: #CFC8DC;
+      --comment: #7C7490;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #131019;
+    --card: #1B1724;
+    --ink: #F0EDF6;
+    --ink-2: #C9C2D6;
+    --muted: #9A92A9;
+    --faint: #7B7389;
+    --line: #2C2637;
+    --line-2: #3B3349;
+    --accent: #A78BFA;
+    --accent-ink: #C4B5FD;
+    --accent-wash: #241C38;
+    --warn: #E8A75C;
+    --warn-wash: #2C2113;
+    --good: #6EE7A5;
+    --good-wash: #16261F;
+    --stop: #FB7185;
+    --code-bg: #221D2E;
+    --code-ink: #CFC8DC;
+    --comment: #7C7490;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    gap: 56px;
+    max-width: 1130px;
+    margin: 0 auto;
+    padding: 0 32px 120px;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 40px 0;
+    font-family: var(--sans);
+    font-size: 12.5px;
+  }
+  nav.toc .toc-label {
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--faint);
+    margin-bottom: 12px;
+  }
+  nav.toc a {
+    display: block;
+    padding: 5px 0 5px 12px;
+    border-left: 2px solid var(--line);
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .16s, border-color .16s;
+  }
+  nav.toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+  nav.toc a .num {
+    font-variant-numeric: tabular-nums;
+    color: var(--faint);
+    margin-right: 7px;
+  }
+
+  main { padding-top: 40px; min-width: 0; }
+
+  header.head {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 26px;
+    margin-bottom: 30px;
+    border-bottom: 1px solid var(--line);
+  }
+  header.head h1 {
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: clamp(29px, 5vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    text-wrap: balance;
+  }
+  header.head .tagline {
+    font-family: var(--sans);
+    font-size: 14px;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+  .fact {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--line-2);
+    color: var(--ink-2);
+    background: var(--card);
+  }
+  .fact b { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  h2 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 23px;
+    letter-spacing: -0.012em;
+    line-height: 1.25;
+    margin: 62px 0 18px;
+    padding-top: 8px;
+    text-wrap: balance;
+  }
+  h2 .num {
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 10px;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 15.5px;
+    margin: 36px 0 12px;
+  }
+
+  p { max-width: var(--measure); margin: 0 0 16px; color: var(--ink-2); }
+  .lede { font-size: 18.5px; line-height: 1.6; color: var(--ink); max-width: 60ch; }
+
+  a { color: var(--accent); }
+  strong { color: var(--ink); font-weight: 600; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.845em;
+    background: var(--code-bg);
+    padding: 1.5px 5px;
+    border-radius: 4px;
+    color: var(--accent-ink);
+  }
+
+  ul, ol { max-width: var(--measure); padding-left: 22px; color: var(--ink-2); }
+  li { margin-bottom: 9px; }
+  li::marker { color: var(--faint); }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    overflow-x: auto;
+    max-width: 78ch;
+    color: var(--code-ink);
+    margin: 20px 0;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  pre .c { color: var(--comment); font-style: italic; }
+  pre .k { color: var(--accent); font-weight: 500; }
+
+  /* ---- Sơ đồ luồng ---- */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    margin: 24px 0 22px;
+    font-family: var(--sans);
+    max-width: 620px;
+  }
+  .flow-step {
+    border: 1px solid var(--line-2);
+    background: var(--card);
+    border-radius: var(--r);
+    padding: 13px 16px;
+  }
+  .flow-step.key {
+    border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+    background: var(--accent-wash);
+  }
+  .flow-who { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+  .flow-what { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .flow-file { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); margin-top: 5px; }
+  .flow-arrow {
+    width: 1px; height: 20px; margin-left: 26px;
+    background: var(--line-2); position: relative; flex-shrink: 0;
+  }
+  .flow-arrow::after {
+    content: ""; position: absolute; bottom: 0; left: -3.5px;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-top: 5px solid var(--line-2);
+  }
+
+  /* ---- Bảng ---- */
+  .table-scroll { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: var(--r); }
+  table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 13px; }
+  th, td { text-align: left; padding: 11px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--faint); background: var(--code-bg); white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--ink); font-weight: 500; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  td code { font-size: 11.5px; }
+
+  .yes { color: var(--good); font-weight: 600; }
+  .no { color: var(--stop); font-weight: 600; }
+  .maybe { color: var(--warn); font-weight: 600; }
+
+  /* ---- Bậc thang mốc ---- */
+  .steps { counter-reset: step; display: grid; gap: 10px; margin: 24px 0; max-width: var(--measure); }
+  .step {
+    display: grid; grid-template-columns: 30px 1fr; gap: 14px;
+    border: 1px solid var(--line); border-radius: var(--r);
+    padding: 14px 16px; background: var(--card);
+  }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    font-family: var(--sans); font-weight: 700; font-size: 14px;
+    color: var(--accent); background: var(--accent-wash);
+    width: 30px; height: 30px; border-radius: 8px;
+    display: grid; place-items: center;
+  }
+  .step.first { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 0 0 3px var(--accent-wash); }
+  .step.first::before { background: var(--accent); color: #fff; }
+  .step h4 { font-family: var(--sans); font-size: 14px; font-weight: 600; margin: 4px 0 3px; }
+  .step p { font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.6; }
+
+  /* ---- Ô nhấn ---- */
+  .callout {
+    border-left: 3px solid var(--warn);
+    background: var(--warn-wash);
+    border-radius: 0 var(--r) var(--r) 0;
+    padding: 15px 18px; margin: 22px 0; max-width: var(--measure);
+    font-family: var(--sans); font-size: 13.5px; line-height: 1.65; color: var(--ink-2);
+  }
+  .callout.key { border-left-color: var(--accent); background: var(--accent-wash); }
+  .callout b { color: var(--ink); }
+
+  .risks { list-style: none; padding: 0; max-width: var(--measure); }
+  .risks li {
+    font-family: var(--sans); font-size: 13.5px;
+    padding: 13px 0 13px 26px; border-bottom: 1px solid var(--line);
+    position: relative; line-height: 1.6;
+  }
+  .risks li::before {
+    content: ""; position: absolute; left: 4px; top: 21px;
+    width: 7px; height: 7px; border-radius: 2px; background: var(--warn);
+  }
+  .risks li b { display: block; color: var(--ink); margin-bottom: 2px; }
+
+  footer {
+    margin-top: 70px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-family: var(--sans); font-size: 12px; color: var(--faint);
+  }
+
+  .mark { flex-shrink: 0; }
+  .mark__note { transform-origin: 256px 220px; animation: rock 1.5s cubic-bezier(.4,0,.2,1) infinite; }
+  .mark__bar { transform-box: fill-box; transform-origin: left center; animation: sweep 1.5s cubic-bezier(.4,0,.2,1) infinite; }
+  @keyframes rock { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  @keyframes sweep { 0% { transform: scaleX(.12); } 55%,80% { transform: scaleX(1); } 100% { transform: scaleX(.12); } }
+  @media (prefers-reduced-motion: reduce) {
+    .mark__note { animation: none; }
+    .mark__bar { animation: none; transform: scaleX(.6); }
+  }
+
+  @media (max-width: 940px) {
+    .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 22px 80px; }
+    nav.toc { display: none; }
+  }
+</style>
+<style>
+  body { margin: 0; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="toc">
+    <div class="toc-label">Mục lục</div>
+    <a href="#visao"><span class="num">1</span>Vì sao Android hợp hơn</a>
+    <a href="#tinhnang"><span class="num">2</span>Tính năng nào chạy được</a>
+    <a href="#luong"><span class="num">3</span>Luồng dữ liệu</a>
+    <a href="#neo"><span class="num">4</span>Neo của cả app</a>
+    <a href="#khung"><span class="num">5</span>Khung lời nổi</a>
+    <a href="#chuyen"><span class="num">6</span>Phần chuyển sang</a>
+    <a href="#quyen"><span class="num">7</span>Quyền</a>
+    <a href="#kiem"><span class="num">8</span>Kiểm chứng</a>
+    <a href="#thutu"><span class="num">9</span>Làm theo thứ tự nào</a>
+    <a href="#vo"><span class="num">10</span>Chỗ có thể vỡ</a>
+  </nav>
+
+  <main>
+    <header class="head">
+      <svg class="mark" width="58" height="58" viewBox="0 0 512 512" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#4338CA"/>
+          </linearGradient>
+          <clipPath id="lb"><rect x="152" y="372" width="208" height="48" rx="24"/></clipPath>
+        </defs>
+        <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#lg)"/>
+        <g class="mark__note" fill="#fff" transform="translate(9 -6)">
+          <path d="M207.4 125 h19 v179 h-19 z"/>
+          <path d="M357.4 97 h19 v179 h-19 z"/>
+          <path d="M207.4 125 L376.4 97 L376.4 137 L207.4 165 Z"/>
+          <ellipse cx="172" cy="300" rx="58" ry="33" transform="rotate(-25 172 300)"/>
+          <ellipse cx="322" cy="272" rx="58" ry="33" transform="rotate(-25 322 272)"/>
+        </g>
+        <g clip-path="url(#lb)">
+          <rect x="152" y="372" width="208" height="48" rx="24" fill="#fff" opacity=".28"/>
+          <rect class="mark__bar" x="152" y="372" width="208" height="48" rx="24" fill="#fff"/>
+        </g>
+      </svg>
+      <div>
+        <h1>Lyra cho Android</h1>
+        <p class="tagline">Kiến trúc cho bản di động — chỉ giữ đúng cái lõi</p>
+      </div>
+    </header>
+
+    <div class="facts">
+      <span class="fact">Kotlin thuần</span>
+      <span class="fact">minSdk <b>26</b> · Android 8</span>
+      <span class="fact">coroutines + StateFlow</span>
+      <span class="fact">Viết mới ~<b>1.500–2.000</b> dòng</span>
+      <span class="fact">Chuyển sang ~<b>1.000</b> dòng</span>
+    </div>
+
+    <section id="visao">
+      <h2><span class="num">1</span>Vì sao Android hợp hơn Windows</h2>
+      <p class="lede">Cái lõi của Lyra — hiện lời cho nhạc đang phát ở app khác — hợp với Android hơn cả nền tảng nó sinh ra.</p>
+      <p>Ba điều, và điều thứ ba mới là điều đáng nói:</p>
+      <ol>
+        <li><strong>Nguồn dữ liệu tốt hơn.</strong> <code>MediaSessionManager</code> trả về nghệ sĩ, tên bài, album, ảnh bìa, vị trí, trạng thái và cả tên app nguồn — ở các trường <strong>riêng biệt</strong>. Trên Windows ta chỉ có một chuỗi thô, phải đoán.</li>
+        <li><strong>Đẩy thay vì hỏi.</strong> Đăng ký <code>MediaController.Callback</code> là hệ thống tự gọi lại khi có gì đổi. Bản Windows phải nuôi một tiến trình PowerShell hỏi liên tục 2 lần mỗi giây.</li>
+        <li><strong>Cái giới hạn khó chịu nhất biến mất.</strong> Trên Windows, Lyra không vào được ô media của hệ điều hành — và vì Lyra ở đó cũng tự phát nhạc nên nó thành một thiếu sót thấy rõ. Trên Android ta <strong>không phát gì cả</strong>, nên chuyện đó không còn là vấn đề.</li>
+      </ol>
+    </section>
+
+    <section id="tinhnang">
+      <h2><span class="num">2</span>Tính năng nào chạy được</h2>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Tính năng</th><th>Android</th><th>Ghi chú</th></tr></thead>
+          <tbody>
+            <tr><td>Đọc nhạc app khác</td><td class="yes">✔ tốt hơn</td><td><code>MediaSessionManager</code> cho tên bài, nghệ sĩ, album, ảnh bìa, vị trí, và cả tên app nguồn</td></tr>
+            <tr><td>Khung lời nổi</td><td class="yes">✔</td><td><code>TYPE_APPLICATION_OVERLAY</code> — Musixmatch làm đúng mô hình này nhiều năm rồi</td></tr>
+            <tr><td>Nhận diện bài từ chuỗi thô</td><td class="yes">✔ dễ hơn</td><td>Spotify và YouTube Music trả nghệ sĩ với tên bài ở hai trường riêng, ít rác hơn tên tab trình duyệt</td></tr>
+            <tr><td>Dò lời LRCLIB / Zing / NCT</td><td class="yes">✔</td><td>HTTPS thuần. HMAC-SHA512 và RC4 đều làm được</td></tr>
+            <tr><td>Sửa lời tay, chỉnh lệch</td><td class="yes">✔</td><td></td></tr>
+            <tr><td>Dịch lời</td><td class="yes">✔</td><td>Chỉ là một lời gọi HTTPS tới Claude API</td></tr>
+            <tr><td>Ẩn/hiện nhanh</td><td class="yes">✔ hợp hơn</td><td>Ô Quick Settings — vuốt xuống, chạm một cái. Và không app nào chiếm mất được</td></tr>
+            <tr><td>Phụ đề video</td><td class="no">✘</td><td>Cần yt-dlp. Gọi thẳng API của Google thì bị 429 ngay — chính lý do đã bỏ hướng đó</td></tr>
+            <tr><td>Căn mốc bằng AI</td><td class="no">✘</td><td>Whisper cần <em>file âm thanh</em>, mà nhạc ở app khác thì không lấy được</td></tr>
+            <tr><td>Phát YouTube, tải nhạc</td><td class="no">✘</td><td>Cùng lý do yt-dlp</td></tr>
+            <tr><td>Phát nhạc offline</td><td class="maybe">⚠ làm được</td><td>Media3/ExoPlayer. Nhưng đây là sản phẩm B — trên Android đang cạnh tranh với hàng chục app khác</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="luong">
+      <h2><span class="num">3</span>Luồng dữ liệu</h2>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-who">Spotify / YouTube Music / Zing / NCT đang phát</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step key">
+          <div class="flow-who">NotificationListenerService</div>
+          <div class="flow-what">Hệ thống tự dựng và giữ sống. Đây là neo của cả app — xem mục 4.</div>
+          <div class="flow-file">service/LyraNotificationListener.kt</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-who">MediaSessionWatcher</div>
+          <div class="flow-what">Lấy các phiên đang chạy, gắn callback cho từng phiên, bù phần thời gian đã trôi</div>
+          <div class="flow-file">media/MediaSessionWatcher.kt → StateFlow&lt;NowPlaying?&gt;</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step key">
+          <div class="flow-who">LyricsRepository</div>
+          <div class="flow-what">Nhận diện bài → hỏi LRCLIB, Zing, NCT → chỉ nhận khi tên đủ giống</div>
+          <div class="flow-file">lyrics/LyricsRepository.kt → StateFlow&lt;Lyrics&gt;</div>
+        </div>
+        <div class="flow-arrow"></div>
+        <div class="flow-step">
+          <div class="flow-who">OverlayHost → OverlayView</div>
+          <div class="flow-what">WindowManager.addView, View tự vẽ</div>
+          <div class="flow-file">overlay/OverlayView.kt</div>
+        </div>
+      </div>
+
+      <p>Vị trí phát là chỗ dễ sai nhất, <strong>y hệt bản Windows</strong>: <code>PlaybackState</code> chỉ đưa một ảnh chụp kèm mốc thời gian, không phải vị trí lúc này.</p>
+
+<pre><code><span class="c">/**
+ * Vị trí phát ở thời điểm hiện tại.
+ *
+ * `position` là ảnh chụp tại `lastPositionUpdateTime`, không phải bây giờ.
+ * Không bù phần đã trôi thì lời luôn chạy chậm hơn nhạc vài giây — đúng cái
+ * bẫy đã gặp ở bản Windows.
+ *
+ * `lastPositionUpdateTime` dùng đồng hồ `elapsedRealtime`, không phải
+ * `currentTimeMillis` — so nhầm hai thang này ra sai lệch hàng chục năm.
+ */</span>
+<span class="k">fun</span> PlaybackState.currentPosition(): Long {
+    <span class="k">if</span> (state != PlaybackState.STATE_PLAYING) <span class="k">return</span> position
+    <span class="k">val</span> drift = SystemClock.elapsedRealtime() - lastPositionUpdateTime
+    <span class="k">return</span> position + (drift * playbackSpeed).toLong()
+}</code></pre>
+    </section>
+
+    <section id="neo">
+      <h2><span class="num">4</span>Neo của cả app</h2>
+      <div class="callout key">
+        <b>Quyết định kiến trúc quan trọng nhất, và nó ngược với trực giác.</b>
+        Phản xạ thường là dựng một foreground service để chạy nền. <strong>Không cần.</strong>
+        <code>NotificationListenerService</code> tự nó đã là một service do hệ thống dựng và giữ sống
+        khi người dùng đã cấp quyền đọc thông báo. Nó sống dai hơn foreground service của chính ta,
+        và <strong>không phải hiện thông báo thường trực</strong> — không phải cắm một dòng
+        “Lyra đang chạy” vào thanh thông báo suốt ngày.
+      </div>
+
+<pre><code><span class="c">/**
+ * Neo của cả app.
+ *
+ * Ta không quan tâm tới thông báo — chỉ cần lớp này tồn tại thì hệ thống mới
+ * cho gọi `getActiveSessions`. Đổi lại được luôn một chỗ trú chạy nền mà
+ * không phải hiện thông báo thường trực.
+ *
+ * Hệ thống có thể giết và dựng lại lớp này bất cứ lúc nào, nên mọi trạng thái
+ * phải nằm ở singleton bên ngoài, không nằm trong chính nó.
+ */</span>
+<span class="k">class</span> LyraNotificationListener : NotificationListenerService() {
+
+    <span class="k">override fun</span> onListenerConnected() {
+        watcher.start(<span class="k">this</span>)
+        overlayHost.attach(<span class="k">this</span>)
+    }
+
+    <span class="k">override fun</span> onListenerDisconnected() {
+        watcher.stop()
+        overlayHost.detach()
+    }
+
+    <span class="c">// Không cần onNotificationPosted — ta đọc phiên media, không đọc thông báo</span>
+}</code></pre>
+
+      <p><strong>Chỉ dựng thêm foreground service khi</strong> cần chắc chắn sống trên máy Xiaomi, Oppo, Vivo — hãng nào cũng có bộ diệt nền riêng, hung hơn Android gốc nhiều. Để đó làm bước sau, đo trên máy thật rồi hẵng quyết.</p>
+    </section>
+
+    <section id="khung">
+      <h2><span class="num">5</span>Khung lời nổi</h2>
+
+      <h3>Cửa sổ</h3>
+<pre><code><span class="k">val</span> params = WindowManager.LayoutParams(
+    WindowManager.LayoutParams.MATCH_PARENT,
+    WindowManager.LayoutParams.WRAP_CONTENT,
+    <span class="c">// API 26+; TYPE_PHONE cũ đã bị chặn</span>
+    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+    <span class="c">// NOT_FOCUSABLE: không cướp bàn phím của app đang dùng
+    // NOT_TOUCH_MODAL: chạm ra ngoài khung thì rơi xuống app bên dưới</span>
+    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE <span class="k">or</span>
+        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL <span class="k">or</span>
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+    PixelFormat.TRANSLUCENT
+)</code></pre>
+      <p>“Chạm xuyên qua” = thêm <code>FLAG_NOT_TOUCHABLE</code>; bỏ cờ đó đi thì kéo thả được lại. Đúng vai trò <code>setIgnoreMouseEvents</code> bên Windows.</p>
+
+      <h3>Vẽ chữ — View thuần, không Compose</h3>
+      <p>Lý do cụ thể: <code>ComposeView</code> đặt trong cửa sổ của <code>WindowManager</code> không có sẵn <code>ViewTreeLifecycleOwner</code> và <code>SavedStateRegistryOwner</code>, phải tự gắn tay — thêm một tầng dễ hỏng mà đổi lại chẳng được gì, vì khung nổi chỉ vẽ vài dòng chữ.</p>
+      <p>Viền chữ làm đúng như bản Windows (<code>paint-order: stroke fill</code>): vẽ hai lượt, <strong>viền trước, thân chữ sau</strong>. Vẽ ngược lại thì viền ăn lẹm vào nét chữ.</p>
+
+<pre><code><span class="k">override fun</span> onDraw(canvas: Canvas) {
+    lines.forEachIndexed { i, line -&gt;
+        <span class="k">val</span> y = baselineOf(i)
+
+        <span class="k">if</span> (strokeWidth &gt; 0f) {
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = strokeWidth * 2f  <span class="c">// nửa nét bị thân chữ đè lên</span>
+            paint.color = strokeColor
+            canvas.drawText(line.text, x, y, paint)
+        }
+
+        paint.style = Paint.Style.FILL
+        paint.color = <span class="k">if</span> (line.isActive) activeColor <span class="k">else</span> dimColor
+        canvas.drawText(line.text, x, y, paint)
+    }
+}</code></pre>
+
+      <h3>Bảng tinh chỉnh</h3>
+      <p>Font, cỡ chữ, độ trong suốt nền, màu chữ — mặc định đóng, chạm nút mới mở, y như bản Windows. Nhưng ở đây là một <code>BottomSheetDialog</code> của một Activity trong suốt, không nhét vào chính khung nổi: khung nổi phải mỏng và không được cướp focus, mà bảng tinh chỉnh thì cần cả hai thứ ngược lại.</p>
+    </section>
+
+    <section id="chuyen">
+      <h2><span class="num">6</span>Phần chuyển sang</h2>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Chuyển sang</th><th>Từ</th><th>Dòng</th><th>Việc phải làm</th></tr></thead>
+          <tbody>
+            <tr><td><code>Identify.kt</code></td><td><code>identify.ts</code></td><td class="num">265</td><td>Dịch thẳng. <code>Normalizer.normalize(NFD)</code> thay cho <code>normalize('NFD')</code></td></tr>
+            <tr><td><code>LrcParser.kt</code></td><td><code>lrc.ts</code></td><td class="num">122</td><td>Dịch thẳng</td></tr>
+            <tr><td>Bù vị trí</td><td><code>smtc.ts</code></td><td class="num">~20</td><td>Đổi sang <code>elapsedRealtime</code></td></tr>
+            <tr><td><code>LrclibClient.kt</code></td><td><code>lrclib.ts</code></td><td class="num">110</td><td>OkHttp thay <code>fetch</code></td></tr>
+            <tr><td><code>ZingClient.kt</code></td><td><code>zing.ts</code></td><td class="num">188</td><td><code>Mac.getInstance("HmacSHA512")</code>. <strong>Nhớ: chỉ ký một số tham số nhất định</strong>, ký hết là hỏng</td></tr>
+            <tr><td><code>NctClient.kt</code></td><td><code>nct.ts</code></td><td class="num">192</td><td>RC4 tự viết ~20 dòng — đừng dựa vào <code>Cipher.getInstance("ARCFOUR")</code>, có máy không có</td></tr>
+            <tr><td><code>LyricsRepository.kt</code></td><td><code>external.ts</code></td><td class="num">202</td><td>Bỏ hết nhánh phụ đề</td></tr>
+            <tr><td>Bảng diễn giải lỗi</td><td><code>errors.ts</code></td><td class="num">77</td><td>Dịch thẳng, đổi mẫu khớp sang lỗi của Android</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Bỏ hẳn:</strong> whisper, yt-dlp và mọi thứ dựa vào nó, giao thức <code>media://</code>, thanh taskbar — khoảng 1.200 dòng.</p>
+      <p><code>Identify.kt</code> là phần đáng giá nhất chuyển sang. Trên Android metadata sạch hơn nhiều, nhưng <strong>app YouTube vẫn đưa nguyên tên video</strong> — đúng loại rác mà nó sinh ra để bóc.</p>
+    </section>
+
+    <section id="quyen">
+      <h2><span class="num">7</span>Quyền và luồng dẫn nhập</h2>
+      <p>Hai quyền, cả hai đều phải người dùng tự bật tay trong Cài đặt Android. Không có <code>requestPermissions()</code> cho loại này — chỉ mở được đúng trang cài đặt rồi chờ.</p>
+
+<pre><code><span class="c">// 1. Đọc thông báo — không có thì không đọc được nhạc app khác</span>
+NotificationManagerCompat.getEnabledListenerPackages(context)
+    .contains(context.packageName)
+startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+
+<span class="c">// 2. Vẽ đè lên app khác — không có thì không hiện được lời</span>
+Settings.canDrawOverlays(context)
+startActivity(Intent(
+    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+    Uri.parse(<span class="k">"package:"</span> + context.packageName)
+))</code></pre>
+
+      <p>Màn hình dẫn nhập nên nói <strong>vì sao</strong> cần từng quyền bằng đúng một câu, rồi tự kiểm lại khi quay về app. Xin hai quyền nhạy cảm mà không giải thích thì người ta thoát ngay — đây là hai quyền đáng ngờ nhất trên Android.</p>
+
+      <div class="callout">
+        Google Play soi rất kỹ cả hai quyền này, phải khai báo và biện minh. Cài riêng cho mình thì không vướng gì.
+      </div>
+    </section>
+
+    <section id="kiem">
+      <h2><span class="num">8</span>Kiểm chứng</h2>
+      <p>Bản Windows mạnh là nhờ 171 phép kiểm tra chạy trên app thật. Giữ đúng tinh thần đó:</p>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Tầng</th><th>Cách</th><th>Kiểm gì</th></tr></thead>
+          <tbody>
+            <tr><td>Logic thuần</td><td>Unit test JVM, không cần máy ảo</td><td><code>Identify</code>, <code>LrcParser</code>, bù vị trí, chấm điểm khớp tên — chạy trong mili-giây</td></tr>
+            <tr><td>Nguồn mạng</td><td>Unit test + MockWebServer</td><td>Chữ ký Zing, giải mã RC4 của NCT, đọc phản hồi</td></tr>
+            <tr><td>Bám phiên media</td><td>Instrumented + <code>MediaSession</code> giả</td><td>Dựng một phiên giả rồi đổi trạng thái, xem repository có theo kịp</td></tr>
+            <tr><td>Khung lời nổi</td><td>Instrumented, chụp màn hình</td><td>Vẽ đúng dòng đang hát, viền chữ, chạm xuyên qua</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Phần logic thuần chuyển sang cũng nên chuyển <strong>luôn cả bộ kiểm tra</strong> của nó — 14 phép cho <code>Identify</code> và 11 phép cho <code>LrcParser</code> đã có sẵn, chỉ dịch cú pháp.</p>
+    </section>
+
+    <section id="thutu">
+      <h2><span class="num">9</span>Làm theo thứ tự nào</h2>
+      <p>Mỗi mốc tự nó kiểm chứng được, và mốc đầu tiên là mốc rủi ro nhất — làm trước để biết sớm nếu có gì chặn.</p>
+
+      <div class="steps">
+        <div class="step first">
+          <div>
+            <h4>Đọc được nhạc app khác</h4>
+            <p>Chỉ một Activity hiện chữ thô. Đi qua trọn vẹn đường quyền khó nhất. <strong>Nếu bước này không xong thì cả dự án không có nghĩa.</strong></p>
+          </div>
+        </div>
+        <div class="step"><div><h4>Khung nổi hiện chữ tĩnh</h4><p>Quyền vẽ đè, kéo thả, chạm xuyên qua.</p></div></div>
+        <div class="step"><div><h4>Nối LRCLIB</h4><p>Lần đầu thấy lời chạy theo nhạc thật.</p></div></div>
+        <div class="step"><div><h4>Identify + Zing + NCT</h4><p>Chỗ này quyết định tỉ lệ tìm ra lời.</p></div></div>
+        <div class="step"><div><h4>Bảng tinh chỉnh + ô Quick Settings</h4><p>Phần dùng hằng ngày.</p></div></div>
+        <div class="step"><div><h4>Sửa lời tay, chỉnh lệch, nhớ lại</h4><p>Đường cứu khi máy dò sai.</p></div></div>
+        <div class="step"><div><h4>Dịch lời</h4><p>Nếu vẫn muốn.</p></div></div>
+      </div>
+    </section>
+
+    <section id="vo">
+      <h2><span class="num">10</span>Chỗ có thể vỡ</h2>
+      <ul class="risks">
+        <li><b>Bộ diệt nền của hãng</b>Xiaomi, Oppo, Vivo, Samsung — mỗi hãng một kiểu, và hung hơn Android gốc nhiều. Người dùng phải tự cho Lyra vào danh sách miễn trừ. Không có cách nào lách, chỉ có cách hướng dẫn.</li>
+        <li><b>App không khai báo metadata tử tế</b>Có app chỉ đưa tên bài, không đưa nghệ sĩ. <code>Identify</code> đỡ được phần nào nhưng không phải tất cả.</li>
+        <li><b>Vài chỗ chặn overlay</b>Nội dung có DRM, một số game toàn màn hình.</li>
+        <li><b>Zing và NCT có thể kiểm khác trên di động</b>User-Agent, khu vực, hoặc bắt buộc dùng app của họ. Phải thử thật rồi mới biết.</li>
+        <li><b>Đây là nền tảng thứ hai phải chăm</b>Zing hay NCT đổi API là hỏng <strong>cả hai</strong> bản. Nếu làm, nên tách hẳn thành repo riêng và chốt luôn hướng thu về lõi cho bản Windows, để hai bên cùng một hình dạng.</li>
+      </ul>
+
+      <div class="callout key" style="margin-top:26px">
+        Đây không phải “port”. Đây là <b>app thứ hai dùng chung bộ não</b> — và bộ não đó là phần đã được kiểm chứng kỹ nhất của bản Windows.
+      </div>
+    </section>
+
+    <footer>
+      Bản trong repo: <code>docs/kien-truc-android.md</code> · Tài liệu bản Windows: <code>docs/tai-lieu-app.md</code>
+    </footer>
+  </main>
+</div>
+</body>
+</html>
