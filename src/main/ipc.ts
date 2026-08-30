@@ -53,6 +53,7 @@ import {
   translateTrackLyrics
 } from './ai'
 import { clearLogs, log, logFolder, notify, recentLogs, reportError } from './logger'
+import { setThumbarPlaying } from './thumbar'
 import { getSettings, patchSettings, playlistStore } from './store'
 import {
   applyClickThrough,
@@ -268,6 +269,8 @@ export function registerIpc(): void {
 
   // Nhip vi tri phat - gui lien tuc nen khong kem theo mang lyric
   ipc.on(IPC.overlayPushTick, (_e, tick: OverlayTick) => {
+    // Nhip nay den 4 lan/giay; `setThumbarPlaying` tu bo qua khi khong doi gi
+    setThumbarPlaying(tick.isPlaying)
     if (lastOverlayState) {
       lastOverlayState.position = tick.position
       lastOverlayState.isPlaying = tick.isPlaying

@@ -10,9 +10,10 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:translate",
+    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:thumbar && npm run test:translate",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "icon": "electron scripts/make-icon.mjs",
+    "icon:thumbar": "electron scripts/make-thumbar-icons.mjs",
     "dist": "electron-vite build && electron-builder --win --x64",
     "probe": "esbuild scripts/probe-sources.ts --bundle --platform=node --format=cjs --external:electron --outfile=out/probe.cjs --log-level=error && electron out/probe.cjs",
     "dig-nct": "node scripts/dig-nct.mjs",
@@ -23,6 +24,7 @@
     "tune:align": "esbuild scripts/tune-align.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/tune-align.cjs --log-level=error && electron out/tune-align.cjs",
     "debug:yt": "esbuild scripts/debug-yt-download.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/debug-yt.cjs --log-level=error && electron out/debug-yt.cjs",
     "test:external": "esbuild scripts/test-external-lyrics.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-external.cjs --log-level=error && electron out/test-external.cjs",
+    "test:thumbar": "esbuild scripts/test-thumbar.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/main/test-thumbar.cjs --log-level=error && electron out/main/test-thumbar.cjs",
     "test:subs": "esbuild scripts/test-subtitle-source.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-subs.cjs --log-level=error && electron out/test-subs.cjs"
   },
   "dependencies": {

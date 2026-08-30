@@ -11,6 +11,8 @@ extraResources:
     to: icon.png
   - from: resources/smtc-watch.ps1
     to: smtc-watch.ps1
+  - from: resources/thumbar
+    to: thumbar
 win:
   icon: resources/icon.png
   target:
