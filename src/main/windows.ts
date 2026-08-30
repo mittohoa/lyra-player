@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, screen, shell } from 'electron'
+import { IPC } from '@shared/ipc'
 import type { OverlaySettings } from '@shared/types'
 import { getSettings, patchSettings } from './store'
 
@@ -181,6 +182,23 @@ export function setOverlayVisible(visible: boolean): void {
   } else {
     destroyOverlayWindow()
   }
+}
+
+/**
+ * Bật/tắt khung lời nổi cho trọn một lượt: mở hoặc đóng cửa sổ, ghi lại lựa
+ * chọn, rồi báo cho cửa sổ chính biết để giao diện Cài đặt khớp theo.
+ *
+ * Gom về một chỗ vì có tới ba đường gọi tới — khay hệ thống, phím tắt toàn
+ * cục, và thanh dưới ô xem trước ở taskbar. Ba bản chép tay thì sớm muộn cũng
+ * có một bản quên mất bước báo cho cửa sổ chính.
+ *
+ * @param next bỏ trống thì đảo trạng thái hiện tại
+ */
+export function toggleOverlay(next = !getSettings().overlay.enabled): boolean {
+  setOverlayVisible(next)
+  const saved = patchSettings({ overlay: { ...getSettings().overlay, enabled: next } })
+  getMainWindow()?.webContents.send(IPC.overlaySettings, saved.overlay)
+  return next
 }
 
 /** Day mot ban tin toi ca hai cua so (cua so nao khong ton tai thi bo qua). */

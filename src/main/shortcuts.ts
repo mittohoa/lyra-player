@@ -1,7 +1,8 @@
 import { globalShortcut } from 'electron'
 import { IPC } from '@shared/ipc'
-import { getSettings, patchSettings } from './store'
-import { getMainWindow, setOverlayVisible } from './windows'
+import { getSettings } from './store'
+import { applyThumbar } from './thumbar'
+import { getMainWindow, toggleOverlay as toggleOverlayWindow } from './windows'
 import { log } from './logger'
 
 export type MediaAction = 'play-pause' | 'next' | 'prev' | 'stop'
@@ -46,12 +47,10 @@ export function registerGlobalShortcuts(): void {
 
   const { toggleOverlay, lyricsEarlier, lyricsLater } = settings.hotkeys
 
-  // Bat/tat khung lyric noi ma khong can mo cua so chinh
+  // Bat/tat khung loi noi ma khong can mo cua so chinh
   register(toggleOverlay, () => {
-    const next = !getSettings().overlay.enabled
-    setOverlayVisible(next)
-    const saved = patchSettings({ overlay: { ...getSettings().overlay, enabled: next } })
-    getMainWindow()?.webContents.send(IPC.overlaySettings, saved.overlay)
+    toggleOverlayWindow()
+    applyThumbar()
   })
 
   // Chinh lech lyric ngay trong luc dang nghe

@@ -1,6 +1,5 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, globalShortcut, Menu, nativeImage, Tray } from 'electron'
-import { IPC } from '@shared/ipc'
 import { registerIpc } from './ipc'
 import {
   handleMediaProtocol,
@@ -19,14 +18,15 @@ import {
   pushNotice,
   setLogBroadcaster
 } from './logger'
-import { flushAllStores, getSettings, patchSettings } from './store'
+import { flushAllStores, getSettings } from './store'
+import { applyThumbar, resetThumbar } from './thumbar'
 import {
   broadcast,
   createMainWindow,
   createOverlayWindow,
   destroyOverlayWindow,
   getMainWindow,
-  setOverlayVisible
+  toggleOverlay
 } from './windows'
 
 // Phai dang ky scheme truoc khi app san sang
@@ -91,12 +91,8 @@ function createTray(): void {
           type: 'checkbox',
           checked: getSettings().overlay.enabled,
           click: (item) => {
-            setOverlayVisible(item.checked)
-            // Ghi vao settings de lan mo app sau con nho, roi bao cho cua so chinh
-            const next = patchSettings({
-              overlay: { ...getSettings().overlay, enabled: item.checked }
-            })
-            getMainWindow()?.webContents.send(IPC.overlaySettings, next.overlay)
+            toggleOverlay(item.checked)
+            applyThumbar()
             rebuildMenu()
           }
         },
@@ -135,6 +131,7 @@ if (!app.requestSingleInstanceLock()) {
     const win = BrowserWindow.fromWebContents(contents)
     if (win && !win.isDestroyed()) {
       win.reload()
+      win.once('ready-to-show', resetThumbar)
       pushNotice({
         level: 'warning',
         scope: 'giao diện',
@@ -169,7 +166,9 @@ if (!app.requestSingleInstanceLock()) {
 
     // Bat cung Windows thi thu thang xuong khay, khong chan man hinh luc dang nhap
     const hidden = startedHidden() || getSettings().startMinimized
-    createMainWindow({ show: !hidden })
+    const win = createMainWindow({ show: !hidden })
+    // Thanh nut gan vao cua so, nen phai doi cua so co that roi moi dung duoc
+    win.once('ready-to-show', resetThumbar)
 
     // Cac buoc con lai deu la tien ich: hong buoc nao thi mat rieng buoc do,
     // nhac van phat duoc. Nen bat rieng tung buoc thay vi mot khoi chung.
