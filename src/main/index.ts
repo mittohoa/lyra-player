@@ -20,6 +20,7 @@ import {
 } from './logger'
 import { flushAllStores, getSettings } from './store'
 import { applyThumbar, resetThumbar } from './thumbar'
+import { batTuCapNhat } from './updater'
 import {
   broadcast,
   createMainWindow,
@@ -194,7 +195,8 @@ if (!app.requestSingleInstanceLock()) {
       ['phím tắt toàn cục', registerGlobalShortcuts],
       ['bật cùng Windows', () => applyLaunchAtStartup(getSettings())],
       ['theo dõi nhạc ở app khác', () => getSettings().followSystemMedia && startSmtcWatch()],
-      ['khung lời nổi', () => getSettings().overlay.enabled && createOverlayWindow()]
+      ['khung lời nổi', () => getSettings().overlay.enabled && createOverlayWindow()],
+      ['tự cập nhật', () => void batTuCapNhat()]
     ]
     for (const [what, step] of optional) {
       try {

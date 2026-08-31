@@ -1,4 +1,12 @@
 appId: com.mittohoa.lyra_player
+
+# Nguon cap nhat: chinh trang phat hanh tren GitHub. Khong can may chu rieng,
+# va `.blockmap` cho phep tai CHENH LECH - ban 104 MB nhung lan cap nhat sau
+# thuong chi tai vai MB.
+publish:
+  provider: github
+  owner: mittohoa
+  repo: lyra-player
 productName: Lyra
 directories:
   buildResources: resources

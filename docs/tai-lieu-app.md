@@ -299,15 +299,57 @@ thật rồi xem Lyra có nhận ra và dò được lời không.
 - **Spotify chỉ tra cứu được thông tin**, không phát được.
 - **Căn mốc bằng AI sai trung vị 2 giây.** Đủ để lời chạy đúng đoạn, không đủ để
   hát karaoke theo từng chữ.
-- **Chất lượng bản dịch chưa kiểm chứng.** Máy này không có khoá API Anthropic;
-  đường đi đã thử bằng máy chủ giả, còn chất lượng chữ nghĩa thì chưa ai đọc.
+- **Máy dịch nhanh sai chừng ba dòng trên mười.** Đo trên 35 dòng lời thật:
+  `opus-mt` dùng được 71%, `NLLB` dùng được 100% nhưng chậm gấp sáu lần.
+  Cả hai chạy tại chỗ, không khoá API, không tiền.
 - **Model `small` chưa đo được độ chính xác** — mỗi lần chạy quá lâu.
 - **Chỉ chạy trên Windows.** Phần đọc nhạc app khác dựa vào SMTC, là thứ riêng
   của Windows.
 
 ---
 
-## 8. Chạy thử
+## 8. Cập nhật
+
+Lyra không nằm trong cửa hàng nào, nên phải tự lo việc báo có bản mới. Không lo
+thì một người cài tay bản 0.1.0 sẽ dùng nó mãi mãi, kể cả sau khi lỗi họ gặp đã
+được sửa từ lâu — và họ không có cách nào biết.
+
+**Windows** dùng `electron-updater` đọc trang phát hành GitHub: tải ngầm, cài
+lúc thoát app. Nhờ `.blockmap`, lần cập nhật sau thường chỉ tải vài MB chứ
+không tải lại cả bộ cài 104 MB. Bản **portable** thì tắt — nó là một file người
+dùng tự để đâu tuỳ ý, ghi đè lên nó là việc không nên tự tiện làm.
+
+**Android** hỏi GitHub một lần mỗi lần mở app, rồi hiện một dải báo ở đầu màn
+hình. Bản `sideload` tự tải APK và mở thẳng hộp cài đặt của hệ thống; bản `play`
+chỉ mở trang phát hành, vì Play tự lo việc cập nhật và quyền
+`REQUEST_INSTALL_PACKAGES` bị soi rất kỹ ở đó.
+
+Ba chỗ dễ sai, đều đã tránh:
+
+- **Đọc tên file APK, không đọc tên thẻ.** Một bản phát hành mang cả file
+  Windows lẫn Android, và hai phía không đổi số cùng lúc — đọc tên thẻ là báo có
+  bản mới trong khi phía Android chẳng đổi gì.
+- **So phiên bản theo từng số, không so chuỗi.** So chuỗi thì `0.1.10` đứng
+  trước `0.1.9`, và tới bản thứ mười app lặng lẽ ngừng báo — một lỗi chỉ lộ ra
+  sau nhiều tháng.
+- **Dải báo nằm ở tầng app, không nằm trong trang phát.** Trang phát thoát sớm
+  khi chưa có quyền đọc thông báo hoặc chưa có gì đang phát, mà đó đúng là trạng
+  thái của một máy vừa cài xong — người cần biết tin này nhất lại là người không
+  thấy nó.
+
+### Máy Samsung
+
+Auto Blocker chặn **mọi** đường cài không đi qua Galaxy Store hay Play Store, kể
+cả `PackageInstaller` do chính app gọi. Cơ chế tự cập nhật ở trên đi đúng con
+đường mà nó sinh ra để chặn, nên trên máy Samsung bật Auto Blocker thì nó không
+chạy. Không có cách nào lách từ phía mã nguồn, và cũng không nên có.
+
+Người dùng tắt Auto Blocker thì cài được. Cách dứt điểm là phát hành qua Play —
+bản `play` không mang quyền cài đặt và không cần cơ chế này.
+
+---
+
+## 9. Chạy thử
 
 ```bash
 npm install
