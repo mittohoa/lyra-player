@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyra — Chính sách quyền riêng tư</title>
+<meta name="description" content="Lyra không có tài khoản, không quảng cáo, không đo đạc hành vi. Trang này nói rõ từng thứ app đọc, từng thứ app gửi đi, và từng thứ app không đụng tới.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nen: #0E0B14;
+    --nen-2: #16111f;
+    --tim: #6D28D9;
+    --tim-sang: #a78bfa;
+    --chu: #f4f1f8;
+    --chu-mo: #a49bb5;
+    --chu-rat-mo: #6f6780;
+    --vien: rgba(255,255,255,.09);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--nen);
+    color: var(--chu);
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .khung { width: min(760px, 100% - 44px); margin-inline: auto; }
+  a { color: var(--tim-sang); }
+  header {
+    padding: 60px 0 44px;
+    background: radial-gradient(700px 380px at 50% -140px, rgba(109,40,217,.38), transparent 70%);
+    border-bottom: 1px solid var(--vien);
+  }
+  .ve-truoc { color: var(--chu-rat-mo); font-size: 14px; text-decoration: none; }
+  .ve-truoc:hover { color: var(--tim-sang); }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; letter-spacing: -.03em; font-weight: 800; margin: 26px 0 14px; }
+  h2 { font-size: clamp(19px, 3vw, 24px); letter-spacing: -.02em; font-weight: 700; margin: 46px 0 14px; }
+  h3 { font-size: 16.5px; font-weight: 600; margin: 28px 0 8px; }
+  p, li { color: var(--chu-mo); font-size: 15.5px; }
+  strong, b { color: var(--chu); font-weight: 600; }
+  .dan-de { font-size: 17px; color: var(--chu-mo); }
+  main { padding: 8px 0 90px; }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--vien); vertical-align: top; }
+  th { color: var(--chu); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  td { color: var(--chu-mo); }
+  code {
+    font-family: Consolas, 'SF Mono', Menlo, monospace;
+    font-size: .92em; background: rgba(255,255,255,.07);
+    border: 1px solid var(--vien); border-radius: 5px; padding: 1px 6px;
+  }
+  .hop {
+    border: 1px solid var(--vien); background: var(--nen-2);
+    border-radius: 14px; padding: 20px 24px; margin: 26px 0;
+  }
+  .hop-nhan {
+    border-color: rgba(52,211,153,.28); background: rgba(16,185,129,.07);
+  }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  footer { border-top: 1px solid var(--vien); padding: 30px 0 60px; color: var(--chu-rat-mo); font-size: 13.5px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="khung">
+    <a class="ve-truoc" href="./">← Lyra</a>
+    <h1>Chính sách quyền riêng tư</h1>
+    <p class="dan-de">
+      Lyra không có tài khoản, không quảng cáo, không đo đạc hành vi, và không
+      có máy chủ nào của riêng nó. Trang này nói rõ từng thứ app đọc, từng thứ
+      app gửi đi, và từng thứ app không đụng tới.
+    </p>
+  </div>
+</header>
+
+<main class="khung">
+
+  <div class="hop hop-nhan">
+    <b>Tóm tắt trong ba câu.</b> Lyra gửi đi <b>tên bài hát và tên ca sĩ</b> để
+    đi tìm lời — không gửi gì khác. Nội dung thông báo, danh bạ, tin nhắn, vị
+    trí, file nhạc trong máy: không thứ nào rời khỏi thiết bị. Không có tài
+    khoản nên cũng không có gì để gắn với danh tính bạn.
+  </div>
+
+  <h2>1. Lyra đọc những gì trên máy</h2>
+
+  <table>
+    <thead>
+      <tr><th>Quyền</th><th>Đọc cái gì</th><th>Có rời khỏi máy không</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Quyền đọc thông báo</td>
+        <td>Chỉ <b>tên bài, tên ca sĩ, độ dài và vị trí phát</b> của phiên nhạc
+            đang chạy. Lyra bỏ qua toàn bộ phần còn lại của thông báo.</td>
+        <td>Tên bài và tên ca sĩ có — xem mục 2. Không gì khác.</td>
+      </tr>
+      <tr>
+        <td>Nhạc trong máy</td>
+        <td>Tên bài, tên ca sĩ, tên album và đường dẫn file nhạc, để dựng thư
+            viện. Xin đúng quyền <b>nhạc</b>, không đụng ảnh, video hay tài liệu.</td>
+        <td><b>Không.</b> Không bao giờ tải file nhạc của bạn đi đâu.</td>
+      </tr>
+      <tr>
+        <td>Vẽ đè lên app khác</td>
+        <td>Không đọc gì. Chỉ để vẽ khung lời nổi lên trên màn hình.</td>
+        <td>Không có gì để gửi.</td>
+      </tr>
+      <tr>
+        <td>Thông báo</td>
+        <td>Không đọc gì. Chỉ để hiện thẻ điều khiển nhạc.</td>
+        <td>Không có gì để gửi.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="hop">
+    <b>Nói rõ về quyền đọc thông báo,</b> vì đây là quyền nhạy cảm nhất và hệ
+    thống cảnh báo đúng khi bạn bật nó.
+    <br><br>
+    Android chỉ cho biết app nào đang phát bài gì qua đúng một đường:
+    <code>NotificationListenerService</code>. Đường đó về mặt kỹ thuật mở ra
+    <b>mọi</b> thông báo trên máy, kể cả tin nhắn ngân hàng và mã OTP. Hệ thống
+    không có cách nào biết app định làm gì với nó, nên cảnh báo cho tất cả.
+    <br><br>
+    Lyra chỉ lấy siêu dữ liệu của phiên phát nhạc và bỏ hết phần còn lại. Nhưng
+    đó là lời của người viết app — thứ kiểm chứng được là
+    <a href="https://github.com/mittohoa/lyra-android">mã nguồn mở</a>.
+    <br><br>
+    Không bật quyền này cũng dùng được: Lyra vẫn là một trình phát nhạc đầy đủ
+    có lời khớp giờ và dịch, chỉ thiếu phần lời cho nhạc phát ở app khác.
+  </div>
+
+  <h2>2. Lyra gửi đi những gì</h2>
+
+  <h3>Đi tìm lời bài hát</h3>
+  <p>
+    Khi cần lời cho một bài, Lyra gửi <b>tên bài, tên ca sĩ và độ dài bài</b> tới
+    <a href="https://lrclib.net">LRCLIB</a> — một kho lời mở, miễn phí, không cần
+    tài khoản. Không kèm định danh nào của bạn hay của máy bạn.
+  </p>
+  <p>
+    Lời tìm được lưu lại trong máy để lần sau không phải hỏi lại.
+  </p>
+
+  <h3>Dịch lời</h3>
+  <p>
+    Phần dịch chạy <b>tại chỗ trên máy</b> bằng ML Kit của Google. Câu chữ trong
+    lời bài hát không được gửi đi đâu cả.
+  </p>
+  <p>
+    Nhưng lần đầu bật dịch cho một ngôn ngữ, ML Kit <b>tải bộ máy dịch</b> từ máy
+    chủ Google. Trong quá trình đó, thư viện ML Kit của Google tạo và gửi đi một
+    <b>mã định danh bản cài đặt</b> (Firebase Installation ID) — một chuỗi gắn với
+    lần cài app này trên máy này, không gắn với danh tính bạn. Đây là hành vi của
+    thư viện Google, không phải của Lyra, và nó chịu
+    <a href="https://policies.google.com/privacy">chính sách quyền riêng tư của
+    Google</a>. Không bật tính năng dịch thì không có bước này.
+  </p>
+
+  <h3>Không có gì khác</h3>
+  <p>
+    Lyra không có máy chủ riêng. Không gửi báo cáo lỗi, không đo đạc hành vi,
+    không quảng cáo, không mạng quảng cáo, không thư viện phân tích nào.
+  </p>
+
+  <h2>3. Lyra lưu gì trong máy</h2>
+  <ul>
+    <li>Cài đặt của bạn: cỡ chữ khung lời nổi, ngôn ngữ dịch, các lựa chọn khác</li>
+    <li>Danh sách phát bạn tự tạo</li>
+    <li>Bộ nhớ đệm lời bài hát và bản dịch</li>
+    <li>Mốc căn chỉnh khi bạn chạm để đồng bộ lời</li>
+  </ul>
+  <p>
+    Tất cả nằm trong vùng dữ liệu riêng của app. Gỡ app là mất sạch. Không có bản
+    sao ở đâu khác, nên cũng không có gì để yêu cầu xoá — Lyra không giữ dữ liệu
+    của bạn ở bất kỳ đâu ngoài chính máy bạn.
+  </p>
+
+  <h2>4. Trẻ em</h2>
+  <p>
+    Lyra không nhắm tới trẻ em và không thu thập dữ liệu của bất kỳ ai, nên cũng
+    không thu thập dữ liệu của trẻ em.
+  </p>
+
+  <h2>5. Bản tải thẳng khác gì bản trên Google Play</h2>
+  <p>
+    Bản tải thẳng từ GitHub có thêm phần tìm và phát nhạc trực tuyến, tải nhạc về
+    máy, và tự cập nhật. Ba phần đó <b>không có</b> trong bản trên Google Play.
+  </p>
+  <p>
+    Về dữ liệu thì khác biệt là: bản tải thẳng còn gọi tới Zing MP3 và
+    NhacCuaTui để tìm bài và tra lời, và gọi tới GitHub để xem có bản mới. Bản
+    trên Google Play chỉ gọi tới LRCLIB.
+  </p>
+
+  <h2>6. Thay đổi</h2>
+  <p>
+    Trang này đổi thì lịch sử thay đổi nằm công khai trong
+    <a href="https://github.com/mittohoa/lyra-player/commits/main/docs/quyen-rieng-tu.html">lịch sử git</a>
+    của chính file này. Không có bản nào bị sửa lặng lẽ.
+  </p>
+
+  <h2>7. Liên hệ</h2>
+  <p>
+    Mở một vấn đề tại
+    <a href="https://github.com/mittohoa/lyra-android/issues">github.com/mittohoa/lyra-android/issues</a>.
+  </p>
+
+</main>
+
+<footer class="khung">
+  Cập nhật lần cuối: 31 tháng 8, 2026 · Lyra 0.1.5
+</footer>
+
+</body>
+</html>
