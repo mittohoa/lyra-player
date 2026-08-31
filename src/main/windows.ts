@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { app, BrowserWindow, screen, shell } from 'electron'
 import { IPC } from '@shared/ipc'
 import type { OverlaySettings } from '@shared/types'
+import { suggestOverlay, suggestOverlayFontSize } from '@shared/overlay-size'
 import { getSettings, patchSettings } from './store'
 
 let mainWindow: BrowserWindow | null = null
@@ -73,17 +74,40 @@ export function createMainWindow(opts: { show?: boolean } = {}): BrowserWindow {
   return mainWindow
 }
 
-/** Vi tri mac dinh cua overlay: giua ngang, gan day man hinh chinh. */
+/**
+ * Vi tri va kich thuoc mac dinh cua overlay: giua ngang, gan day man hinh chinh.
+ *
+ * Kich thuoc do tu man hinh that chu khong chot cung - xem `@shared/overlay-size`.
+ */
 function defaultOverlayBounds(): OverlaySettings['bounds'] {
   const { workArea } = screen.getPrimaryDisplay()
-  const width = Math.min(920, Math.round(workArea.width * 0.7))
-  const height = 190
+  const { width, height } = suggestOverlay(workArea.width, getSettings().overlay.contextLines)
   return {
     x: workArea.x + Math.round((workArea.width - width) / 2),
     y: workArea.y + workArea.height - height - 90,
     width,
     height
   }
+}
+
+/**
+ * Chot co chu cho lan dau chay, theo man hinh dang co.
+ *
+ * `fontSize: 0` trong gia tri mac dinh nghia la CHUA AI CHON - khong phai la
+ * co chu bang khong. Dung mot so vo nghia lam dau cho tiet kiem hon la them mot
+ * o `fontSizeAuto` rieng, va no chi ton tai trong khoang thoi gian rat ngan:
+ * ngay lan mo dau tien ta thay no bang so do duoc, va tu do tro di day la mot
+ * lua chon binh thuong cua nguoi dung, sua duoc bang thanh truot nhu moi thu
+ * khac.
+ *
+ * Goi luc app san sang - som hon thi `screen` cua Electron chua dung duoc.
+ */
+export function resolveOverlayFontSize(): void {
+  const overlay = getSettings().overlay
+  if (overlay.fontSize > 0) return
+
+  const fontSize = suggestOverlayFontSize(screen.getPrimaryDisplay().workArea.width)
+  patchSettings({ overlay: { ...overlay, fontSize } })
 }
 
 /** Dam bao overlay nam trong mot man hinh dang co (vd. sau khi rut man hinh phu). */

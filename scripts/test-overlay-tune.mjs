@@ -140,6 +140,37 @@ try {
   )
   check('chu doi co ngay tren khung', shownSize === '52px', shownSize)
 
+  // ---- 4b. Co goi y: hien khi dang lech, va bam mot cai la ve dung ----
+  // Vua dat 52 o buoc tren, gan nhu chac chan lech voi co do tu man hinh - nen
+  // loi moi phai dang hien.
+  const suggestLabel = await ev(`
+    (document.querySelector('.ov__tune-suggest') || {}).textContent
+  `)
+  check('dat co la thi hien loi moi ve co goi y', !!suggestLabel, suggestLabel)
+
+  const suggested = Number(String(suggestLabel ?? '').split('→')[1])
+  check(
+    'co goi y do tu be ngang man hinh',
+    Number.isFinite(suggested) && suggested >= 24 && suggested <= 72,
+    `goi y ${suggested}`
+  )
+
+  await ev(`document.querySelector('.ov__tune-suggest').click()`)
+  await sleep(400)
+
+  const afterSuggest = await ev(
+    `getComputedStyle(document.querySelector('.ov__line')).fontSize`
+  )
+  check(
+    'bam mot cai la chu ve dung co goi y',
+    afterSuggest === `${suggested}px`,
+    afterSuggest
+  )
+  check(
+    've dung co roi thi loi moi bien mat',
+    !(await ev(`!!document.querySelector('.ov__tune-suggest')`))
+  )
+
   // ---- 5. Doi do trong suot nen ----
   await ev(`
     (() => {
@@ -157,7 +188,11 @@ try {
 
   // ---- 6. Ghi xuong dia that, khong chi doi tren man hinh ----
   const saved = JSON.parse(readFileSync(settingsFile, 'utf8'))
-  check('co chu duoc luu lai', saved.overlay?.fontSize === 52, `fontSize = ${saved.overlay?.fontSize}`)
+  check(
+    'co chu duoc luu lai',
+    saved.overlay?.fontSize === suggested,
+    `fontSize = ${saved.overlay?.fontSize}, cho doi ${suggested}`
+  )
   check(
     'do trong suot duoc luu lai',
     Math.abs((saved.overlay?.backgroundOpacity ?? 0) - 0.8) < 0.01,

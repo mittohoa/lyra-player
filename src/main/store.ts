@@ -38,7 +38,10 @@ const DEFAULTS: AppSettings = {
     enabled: false,
     clickThrough: false,
     locked: false,
-    fontSize: 34,
+    // 0 = chua ai chon. Lan mo dau tien `resolveOverlayFontSize` do man hinh
+    // roi thay bang so that - mot con so chot cung o day khong the vua cho ca
+    // laptop 1366 lan man hinh 4K.
+    fontSize: 0,
     fontFamily: 'Segoe UI',
     color: '#ffffff',
     strokeColor: '#000000',

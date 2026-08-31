@@ -1,6 +1,7 @@
 import { useEffect, useState, type JSX, type ReactNode } from 'react'
 import type { LogEntry } from '@shared/ipc'
 import type { OverlaySettings } from '@shared/types'
+import { suggestOverlayFontSize } from '@shared/overlay-size'
 import { useApp } from '@/store/app'
 import { useExternal } from '@/store/external'
 import { IconFolder, IconRefresh, IconTrash } from '@/lib/icons'
@@ -490,6 +491,11 @@ export function SettingsView(): JSX.Element {
 
   const overlay = settings.overlay
 
+  // Do man hinh DANG CHUA cua so nay, khong phai man hinh chinh: nguoi cam hai
+  // man hinh thuong keo Lyra sang cai phu, va co chu hop voi cai phu moi la co
+  // ho muon.
+  const suggestedFontSize = suggestOverlayFontSize(window.screen.availWidth)
+
   /** Sua mot truong cua overlay va day sang cua so overlay ngay lap tuc. */
   const setOverlay = async (patch: Partial<OverlaySettings>): Promise<void> => {
     await window.api.overlay.patchSettings(patch)
@@ -627,6 +633,16 @@ export function SettingsView(): JSX.Element {
               onChange={(e) => void setOverlay({ fontSize: Number(e.target.value) })}
               style={{ width: 160 }}
             />
+            {suggestedFontSize !== overlay.fontSize && (
+              <button
+                className="btn btn--ghost"
+                style={{ marginLeft: 8, fontSize: 12 }}
+                onClick={() => void setOverlay({ fontSize: suggestedFontSize })}
+                title={`Cỡ hợp với màn hình ${window.screen.availWidth} điểm ảnh này`}
+              >
+                Cỡ gợi ý: {suggestedFontSize}
+              </button>
+            )}
           </Field>
 
           <Field label="Font chữ">
