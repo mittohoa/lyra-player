@@ -10,7 +10,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && node scripts/test-overlay-size.ts && node scripts/test-language.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:thumbar && npm run test:translate",
+    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && node scripts/test-overlay-size.ts && node scripts/test-language.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:thumbar",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "icon": "electron scripts/make-icon.mjs",
     "icon:thumbar": "electron scripts/make-thumbar-icons.mjs",
@@ -20,7 +20,6 @@
     "test:download": "esbuild scripts/test-download.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-download.cjs --log-level=error && electron out/test-download.cjs",
     "test:whisper": "esbuild scripts/test-whisper-align.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-whisper.cjs --log-level=error && electron out/test-whisper.cjs",
     "tune:whisper": "esbuild scripts/tune-whisper.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/tune-whisper.cjs --log-level=error && electron out/tune-whisper.cjs",
-    "test:translate": "esbuild scripts/test-translate.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-translate.cjs --log-level=error && electron out/test-translate.cjs",
     "tune:align": "esbuild scripts/tune-align.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/tune-align.cjs --log-level=error && electron out/tune-align.cjs",
     "debug:yt": "esbuild scripts/debug-yt-download.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/debug-yt.cjs --log-level=error && electron out/debug-yt.cjs",
     "test:external": "esbuild scripts/test-external-lyrics.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-external.cjs --log-level=error && electron out/test-external.cjs",
@@ -29,11 +28,9 @@
     "test:dich": "esbuild scripts/test-local-translate.mjs --bundle --platform=node --format=cjs --external:electron --external:@huggingface/transformers --alias:@shared=./src/shared --outfile=out/test-dich.cjs --log-level=error && electron out/test-dich.cjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.122.0",
     "@huggingface/transformers": "^4.2.0",
     "music-metadata": "^11.9.0",
-    "node-id3": "^0.2.9",
-    "zod": "^4.5.2"
+    "node-id3": "^0.2.9"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",

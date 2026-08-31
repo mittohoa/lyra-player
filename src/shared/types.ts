@@ -123,8 +123,15 @@ export interface AppSettings {
   ytDlpPath: string
   ffmpegPath: string
   spotify: SpotifyCredentials
-  /** Khoa API Anthropic de dich lyric; rong = doc tu bien moi truong. */
-  anthropicApiKey: string
+  /**
+   * Bo may dich loi.
+   *
+   * 'tot'  - NLLB-200: 875 MB cho moi ngon ngu, ~5,7 giay moi dong, dich ra
+   *          cau doc duoc
+   * 'nhanh' - opus-mt: 102 MB moi chieu, ~1 giay moi dong, tho hon va bo trong
+   *          gan mot phan ba so dong
+   */
+  translateEngine: 'nhanh' | 'tot'
   /** Ma ngon ngu dich lyric sang. */
   translateTo: string
   /** Co nho cua model Whisper dung de can timestamp. */

@@ -27,7 +27,7 @@ export async function aiStatus(): Promise<AiStatus> {
     whisperInstalled: !!(await findWhisper()),
     models,
     // SDK cung doc duoc khoa tu bien moi truong, nen coi ca hai la "co khoa"
-    hasApiKey: !!(getSettings().anthropicApiKey.trim() || process.env.ANTHROPIC_API_KEY)
+    boMayDich: getSettings().translateEngine
   }
 }
 

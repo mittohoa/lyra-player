@@ -59,7 +59,6 @@ export const IPC = {
   aiTranslate: 'ai:translate',
   aiTranslateProgress: 'ai:translate-progress',
   aiGetTranslation: 'ai:get-translation',
-  aiCheckKey: 'ai:check-key',
 
   lyricsForExternal: 'lyrics:for-external',
 
@@ -132,7 +131,8 @@ export interface AiStatus {
   whisperInstalled: boolean
   /** Co nho model -> da tai ve chua. */
   models: Record<string, boolean>
-  hasApiKey: boolean
+  /** Bo may dich dang chon: 'nhanh' hoac 'tot'. */
+  boMayDich: 'nhanh' | 'tot'
 }
 
 /** Tien do tai whisper.cpp hoac model ve may. */

@@ -197,19 +197,17 @@ const LANGS: Record<string, string> = {
 /**
  * Hai tinh nang AI rat khac nhau nen tach ro trong UI:
  * - Can timestamp: chay Whisper TREN MAY, khong gui gi di, chi ton dung luong tai ve.
- * - Dich lyric: goi API Anthropic, can khoa va co tinh phi.
+ * - Dich lyric: chay tren may, khong khoa va khong ton tien.
  */
 function AiSection(): JSX.Element | null {
   const { settings, patchSettings, toast } = useApp()
   const [status, setStatus] = useState<{
     whisperInstalled: boolean
     models: Record<string, boolean>
-    hasApiKey: boolean
+    boMayDich: 'nhanh' | 'tot'
   } | null>(null)
   const [installing, setInstalling] = useState(false)
   const [progress, setProgress] = useState('')
-  const [keyDraft, setKeyDraft] = useState('')
-  const [checking, setChecking] = useState(false)
 
   useEffect(() => {
     void window.api.ai.status().then(setStatus)
@@ -219,10 +217,6 @@ function AiSection(): JSX.Element | null {
       setProgress(`Đang tải ${what}: ${pct}%`)
     })
   }, [])
-
-  useEffect(() => {
-    if (settings) setKeyDraft(settings.anthropicApiKey)
-  }, [settings?.anthropicApiKey])
 
   if (!settings || !status) return null
 
@@ -243,14 +237,6 @@ function AiSection(): JSX.Element | null {
     }
   }
 
-  const checkKey = async (): Promise<void> => {
-    setChecking(true)
-    await patchSettings({ anthropicApiKey: keyDraft })
-    const r = await window.api.ai.checkKey()
-    setStatus(await window.api.ai.status())
-    setChecking(false)
-    toast(r.ok ? 'Khoá API dùng được.' : `Không dùng được: ${r.error}`, r.ok ? 'info' : 'error')
-  }
 
   return (
     <>
@@ -316,9 +302,9 @@ function AiSection(): JSX.Element | null {
       <section className="card">
         <h3>Dịch lyric</h3>
         <p className="card__hint">
-          Hiện bản dịch ngay dưới mỗi dòng, cả trong app lẫn trên khung lyric nổi. Phần này{' '}
-          <strong>gọi API Anthropic</strong> nên cần khoá riêng của bạn và có tính phí theo lượng
-          dùng. Lời bài hát được gửi đi; nhạc thì không.
+          Hiện bản dịch ngay dưới mỗi dòng, cả trong app lẫn trên khung lyric nổi.{' '}
+          <strong>Chạy hoàn toàn trên máy bạn</strong> — không khoá API, không tài khoản,
+          không tốn tiền, và dùng được cả khi mất mạng. Lời bài hát không rời khỏi máy.
         </p>
 
         <Field label="Dịch sang">
@@ -334,28 +320,30 @@ function AiSection(): JSX.Element | null {
           </select>
         </Field>
 
-        <Field label="Khoá API" hint={status.hasApiKey ? 'Đã có khoá' : 'Lấy ở console.anthropic.com'}>
-          <input
-            type="password"
-            value={keyDraft}
-            onChange={(e) => setKeyDraft(e.target.value)}
-            placeholder="sk-ant-..."
-            style={{ width: 240 }}
-          />
+        <Field
+          label="Bộ máy dịch"
+          hint={
+            settings.translateEngine === 'tot'
+              ? '875 MB, dùng cho mọi ngôn ngữ'
+              : '102 MB mỗi chiều'
+          }
+        >
+          <select
+            value={settings.translateEngine}
+            onChange={(e) =>
+              void patchSettings({ translateEngine: e.target.value as 'nhanh' | 'tot' })
+            }
+          >
+            <option value="tot">Chất lượng — chậm hơn, dịch ra câu đọc được</option>
+            <option value="nhanh">Nhanh và nhẹ — thô hơn, bỏ trống nhiều dòng</option>
+          </select>
         </Field>
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          <button className="btn btn--primary btn--sm" onClick={() => void checkKey()} disabled={checking}>
-            {checking ? <LyraLoader /> : null}
-            Lưu và kiểm tra
-          </button>
-          <button
-            className="btn btn--ghost btn--sm"
-            onClick={() => void window.api.system.openExternal('https://console.anthropic.com/settings/keys')}
-          >
-            Lấy khoá API
-          </button>
-        </div>
+        <p className="card__hint" style={{ marginTop: 10 }}>
+          {settings.translateEngine === 'tot'
+            ? 'Một gói 875 MB dùng chung cho mọi ngôn ngữ, tải một lần. Khoảng 6 giây mỗi dòng nên một bài mất vài phút — bản dịch hiện dần từng dòng chứ không đợi xong hết, và lần nghe sau thì có ngay.'
+            : 'Mỗi chiều dịch một gói 102 MB. Nhanh gấp sáu lần, nhưng đo trên lời thật thì khoảng một phần ba số dòng không dịch nổi và bị bỏ trống.'}
+        </p>
       </section>
     </>
   )
