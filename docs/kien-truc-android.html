@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Kiến trúc bản Android của Lyra: tính năng nào chạy được, luồng dữ liệu, phần chuyển từ bản Windows, và thứ tự làm.">
+<meta name="description" content="Kiến trúc bản Android của Lyra: hai vai của cùng một app, vòng lặp phải cắt, lời trên thẻ màn hình khoá, và hai biến thể phát hành.">
 <title>Lyra cho Android</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -355,324 +355,178 @@
 </head>
 <body>
 <div class="wrap">
-
-  <nav class="toc">
-    <div class="toc-label">Mục lục</div>
-    <a href="#visao"><span class="num">1</span>Vì sao Android hợp hơn</a>
-    <a href="#tinhnang"><span class="num">2</span>Tính năng nào chạy được</a>
-    <a href="#luong"><span class="num">3</span>Luồng dữ liệu</a>
-    <a href="#neo"><span class="num">4</span>Neo của cả app</a>
-    <a href="#khung"><span class="num">5</span>Khung lời nổi</a>
-    <a href="#chuyen"><span class="num">6</span>Phần chuyển sang</a>
-    <a href="#quyen"><span class="num">7</span>Quyền</a>
-    <a href="#kiem"><span class="num">8</span>Kiểm chứng</a>
-    <a href="#thutu"><span class="num">9</span>Làm theo thứ tự nào</a>
-    <a href="#vo"><span class="num">10</span>Chỗ có thể vỡ</a>
-  </nav>
-
-  <main>
-    <header class="head">
-      <svg class="mark" width="58" height="58" viewBox="0 0 512 512" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#4338CA"/>
-          </linearGradient>
-          <clipPath id="lb"><rect x="152" y="372" width="208" height="48" rx="24"/></clipPath>
-        </defs>
-        <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#lg)"/>
-        <g class="mark__note" fill="#fff" transform="translate(9 -6)">
-          <path d="M207.4 125 h19 v179 h-19 z"/>
-          <path d="M357.4 97 h19 v179 h-19 z"/>
-          <path d="M207.4 125 L376.4 97 L376.4 137 L207.4 165 Z"/>
-          <ellipse cx="172" cy="300" rx="58" ry="33" transform="rotate(-25 172 300)"/>
-          <ellipse cx="322" cy="272" rx="58" ry="33" transform="rotate(-25 322 272)"/>
-        </g>
-        <g clip-path="url(#lb)">
-          <rect x="152" y="372" width="208" height="48" rx="24" fill="#fff" opacity=".28"/>
-          <rect class="mark__bar" x="152" y="372" width="208" height="48" rx="24" fill="#fff"/>
-        </g>
-      </svg>
-      <div>
-        <h1>Lyra cho Android</h1>
-        <p class="tagline">Kiến trúc cho bản di động — chỉ giữ đúng cái lõi</p>
-      </div>
-    </header>
-
-    <div class="facts">
-      <span class="fact">Kotlin thuần</span>
-      <span class="fact">minSdk <b>26</b> · Android 8</span>
-      <span class="fact">coroutines + StateFlow</span>
-      <span class="fact">Viết mới ~<b>1.500–2.000</b> dòng</span>
-      <span class="fact">Chuyển sang ~<b>1.000</b> dòng</span>
-    </div>
-
-    <section id="visao">
-      <h2><span class="num">1</span>Vì sao Android hợp hơn Windows</h2>
-      <p class="lede">Cái lõi của Lyra — hiện lời cho nhạc đang phát ở app khác — hợp với Android hơn cả nền tảng nó sinh ra.</p>
-      <p>Ba điều, và điều thứ ba mới là điều đáng nói:</p>
-      <ol>
-        <li><strong>Nguồn dữ liệu tốt hơn.</strong> <code>MediaSessionManager</code> trả về nghệ sĩ, tên bài, album, ảnh bìa, vị trí, trạng thái và cả tên app nguồn — ở các trường <strong>riêng biệt</strong>. Trên Windows ta chỉ có một chuỗi thô, phải đoán.</li>
-        <li><strong>Đẩy thay vì hỏi.</strong> Đăng ký <code>MediaController.Callback</code> là hệ thống tự gọi lại khi có gì đổi. Bản Windows phải nuôi một tiến trình PowerShell hỏi liên tục 2 lần mỗi giây.</li>
-        <li><strong>Cái giới hạn khó chịu nhất biến mất.</strong> Trên Windows, Lyra không vào được ô media của hệ điều hành — và vì Lyra ở đó cũng tự phát nhạc nên nó thành một thiếu sót thấy rõ. Trên Android ta <strong>không phát gì cả</strong>, nên chuyện đó không còn là vấn đề.</li>
-      </ol>
-    </section>
-
-    <section id="tinhnang">
-      <h2><span class="num">2</span>Tính năng nào chạy được</h2>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Tính năng</th><th>Android</th><th>Ghi chú</th></tr></thead>
-          <tbody>
-            <tr><td>Đọc nhạc app khác</td><td class="yes">✔ tốt hơn</td><td><code>MediaSessionManager</code> cho tên bài, nghệ sĩ, album, ảnh bìa, vị trí, và cả tên app nguồn</td></tr>
-            <tr><td>Khung lời nổi</td><td class="yes">✔</td><td><code>TYPE_APPLICATION_OVERLAY</code> — Musixmatch làm đúng mô hình này nhiều năm rồi</td></tr>
-            <tr><td>Nhận diện bài từ chuỗi thô</td><td class="yes">✔ dễ hơn</td><td>Spotify và YouTube Music trả nghệ sĩ với tên bài ở hai trường riêng, ít rác hơn tên tab trình duyệt</td></tr>
-            <tr><td>Dò lời LRCLIB / Zing / NCT</td><td class="yes">✔</td><td>HTTPS thuần. HMAC-SHA512 và RC4 đều làm được</td></tr>
-            <tr><td>Sửa lời tay, chỉnh lệch</td><td class="yes">✔</td><td></td></tr>
-            <tr><td>Dịch lời</td><td class="yes">✔</td><td>Chỉ là một lời gọi HTTPS tới Claude API</td></tr>
-            <tr><td>Ẩn/hiện nhanh</td><td class="yes">✔ hợp hơn</td><td>Ô Quick Settings — vuốt xuống, chạm một cái. Và không app nào chiếm mất được</td></tr>
-            <tr><td>Phụ đề video</td><td class="no">✘</td><td>Cần yt-dlp. Gọi thẳng API của Google thì bị 429 ngay — chính lý do đã bỏ hướng đó</td></tr>
-            <tr><td>Căn mốc bằng AI</td><td class="no">✘</td><td>Whisper cần <em>file âm thanh</em>, mà nhạc ở app khác thì không lấy được</td></tr>
-            <tr><td>Phát YouTube, tải nhạc</td><td class="no">✘</td><td>Cùng lý do yt-dlp</td></tr>
-            <tr><td>Phát nhạc offline</td><td class="maybe">⚠ làm được</td><td>Media3/ExoPlayer. Nhưng đây là sản phẩm B — trên Android đang cạnh tranh với hàng chục app khác</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="luong">
-      <h2><span class="num">3</span>Luồng dữ liệu</h2>
-
-      <div class="flow">
-        <div class="flow-step">
-          <div class="flow-who">Spotify / YouTube Music / Zing / NCT đang phát</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step key">
-          <div class="flow-who">NotificationListenerService</div>
-          <div class="flow-what">Hệ thống tự dựng và giữ sống. Đây là neo của cả app — xem mục 4.</div>
-          <div class="flow-file">service/LyraNotificationListener.kt</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">
-          <div class="flow-who">MediaSessionWatcher</div>
-          <div class="flow-what">Lấy các phiên đang chạy, gắn callback cho từng phiên, bù phần thời gian đã trôi</div>
-          <div class="flow-file">media/MediaSessionWatcher.kt → StateFlow&lt;NowPlaying?&gt;</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step key">
-          <div class="flow-who">LyricsRepository</div>
-          <div class="flow-what">Nhận diện bài → hỏi LRCLIB, Zing, NCT → chỉ nhận khi tên đủ giống</div>
-          <div class="flow-file">lyrics/LyricsRepository.kt → StateFlow&lt;Lyrics&gt;</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">
-          <div class="flow-who">OverlayHost → OverlayView</div>
-          <div class="flow-what">WindowManager.addView, View tự vẽ</div>
-          <div class="flow-file">overlay/OverlayView.kt</div>
-        </div>
-      </div>
-
-      <p>Vị trí phát là chỗ dễ sai nhất, <strong>y hệt bản Windows</strong>: <code>PlaybackState</code> chỉ đưa một ảnh chụp kèm mốc thời gian, không phải vị trí lúc này.</p>
-
-<pre><code><span class="c">/**
- * Vị trí phát ở thời điểm hiện tại.
- *
- * `position` là ảnh chụp tại `lastPositionUpdateTime`, không phải bây giờ.
- * Không bù phần đã trôi thì lời luôn chạy chậm hơn nhạc vài giây — đúng cái
- * bẫy đã gặp ở bản Windows.
- *
- * `lastPositionUpdateTime` dùng đồng hồ `elapsedRealtime`, không phải
- * `currentTimeMillis` — so nhầm hai thang này ra sai lệch hàng chục năm.
- */</span>
-<span class="k">fun</span> PlaybackState.currentPosition(): Long {
-    <span class="k">if</span> (state != PlaybackState.STATE_PLAYING) <span class="k">return</span> position
-    <span class="k">val</span> drift = SystemClock.elapsedRealtime() - lastPositionUpdateTime
-    <span class="k">return</span> position + (drift * playbackSpeed).toLong()
-}</code></pre>
-    </section>
-
-    <section id="neo">
-      <h2><span class="num">4</span>Neo của cả app</h2>
-      <div class="callout key">
-        <b>Quyết định kiến trúc quan trọng nhất, và nó ngược với trực giác.</b>
-        Phản xạ thường là dựng một foreground service để chạy nền. <strong>Không cần.</strong>
-        <code>NotificationListenerService</code> tự nó đã là một service do hệ thống dựng và giữ sống
-        khi người dùng đã cấp quyền đọc thông báo. Nó sống dai hơn foreground service của chính ta,
-        và <strong>không phải hiện thông báo thường trực</strong> — không phải cắm một dòng
-        “Lyra đang chạy” vào thanh thông báo suốt ngày.
-      </div>
-
-<pre><code><span class="c">/**
- * Neo của cả app.
- *
- * Ta không quan tâm tới thông báo — chỉ cần lớp này tồn tại thì hệ thống mới
- * cho gọi `getActiveSessions`. Đổi lại được luôn một chỗ trú chạy nền mà
- * không phải hiện thông báo thường trực.
- *
- * Hệ thống có thể giết và dựng lại lớp này bất cứ lúc nào, nên mọi trạng thái
- * phải nằm ở singleton bên ngoài, không nằm trong chính nó.
- */</span>
-<span class="k">class</span> LyraNotificationListener : NotificationListenerService() {
-
-    <span class="k">override fun</span> onListenerConnected() {
-        watcher.start(<span class="k">this</span>)
-        overlayHost.attach(<span class="k">this</span>)
-    }
-
-    <span class="k">override fun</span> onListenerDisconnected() {
-        watcher.stop()
-        overlayHost.detach()
-    }
-
-    <span class="c">// Không cần onNotificationPosted — ta đọc phiên media, không đọc thông báo</span>
-}</code></pre>
-
-      <p><strong>Chỉ dựng thêm foreground service khi</strong> cần chắc chắn sống trên máy Xiaomi, Oppo, Vivo — hãng nào cũng có bộ diệt nền riêng, hung hơn Android gốc nhiều. Để đó làm bước sau, đo trên máy thật rồi hẵng quyết.</p>
-    </section>
-
-    <section id="khung">
-      <h2><span class="num">5</span>Khung lời nổi</h2>
-
-      <h3>Cửa sổ</h3>
-<pre><code><span class="k">val</span> params = WindowManager.LayoutParams(
-    WindowManager.LayoutParams.MATCH_PARENT,
-    WindowManager.LayoutParams.WRAP_CONTENT,
-    <span class="c">// API 26+; TYPE_PHONE cũ đã bị chặn</span>
-    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-    <span class="c">// NOT_FOCUSABLE: không cướp bàn phím của app đang dùng
-    // NOT_TOUCH_MODAL: chạm ra ngoài khung thì rơi xuống app bên dưới</span>
-    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE <span class="k">or</span>
-        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL <span class="k">or</span>
-        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-    PixelFormat.TRANSLUCENT
-)</code></pre>
-      <p>“Chạm xuyên qua” = thêm <code>FLAG_NOT_TOUCHABLE</code>; bỏ cờ đó đi thì kéo thả được lại. Đúng vai trò <code>setIgnoreMouseEvents</code> bên Windows.</p>
-
-      <h3>Vẽ chữ — View thuần, không Compose</h3>
-      <p>Lý do cụ thể: <code>ComposeView</code> đặt trong cửa sổ của <code>WindowManager</code> không có sẵn <code>ViewTreeLifecycleOwner</code> và <code>SavedStateRegistryOwner</code>, phải tự gắn tay — thêm một tầng dễ hỏng mà đổi lại chẳng được gì, vì khung nổi chỉ vẽ vài dòng chữ.</p>
-      <p>Viền chữ làm đúng như bản Windows (<code>paint-order: stroke fill</code>): vẽ hai lượt, <strong>viền trước, thân chữ sau</strong>. Vẽ ngược lại thì viền ăn lẹm vào nét chữ.</p>
-
-<pre><code><span class="k">override fun</span> onDraw(canvas: Canvas) {
-    lines.forEachIndexed { i, line -&gt;
-        <span class="k">val</span> y = baselineOf(i)
-
-        <span class="k">if</span> (strokeWidth &gt; 0f) {
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = strokeWidth * 2f  <span class="c">// nửa nét bị thân chữ đè lên</span>
-            paint.color = strokeColor
-            canvas.drawText(line.text, x, y, paint)
-        }
-
-        paint.style = Paint.Style.FILL
-        paint.color = <span class="k">if</span> (line.isActive) activeColor <span class="k">else</span> dimColor
-        canvas.drawText(line.text, x, y, paint)
-    }
-}</code></pre>
-
-      <h3>Bảng tinh chỉnh</h3>
-      <p>Font, cỡ chữ, độ trong suốt nền, màu chữ — mặc định đóng, chạm nút mới mở, y như bản Windows. Nhưng ở đây là một <code>BottomSheetDialog</code> của một Activity trong suốt, không nhét vào chính khung nổi: khung nổi phải mỏng và không được cướp focus, mà bảng tinh chỉnh thì cần cả hai thứ ngược lại.</p>
-    </section>
-
-    <section id="chuyen">
-      <h2><span class="num">6</span>Phần chuyển sang</h2>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Chuyển sang</th><th>Từ</th><th>Dòng</th><th>Việc phải làm</th></tr></thead>
-          <tbody>
-            <tr><td><code>Identify.kt</code></td><td><code>identify.ts</code></td><td class="num">265</td><td>Dịch thẳng. <code>Normalizer.normalize(NFD)</code> thay cho <code>normalize('NFD')</code></td></tr>
-            <tr><td><code>LrcParser.kt</code></td><td><code>lrc.ts</code></td><td class="num">122</td><td>Dịch thẳng</td></tr>
-            <tr><td>Bù vị trí</td><td><code>smtc.ts</code></td><td class="num">~20</td><td>Đổi sang <code>elapsedRealtime</code></td></tr>
-            <tr><td><code>LrclibClient.kt</code></td><td><code>lrclib.ts</code></td><td class="num">110</td><td>OkHttp thay <code>fetch</code></td></tr>
-            <tr><td><code>ZingClient.kt</code></td><td><code>zing.ts</code></td><td class="num">188</td><td><code>Mac.getInstance("HmacSHA512")</code>. <strong>Nhớ: chỉ ký một số tham số nhất định</strong>, ký hết là hỏng</td></tr>
-            <tr><td><code>NctClient.kt</code></td><td><code>nct.ts</code></td><td class="num">192</td><td>RC4 tự viết ~20 dòng — đừng dựa vào <code>Cipher.getInstance("ARCFOUR")</code>, có máy không có</td></tr>
-            <tr><td><code>LyricsRepository.kt</code></td><td><code>external.ts</code></td><td class="num">202</td><td>Bỏ hết nhánh phụ đề</td></tr>
-            <tr><td>Bảng diễn giải lỗi</td><td><code>errors.ts</code></td><td class="num">77</td><td>Dịch thẳng, đổi mẫu khớp sang lỗi của Android</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p><strong>Bỏ hẳn:</strong> whisper, yt-dlp và mọi thứ dựa vào nó, giao thức <code>media://</code>, thanh taskbar — khoảng 1.200 dòng.</p>
-      <p><code>Identify.kt</code> là phần đáng giá nhất chuyển sang. Trên Android metadata sạch hơn nhiều, nhưng <strong>app YouTube vẫn đưa nguyên tên video</strong> — đúng loại rác mà nó sinh ra để bóc.</p>
-    </section>
-
-    <section id="quyen">
-      <h2><span class="num">7</span>Quyền và luồng dẫn nhập</h2>
-      <p>Hai quyền, cả hai đều phải người dùng tự bật tay trong Cài đặt Android. Không có <code>requestPermissions()</code> cho loại này — chỉ mở được đúng trang cài đặt rồi chờ.</p>
-
-<pre><code><span class="c">// 1. Đọc thông báo — không có thì không đọc được nhạc app khác</span>
-NotificationManagerCompat.getEnabledListenerPackages(context)
-    .contains(context.packageName)
-startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-
-<span class="c">// 2. Vẽ đè lên app khác — không có thì không hiện được lời</span>
-Settings.canDrawOverlays(context)
-startActivity(Intent(
-    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-    Uri.parse(<span class="k">"package:"</span> + context.packageName)
-))</code></pre>
-
-      <p>Màn hình dẫn nhập nên nói <strong>vì sao</strong> cần từng quyền bằng đúng một câu, rồi tự kiểm lại khi quay về app. Xin hai quyền nhạy cảm mà không giải thích thì người ta thoát ngay — đây là hai quyền đáng ngờ nhất trên Android.</p>
-
-      <div class="callout">
-        Google Play soi rất kỹ cả hai quyền này, phải khai báo và biện minh. Cài riêng cho mình thì không vướng gì.
-      </div>
-    </section>
-
-    <section id="kiem">
-      <h2><span class="num">8</span>Kiểm chứng</h2>
-      <p>Bản Windows mạnh là nhờ 171 phép kiểm tra chạy trên app thật. Giữ đúng tinh thần đó:</p>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Tầng</th><th>Cách</th><th>Kiểm gì</th></tr></thead>
-          <tbody>
-            <tr><td>Logic thuần</td><td>Unit test JVM, không cần máy ảo</td><td><code>Identify</code>, <code>LrcParser</code>, bù vị trí, chấm điểm khớp tên — chạy trong mili-giây</td></tr>
-            <tr><td>Nguồn mạng</td><td>Unit test + MockWebServer</td><td>Chữ ký Zing, giải mã RC4 của NCT, đọc phản hồi</td></tr>
-            <tr><td>Bám phiên media</td><td>Instrumented + <code>MediaSession</code> giả</td><td>Dựng một phiên giả rồi đổi trạng thái, xem repository có theo kịp</td></tr>
-            <tr><td>Khung lời nổi</td><td>Instrumented, chụp màn hình</td><td>Vẽ đúng dòng đang hát, viền chữ, chạm xuyên qua</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Phần logic thuần chuyển sang cũng nên chuyển <strong>luôn cả bộ kiểm tra</strong> của nó — 14 phép cho <code>Identify</code> và 11 phép cho <code>LrcParser</code> đã có sẵn, chỉ dịch cú pháp.</p>
-    </section>
-
-    <section id="thutu">
-      <h2><span class="num">9</span>Làm theo thứ tự nào</h2>
-      <p>Mỗi mốc tự nó kiểm chứng được, và mốc đầu tiên là mốc rủi ro nhất — làm trước để biết sớm nếu có gì chặn.</p>
-
-      <div class="steps">
-        <div class="step first">
-          <div>
-            <h4>Đọc được nhạc app khác</h4>
-            <p>Chỉ một Activity hiện chữ thô. Đi qua trọn vẹn đường quyền khó nhất. <strong>Nếu bước này không xong thì cả dự án không có nghĩa.</strong></p>
-          </div>
-        </div>
-        <div class="step"><div><h4>Khung nổi hiện chữ tĩnh</h4><p>Quyền vẽ đè, kéo thả, chạm xuyên qua.</p></div></div>
-        <div class="step"><div><h4>Nối LRCLIB</h4><p>Lần đầu thấy lời chạy theo nhạc thật.</p></div></div>
-        <div class="step"><div><h4>Identify + Zing + NCT</h4><p>Chỗ này quyết định tỉ lệ tìm ra lời.</p></div></div>
-        <div class="step"><div><h4>Bảng tinh chỉnh + ô Quick Settings</h4><p>Phần dùng hằng ngày.</p></div></div>
-        <div class="step"><div><h4>Sửa lời tay, chỉnh lệch, nhớ lại</h4><p>Đường cứu khi máy dò sai.</p></div></div>
-        <div class="step"><div><h4>Dịch lời</h4><p>Nếu vẫn muốn.</p></div></div>
-      </div>
-    </section>
-
-    <section id="vo">
-      <h2><span class="num">10</span>Chỗ có thể vỡ</h2>
-      <ul class="risks">
-        <li><b>Bộ diệt nền của hãng</b>Xiaomi, Oppo, Vivo, Samsung — mỗi hãng một kiểu, và hung hơn Android gốc nhiều. Người dùng phải tự cho Lyra vào danh sách miễn trừ. Không có cách nào lách, chỉ có cách hướng dẫn.</li>
-        <li><b>App không khai báo metadata tử tế</b>Có app chỉ đưa tên bài, không đưa nghệ sĩ. <code>Identify</code> đỡ được phần nào nhưng không phải tất cả.</li>
-        <li><b>Vài chỗ chặn overlay</b>Nội dung có DRM, một số game toàn màn hình.</li>
-        <li><b>Zing và NCT có thể kiểm khác trên di động</b>User-Agent, khu vực, hoặc bắt buộc dùng app của họ. Phải thử thật rồi mới biết.</li>
-        <li><b>Đây là nền tảng thứ hai phải chăm</b>Zing hay NCT đổi API là hỏng <strong>cả hai</strong> bản. Nếu làm, nên tách hẳn thành repo riêng và chốt luôn hướng thu về lõi cho bản Windows, để hai bên cùng một hình dạng.</li>
-      </ul>
-
-      <div class="callout key" style="margin-top:26px">
-        Đây không phải “port”. Đây là <b>app thứ hai dùng chung bộ não</b> — và bộ não đó là phần đã được kiểm chứng kỹ nhất của bản Windows.
-      </div>
-    </section>
-
-    <footer>
-      Bản trong repo: <code>docs/kien-truc-android.md</code> · Tài liệu bản Windows: <code>docs/tai-lieu-app.md</code>
-    </footer>
-  </main>
+<nav class="toc"><div class="toc-label">Mục lục</div><a href="#1-hai-vai-cua-cung-mot-app"><span class="num">1</span>Hai vai của cùng một app</a><a href="#2-ban-do-luong-du-lieu"><span class="num">2</span>Bản đồ luồng dữ liệu</a><a href="#3-vong-lap-phai-cat-lyra-doc-chinh-minh"><span class="num">3</span>Vòng lặp phải cắt: Lyra đọc chính mình</a><a href="#4-neo-cua-ca-app-notificationlistenerservice"><span class="num">4</span>Neo của cả app: `NotificationListenerService`</a><a href="#5-tim-loi"><span class="num">5</span>Tìm lời</a><a href="#6-khung-loi-noi-va-the-man-hinh-khoa"><span class="num">6</span>Khung lời nổi và thẻ màn hình khoá</a><a href="#7-dich-loi-ml-kit-tren-may"><span class="num">7</span>Dịch lời — ML Kit trên máy</a><a href="#8-phan-trinh-phat"><span class="num">8</span>Phần trình phát</a><a href="#9-tai-nhac-chi-co-o-ban-sideload"><span class="num">9</span>Tải nhạc — chỉ có ở bản sideload</a><a href="#10-quyen"><span class="num">10</span>Quyền</a><a href="#11-hai-bien-the-phat-hanh"><span class="num">11</span>Hai biến thể phát hành</a><a href="#12-co-chu-do-tu-man-hinh"><span class="num">12</span>Cỡ chữ đo từ màn hình</a><a href="#13-cau-truc-goi"><span class="num">13</span>Cấu trúc gói</a><a href="#14-cho-co-the-vo"><span class="num">14</span>Chỗ có thể vỡ</a><a href="#15-da-nghiem-thu-toi-dau"><span class="num">15</span>Đã nghiệm thu tới đâu</a></nav>
+<main>
+<h1 id="lyra-cho-android-kien-truc">Lyra cho Android — kiến trúc</h1>
+<blockquote><p>Phạm vi: <strong>công cụ lời cho cả máy, cộng một trình nghe nhạc đầy đủ.</strong> Đọc bài đang phát ở app khác và hiện lời nổi; tự tìm, tự phát, tự tải nhạc; thư viện trong máy; danh sách phát; dịch lời ngay trên máy.</p>
+<p>Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 34 · coroutines + StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho phần phát · ML Kit cho phần dịch.</p>
+<p><strong>Hai biến thể phát hành, một mã nguồn</strong> — xem §11.</p></blockquote>
+<p>Tài liệu này thay thế bản phác thảo trước. Bản đó ghi <em>"chỉ sản phẩm A — không phát nhạc, không thư viện, không tải nhạc"</em>, và điều đó <strong>không còn đúng</strong>: từ đó tới nay app đã đi qua chín mốc và trở thành cả hai sản phẩm.</p>
+<hr>
+<h2 id="1-hai-vai-cua-cung-mot-app">1. Hai vai của cùng một app</h2>
+<p>Lyra làm hai việc, và ranh giới giữa chúng chạy xuyên qua gần như mọi phần:</p>
+<p><strong>Vai đồng hành</strong> — nhạc phát ở Spotify, YouTube, Zing MP3, NhacCuaTui. Lyra chỉ đọc xem đang phát gì rồi hiện lời nổi đè lên. Đây là vai không ai làm thay được.</p>
+<p><strong>Vai trình phát</strong> — Lyra tự tìm, tự phát. Lúc đó nó <strong>sở hữu đồng hồ phát</strong>, và đó không phải chi tiết nhỏ: toàn bộ chuyện lời chạy lệch chỉ tồn tại ở vai thứ nhất.</p>
+<p>Hai vai gặp nhau ở một chỗ duy nhất — <code>Lyra.now</code> (§3). Mọi thứ phía sau đó (tìm lời, dịch, khung nổi, thẻ màn hình khoá) không biết nhạc đang đến từ đâu.</p>
+<h3 id="vi-sao-vai-dong-hanh-tren-android-tot-hon-han-tren-windows">Vì sao vai đồng hành trên Android tốt hơn hẳn trên Windows</h3>
+<ol><li><strong>Nguồn dữ liệu tốt hơn.</strong> <code>MediaSessionManager</code> trả về nghệ sĩ, tên bài, album, ảnh bìa, vị trí, trạng thái và tên app nguồn — ở các trường <strong>riêng biệt</strong>. Trên Windows chỉ có một chuỗi thô, phải đoán.</li><li><strong>Đẩy thay vì hỏi.</strong> Đăng ký <code>MediaController.Callback</code> là hệ thống tự gọi lại khi có gì đổi. Bản Windows phải nuôi một tiến trình PowerShell hỏi liên tục 2 lần/giây.</li><li><strong>Vào được ô media của hệ điều hành.</strong> Đây là thứ bản Windows không có. Khi Lyra tự phát, nó sở hữu thẻ trên màn hình khoá — và <strong>câu đang hát được đưa thẳng vào đó</strong> (§6).</li></ol>
+<hr>
+<h2 id="2-ban-do-luong-du-lieu">2. Bản đồ luồng dữ liệu</h2>
+<pre><code>  ┌─ VAI ĐỒNG HÀNH ────────────┐   ┌─ VAI TRÌNH PHÁT ──────────────┐
+  │ Spotify / YouTube / Zing…  │   │ Catalog: Zing + NCT + MediaStore │
+  │            │               │   │            │                  │
+  │            ▼               │   │            ▼                  │
+  │ NotificationListenerService│   │ Playback ──► LyraPlaybackService │
+  │   (neo của cả app, §4)     │   │              ExoPlayer + MediaSession │
+  │            ▼               │   │            │                  │
+  │  MediaSessionWatcher       │   │  localNow  │                  │
+  │  (BỎ QUA gói của chính ta) │   │            │                  │
+  └────────────┬───────────────┘   └────────────┬──────────────────┘
+               └──────────► Lyra.now ◄──────────┘
+                              │
+              ┌───────────────┼────────────────┐
+              ▼               ▼                ▼
+      LyricsRepository  TranslationRepository  Artwork
+       (§5)              (ML Kit, §7)          (màu nền)
+              │               │
+              └───────┬───────┘
+                      ▼
+     ┌────────────────┼────────────────┐
+     ▼                ▼                ▼
+  OverlayHost    Thẻ media        Trang "Lời"
+  (khung nổi)    (màn hình khoá)  (Compose)</code></pre>
+<p>Điểm mấu chốt: <strong><code>Lyra.now</code> là hợp lưu</strong>. Lyra đang phát thì Lyra thắng; Lyra tạm dừng mà app khác đang phát thì nhường.</p>
+<hr>
+<h2 id="3-vong-lap-phai-cat-lyra-doc-chinh-minh">3. Vòng lặp phải cắt: Lyra đọc chính mình</h2>
+<p>Đây là lỗi tốn một vòng gỡ nhất trong cả dự án, và nó chỉ xuất hiện sau khi Lyra vừa tự phát vừa ghi lời lên thẻ media.</p>
+<p>Lyra ghi <strong>câu đang hát</strong> vào phần mô tả phiên media của mình để nó hiện trên màn hình khoá. <code>MediaSessionWatcher</code> đọc mọi phiên media trên máy — kể cả phiên của chính Lyra. Nên câu hát trở thành "tên bài mới", app đi tra lời cho một câu hát, kết quả lại ghi đè lên, và vòng tiếp:</p>
+<pre><code>Tim loi: 'Nhà Tôi Có Treo Một Lá Cờ — DTAP, Hà Anh Tuấn' - 'Nơi đâu tôi cũng bên mình lá cờ'</code></pre>
+<p>Cách sửa gồm hai nửa, thiếu một nửa là vẫn hỏng:</p>
+<ul><li><code>MediaSessionWatcher</code> <strong>bỏ qua gói của chính mình</strong> (<code>ownPackage</code>).</li><li>Bài Lyra tự phát đi một dòng riêng, <code>Lyra.localNow</code>, lấy thẳng từ <code>Playback.currentTrack</code> — tên bài, nghệ sĩ, độ dài đều là <strong>bản gốc từ nguồn nhạc</strong>, không đoán từ chuỗi thô. Đọc <code>player.mediaMetadata</code> là đọc lại chính kết quả của mình.</li></ul>
+<p>Hệ quả tốt: bài Lyra tự phát <strong>không cần <code>Identify</code> đoán</strong> gì cả. Cùng một bài, qua YouTube sinh 4 phương án và trượt; qua Lyra sinh 2 phương án và trúng ngay phương án đầu.</p>
+<hr>
+<h2 id="4-neo-cua-ca-app-notificationlistenerservice">4. Neo của cả app: <code>NotificationListenerService</code></h2>
+<p>Không dùng foreground service tự viết. <code>NotificationListenerService</code> tự nó là một service do hệ thống dựng và giữ sống khi người dùng đã cấp quyền đọc thông báo, và nó <strong>sống dai hơn</strong> foreground service của chính ta. Đổi lại được một chỗ trú chạy nền mà không phải hiện thông báo thường trực.</p>
+<p>Ta <strong>không đọc nội dung thông báo</strong>. Lớp này tồn tại chỉ để hệ thống cho gọi <code>getActiveSessions</code>.</p>
+<p>Hệ thống giết và dựng lại lớp này bất cứ lúc nào, nên <strong>mọi trạng thái nằm ở <code>Lyra</code></strong> (singleton ngoài service), không nằm trong nó.</p>
+<h3 id="khung-noi-phai-tu-song-lai">Khung nổi phải tự sống lại</h3>
+<p>Tiến trình Lyra chỉ được neo bởi service này. Android giết nó khi máy thiếu bộ nhớ — mà thời điểm dễ bị giết nhất chính là lúc người dùng đang ở trong app nhạc, tức đúng lúc khung lời nổi cần có mặt nhất.</p>
+<p>Nên trạng thái "đang bật khung nổi" phải <strong>lưu xuống đĩa</strong> (<code>OverlayPrefs.isEnabled</code>), và <code>onListenerConnected</code> gọi <code>Lyra.restoreOverlay</code>. Chỉ ghi cờ khi <code>show()</code> thành công thật — thiếu quyền vẽ đè thì <code>show()</code> lặng lẽ không làm gì, và ghi bừa sẽ thành một lần thử dựng khung vô ích mỗi lần hệ thống nối lại service.</p>
+<hr>
+<h2 id="5-tim-loi">5. Tìm lời</h2>
+<p>Thứ tự các chặng xếp theo <strong>giá phải trả, rẻ trước đắt sau</strong>:</p>
+<ol><li>Lời <strong>tự nhập</strong> — người dùng đã bỏ công gõ thì không một lần tra mạng nào được ghi đè lên.</li><li>Bộ nhớ đệm — trả về <strong>ngay</strong>, không qua trạng thái "đang tìm". Nháy một khung trống rồi mới hiện chữ là cảm giác chậm nhất, dù thật ra chỉ tốn vài mili-giây.</li><li>Gọi mạng: <code>candidatesFrom</code> sinh tối đa 4 phương án, mỗi phương án hỏi <strong>cả ba nguồn cùng lúc</strong>. Hỏi lần lượt thì thời gian chờ là tổng của ba lần gọi.</li></ol>
+<h3 id="titlesimilarity-cho-tung-sai-va-hau-qua"><code>titleSimilarity</code> — chỗ từng sai và hậu quả</h3>
+<p>Bản đầu chia cho tập nhỏ hơn. Nghĩa là tên bài ngắn nằm gọn trong một tên video dài sẽ đạt điểm tuyệt đối — và app hiện lời của <strong>tên concert</strong> thay vì tên bài. Nay dùng trung bình điều hoà của cả hai chiều phủ (F1), nên cả hai phía đều phải giống mới đạt điểm cao.</p>
+<h3 id="moc-thoi-gian-dang-ngo">Mốc thời gian đáng ngờ</h3>
+<p>Tìm đúng <strong>tên</strong> bài không có nghĩa là đúng <strong>bản thu</strong>. Lời của bản thu phòng đắp lên một bản hát live thì lệch từ đầu tới cuối. Độ dài bài là manh mối rẻ nhất và đáng tin nhất: lệch quá 15 giây thì bật <code>timingSuspect</code>, và giao diện chuyển sang hiện lời dạng chữ trơn — không tô sáng, không tự cuộn, và nói rõ mốc có thể lệch. <strong>Hiện sai một cách tự tin còn tệ hơn hiện thật thà là không chắc.</strong></p>
+<h3 id="cham-de-can-lai">Chạm để căn lại</h3>
+<p>Chạm vào câu đang nghe — <strong>trên trang Lời hoặc ngay trên khung nổi</strong> — là căn lại cả bài. Một cú chạm thay cho hàng chục lần bấm ±0,5 giây.</p>
+<p>Chạm ngay trên khung nổi là đường sửa <strong>tại chỗ phát hiện ra lỗi</strong>: đang xem YouTube, thấy lời lệch, chạm vào câu mình đang nghe là xong — không phải thoát app nhạc, mở Lyra, rồi tìm tới trang Lời.</p>
+<hr>
+<h2 id="6-khung-loi-noi-va-the-man-hinh-khoa">6. Khung lời nổi và thẻ màn hình khoá</h2>
+<h3 id="cua-so">Cửa sổ</h3>
+<p><code>TYPE_APPLICATION_OVERLAY</code> (API 26+; các kiểu cũ hơn đều đã bị Android chặn), với <code>FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_NO_LIMITS</code>.</p>
+<p>View thuần chứ không Compose: <code>ComposeView</code> đặt trong cửa sổ của <code>WindowManager</code> không có sẵn <code>ViewTreeLifecycleOwner</code> và <code>SavedStateRegistryOwner</code>, phải tự gắn tay — thêm một tầng dễ hỏng mà chỗ này chỉ vẽ vài dòng chữ.</p>
+<h3 id="ve">Vẽ</h3>
+<p>Viền trước, thân chữ sau — vẽ ngược lại thì viền ăn lem vào nét chữ. Và vì nửa trong của nét viền bị thân chữ đè, phải <strong>nhân đôi</strong> độ dày thì nhìn mới đúng như đã đặt.</p>
+<p>Chỉ vẽ lại khi <strong>đổi dòng</strong>, dù nhịp cập nhật là 10 lần/giây. Vẽ lại vô ích mỗi 100 ms là một đồng hồ đánh thức GPU suốt cả bài hát.</p>
+<p>Câu dài hơn khung thì <strong>thu chữ lại cho vừa</strong>, không xuống dòng. Xuống dòng làm số hàng đổi theo từng câu, khung sẽ phồng lên xẹp xuống suốt bài, và phép đổi chạm-thành-số-dòng cũng không còn đúng.</p>
+<h3 id="ba-duong-tat-nhanh-xep-theo-muc-nhanh">Ba đường tắt nhanh, xếp theo mức nhanh</h3>
+<ol><li><strong>Giữ tay ngay trên khung</strong> — ngón tay đang ở sẵn trên đúng thứ cần tắt. Máy rung một cái báo đã nhận. Ngưỡng dài hơn ngưỡng giữ thông thường 250 ms: tắt nhầm giữa bài khó chịu hơn phải giữ thêm một phần tư giây.</li><li><strong>Ô Quick Settings</strong> — với Android 13+ có nút xin thêm ô bằng một chạm (<code>requestAddTileService</code>). Bản cũ hơn thì Android không cho app tự thêm ô, và đúng ra là vậy: bảng đó là chỗ của người dùng.</li><li>Nút trong app.</li></ol>
+<h3 id="the-tren-man-hinh-khoa">Thẻ trên màn hình khoá</h3>
+<p><strong>Khung nổi không lên được màn hình khoá.</strong> Keyguard nằm ở lớp cửa sổ cao hơn <code>TYPE_APPLICATION_OVERLAY</code>; không có cờ nào lách được. Đã kiểm chứng bằng ảnh chụp lúc khoá máy.</p>
+<p>Đường đi được là thẻ media — và nó chỉ mở ra khi <strong>Lyra tự phát</strong>, vì thẻ thuộc về app đang phát. Lúc đó câu đang hát được đặt vào <strong>dòng tiêu đề</strong> của thẻ (chỗ chữ to nhất), tên bài và nghệ sĩ dồn xuống dòng dưới.</p>
+<p>Ba chi tiết phải đúng, thiếu một là hỏng:</p>
+<ul><li>Dùng <code>replaceMediaItem</code>, <strong>không</strong> <code>setMediaItem</code>. Cùng một đường dẫn thì ExoPlayer chỉ đổi phần mô tả, không nạp lại. <code>setMediaItem</code> là ngắt nhạc một nhịp <strong>mỗi câu hát</strong>.</li><li><strong>Tắt đọc thẻ ID3</strong> (<code>Mp3Extractor.FLAG_DISABLE_ID3_METADATA</code>). ExoPlayer đọc thẻ ID3 trong file rồi ghi đè lên phần mô tả ta vừa đặt, kể cả khi ta đặt sau — nên cứ vài giây câu hát lại bị kéo ngược về tên bài.</li><li><strong>Dòng trống trong .lrc thì giữ nguyên câu vừa hát.</strong> File .lrc nào cũng có dòng trống giữa các đoạn; trả thẻ về tên bài ở đó biến màn hình khoá thành một chỗ nhấp nháy.</li></ul>
+<hr>
+<h2 id="7-dich-loi-ml-kit-tren-may">7. Dịch lời — ML Kit trên máy</h2>
+<p>Không nguồn nào (LRCLIB, Zing, NCT) có sẵn bản dịch — đã dò tận nơi. Nên dịch máy là đường duy nhất.</p>
+<p>Chạy <strong>ngay trên máy</strong>: không khoá API, không quota, không trả tiền, không gửi lời bài hát ra ngoài, và chạy được khi mất mạng. Đổi lại bản dịch thô hơn bản trên máy chủ — với lời bài hát vốn nhiều ẩn dụ thì càng thô. Nhưng mục tiêu không phải một bản dịch đẹp, mà là để người nghe <strong>hiểu nghĩa</strong> câu đang hát.</p>
+<p>Thứ tự chặng, cũng rẻ trước đắt sau:</p>
+<ol><li>Tắt, hoặc không có lời → không làm gì</li><li>Đoán ngôn ngữ (trên máy, vài mili-giây, không tải gì)</li><li><strong>Lời đã đúng thứ tiếng người dùng đọc → không làm gì.</strong> Đây là trường hợp thường gặp nhất với người Việt nghe nhạc Việt, và nó không tốn một byte nào</li><li>Đã dịch lần trước → lấy trong bộ nhớ đệm</li><li>Gói ngôn ngữ có sẵn trên máy → dịch ngay</li><li>Chưa có gói → <strong>hỏi người dùng rồi mới tải</strong></li></ol>
+<p>Dịch <strong>từng dòng</strong> chứ không gộp cả bài: gộp thì mô hình tự quyết định xuống dòng ở đâu và số dòng trả về không còn khớp — mà khớp dòng mới là thứ ta cần.</p>
+<p>Khoá bộ nhớ đệm là <strong>băm của chính nội dung lời</strong> cộng mã ngôn ngữ, không phải tên bài. Nhờ vậy không thể có cảnh lời đã đổi nguồn (chia dòng khác) mà bản dịch cũ vẫn còn nằm đó và ghép lệch từng dòng.</p>
+<p>ML Kit đi <strong>vòng qua tiếng Anh</strong> cho mọi cặp ngôn ngữ, nên dịch Hàn sang Việt cần cả hai gói. Đổi lại n ngôn ngữ chỉ tốn n gói chứ không phải n².</p>
+<hr>
+<h2 id="8-phan-trinh-phat">8. Phần trình phát</h2>
+<h3 id="bo-may">Bộ máy</h3>
+<p><code>MediaSessionService</code> của Media3, không phải foreground service tự viết. Hệ thống tự lo thông báo, thẻ màn hình khoá, nút trên tai nghe, ô điều khiển âm thanh.</p>
+<p>Giao diện nối vào bằng <code>MediaController</code> chứ không giữ thẳng <code>ExoPlayer</code>, dù cả hai cùng một tiến trình: hệ thống có thể giết và dựng lại service bất cứ lúc nào, và <code>MediaController</code> tự nối lại được.</p>
+<p>Vuốt app khỏi danh sách gần đây mà <strong>đang phát thì giữ nguyên</strong> — vuốt app đi không có nghĩa là "dừng nhạc".</p>
+<h3 id="duong-phat-lay-muon">Đường phát lấy muộn</h3>
+<p>Hàng đợi chứa địa chỉ giả <code>lyra://&lt;nguồn&gt;/&lt;mã&gt;</code>; đường phát thật được hỏi <strong>ngay trước khi mở byte đầu tiên</strong>, qua <code>ResolvingDataSource</code>. Hai lý do:</p>
+<ul><li>Đường phát của cả Zing lẫn NCT <strong>đều có hạn</strong>. Xếp hai chục bài rồi nghe tới bài cuối sau một tiếng thì đường ấy đã chết.</li><li>Zing phải gọi mạng một lần cho <strong>mỗi</strong> bài. Gọi hai chục lần chỉ để xếp hàng đợi là bắt người dùng trả giá cho những bài chưa chắc nghe tới.</li></ul>
+<p>Nhạc trong máy không đi qua đường này — địa chỉ <code>content://</code> dùng được ngay.</p>
+<h3 id="tim">Tìm</h3>
+<p>Zing và NCT được hỏi <strong>cùng lúc</strong> rồi trộn kiểu cài răng lược, không nối đuôi: một nguồn trả nhiều kết quả kém mà xếp trước sẽ đẩy hết kết quả tốt của nguồn kia xuống dưới màn hình. Nhạc trong máy xếp <strong>trước</strong> cả hai và không tính vào hạn mức trộn — không tốn mạng, phát được khi mất sóng, và người dùng đã có nó rồi.</p>
+<h3 id="thu-vien-trong-may">Thư viện trong máy</h3>
+<p>Đọc qua <code>MediaStore</code>, không tự quét thư mục — Android từ 10 không cho app đi lang thang trong bộ nhớ ngoài, và <code>MediaStore</code> chỉ cần quyền đọc <strong>nhạc</strong>.</p>
+<p>Bộ lọc phải là <strong>bỏ thứ chắc chắn không phải nhạc</strong>, không phải đòi thứ chắc chắn là nhạc. <code>is_music != 0</code> sai theo một kiểu rất khó thấy: cột đó có thể là <code>NULL</code> khi máy chưa phân loại xong, mà trong SQL <code>NULL != 0</code> không phải "đúng" — nó là <code>NULL</code>. File vừa chép vào máy sẽ biến mất khỏi thư viện không dấu vết.</p>
+<h3 id="giao-dien">Giao diện</h3>
+<p><strong>Sân khấu là một chỗ cắm, không phải khung ảnh.</strong> Hôm nay dựng ảnh bìa vuông; có video thì cùng chỗ ấy đổi sang 16:9 và nhận một bề mặt vẽ. Thanh tua, nút bấm, hàng đợi quanh nó không biết bên trong là gì. <code>MediaKind { AUDIO, VIDEO }</code> đã cắm sẵn vào <code>Track</code> và <code>Playable</code> — ranh giới nhạc/video đi xuyên qua cả app, và sửa một ranh giới đã chạy khắp nơi thì đắt hơn nhiều so với khai nó ra từ đầu.</p>
+<p><strong>Thanh tua là cạnh dưới của sân khấu</strong>, không phải một thanh trượt đặt ở đâu đó. Kéo thì hiện vị trí <em>đang kéo</em> chứ không phải vị trí đang phát.</p>
+<p>Màu chủ đạo lấy từ ảnh bìa nhuộm cả màn hình — tính trên <strong>luồng nền</strong>, vì đọc điểm ảnh là việc của CPU và làm trong thân composable nghĩa là làm trên luồng chính đúng lúc người dùng đang nhìn nhất.</p>
+<h3 id="hang-doi-va-danh-sach-phat">Hàng đợi và danh sách phát</h3>
+<p>Hàng đợi là <strong>chỗ làm việc</strong>; danh sách phát là thứ <strong>giữ lại</strong>. Một nút nối hai cái đó.</p>
+<p>Danh sách phát <strong>không lưu đường phát</strong> (<code>@Transient</code>): một danh sách mở lại sau một tuần mà mang theo hai chục đường đã chết thì tệ hơn hẳn mang theo không gì cả. Khoá là mã riêng chứ không phải tên — được phép trùng tên và đổi tên.</p>
+<p>Lưu vào <code>filesDir</code> chứ không <code>cacheDir</code>: đây là dữ liệu người dùng tự tạo, khác hẳn bộ nhớ đệm lời hay bản dịch vốn lúc nào cũng lấy lại được từ mạng.</p>
+<hr>
+<h2 id="9-tai-nhac-chi-co-o-ban-sideload">9. Tải nhạc — chỉ có ở bản sideload</h2>
+<p>File đi vào <code>Music/Lyra/</code> của bộ nhớ chung, không phải thư mục riêng của app. Tải về là để <strong>sở hữu</strong>: gỡ Lyra ra thì nhạc vẫn còn, và mọi trình phát khác đều thấy. Không cần quyền ghi — từ Android 10, app được phép chèn file media của chính nó vào bộ sưu tập chung. Cờ <code>is_pending</code> bật suốt lúc ghi, nên máy sập nguồn giữa chừng thì bản ghi treo bị hệ thống dọn.</p>
+<p><strong>Lời nằm trong chính file nhạc</strong>, dạng thẻ ID3v2.3 khung <code>USLT</code>. File <code>.lrc</code> để cạnh sẽ bị bộ nhớ giới hạn từ chối — thư mục <code>Music/</code> không nhận file chữ. Nhúng vào lại là cách đúng hơn: lời đi theo bài sang mọi trình phát, không riêng Lyra.</p>
+<p>Ba lựa chọn trong đó:</p>
+<ul><li><strong>v2.3 chứ không v2.4</strong> — bản được đọc rộng rãi nhất, kể cả đầu phát cũ và dàn xe hơi.</li><li><strong><code>USLT</code> mang cả mốc thời gian</strong>, dù theo chuẩn USLT là lời không mốc. Khung <code>SYLT</code> đúng chuẩn cho lời có mốc thì gần như không nơi nào hỗ trợ — đúng chuẩn mà không ai đọc được thì không giúp gì ai.</li><li><strong>UTF-16 chứ không Latin-1</strong>, nếu không "Nàng Thơ" thành một chuỗi dấu hỏi.</li></ul>
+<p>Thẻ cũ của nguồn bị <strong>bỏ đi</strong>: hai thẻ chồng lên nhau thì trình phát đọc cái đầu tiên rồi bỏ cái sau — mà cái sau mới là của ta. Phải đọc 10 byte để biết có thẻ hay không, và nếu <strong>không</strong> có thì 10 byte ấy là nhạc thật, phải ghi lại chứ không được nuốt.</p>
+<hr>
+<h2 id="10-quyen">10. Quyền</h2>
+<table><thead><tr><th>Quyền</th><th>Vì sao</th><th>Bắt buộc?</th></tr></thead><tbody><tr><td>Đọc thông báo</td><td>Điều kiện để gọi <code>getActiveSessions</code>. Không đọc nội dung thông báo</td><td>Có — thiếu là mất vai đồng hành</td></tr><tr><td>Vẽ đè lên app khác</td><td>Khung lời nổi</td><td>Chỉ khi dùng khung nổi</td></tr><tr><td><code>READ_MEDIA_AUDIO</code> (33+)</td><td>Thư viện trong máy. Xin đúng quyền <strong>nhạc</strong>, không đụng ảnh/video/tài liệu</td><td>Chỉ khi dùng thư viện</td></tr><tr><td><code>FOREGROUND_SERVICE_MEDIA_PLAYBACK</code></td><td>Phát khi màn hình tắt. Bắt buộc khai từ Android 14</td><td>Có, nếu tự phát</td></tr><tr><td><code>POST_NOTIFICATIONS</code> (33+)</td><td>Thẻ điều khiển nhạc. Từ chối thì nhạc vẫn phát, chỉ mất thẻ</td><td>Không</td></tr><tr><td><code>INTERNET</code></td><td>Tra lời, tìm và phát nhạc</td><td>Có</td></tr></tbody></table>
+<p>Cả ba quyền đầu đều <strong>hỏi đúng lúc cần</strong>, kèm một câu giải thích tại chỗ — không dồn vào một màn hình dẫn nhập lúc mở app lần đầu, khi người dùng chưa hiểu vì sao.</p>
+<hr>
+<h2 id="11-hai-bien-the-phat-hanh">11. Hai biến thể phát hành</h2>
+<table><thead><tr><th></th><th><code>sideload</code></th><th><code>play</code></th></tr></thead><tbody><tr><td>Tải nhạc</td><td>Có</td><td><strong>Không có</strong></td></tr><tr><td>Mọi thứ khác</td><td>Đầy đủ</td><td>Đầy đủ</td></tr><tr><td><code>applicationId</code></td><td><code>com.mittohoa.lyra_player</code></td><td>như nhau</td></tr></tbody></table>
+<p>Chính sách Google Play cấm app cho tải nội dung từ dịch vụ phát trực tuyến. Nên bản lên Play không mang phần đó.</p>
+<p><strong>Tách bằng bộ mã nguồn, không bằng cờ bật/tắt.</strong> Toàn bộ phần tải nằm trong <code>app/src/sideload/</code>; bản Play không <em>tắt</em> tính năng mà <strong>không mang</strong> tính năng. Một cái cờ chạy lúc chạy vẫn để lại toàn bộ mã trong file cài đặt, và người duyệt Play mở file ra xem thì thấy. Khác biệt giữa "không dùng" và "không có" là khác biệt thật — đã kiểm chứng bằng cách tìm tên lớp trong mã dex:</p>
+<table><thead><tr><th>Lớp</th><th>sideload</th><th>play</th></tr></thead><tbody><tr><td><code>download/Id3</code></td><td>2</td><td><strong>0</strong></td></tr><tr><td><code>download/Downloader</code></td><td>5</td><td><strong>0</strong></td></tr><tr><td><code>download/Downloads</code> (vỏ)</td><td>3</td><td>3</td></tr><tr><td><code>player/Playback</code></td><td>6</td><td>6</td></tr></tbody></table>
+<p>Cùng <code>applicationId</code>: đây là <strong>một app, hai đường phát hành</strong>. Không cài được cả hai cùng lúc, và đúng ra là vậy.</p>
+<pre><code>./gradlew assembleSideloadDebug     # cài tay, có tải nhạc
+./gradlew assemblePlayRelease       # lên Play
+./gradlew bundlePlayRelease         # bản gộp, Play giao đúng một kiến trúc CPU</code></pre>
+<h3 id="co-app">Cỡ app</h3>
+<p><code>libtranslate_jni.so</code> của ML Kit nặng <strong>15,6 MB cho mỗi kiến trúc CPU</strong>. Đã bật tách gói theo kiến trúc, nên bản phát hành arm64 là <strong>19,8 MB</strong>; Play chỉ giao đúng gói máy người dùng cần. Bản gộp cả bốn kiến trúc (69 MB) chỉ là hiện vật đóng gói cho ai cài tay.</p>
+<hr>
+<h2 id="12-co-chu-do-tu-man-hinh">12. Cỡ chữ đo từ màn hình</h2>
+<p>Một con số chốt cứng không thể vừa cho mọi máy. Khung lời nổi là thứ để <strong>liếc mắt đọc</strong> trong lúc đang làm việc khác, nên chữ nhỏ quá thì nó vô dụng — mà người dùng thường không nghĩ tới việc vào chỉnh, họ chỉ thấy tính năng này dở.</p>
+<p><code>sp</code> không lo được việc này: <code>sp</code> chỉ lo mật độ điểm ảnh và cỡ chữ hệ thống, tức 26sp trên máy nào cũng to bằng nhau tính theo xen-ti-met. Nhưng khung nổi chiếm trọn bề ngang, nên trên máy gập mở ra cùng cỡ chữ ấy lại hoá bé so với khung.</p>
+<p>Nên đo <strong>bề ngang nhỏ nhất</strong> của màn hình (không đổi khi xoay máy) rồi suy ra cỡ chữ: 320dp → 25sp, 411dp → 32sp, tối đa 44sp. Cùng một phép đo, cùng một cách nghĩ với bản Windows (<code>@shared/overlay-size.ts</code>).</p>
+<p>Cài đặt đã lưu thì mặc định mới không đụng tới — thay vào đó, khi giá trị đang lệch với cỡ đo được, chính con số ấy mọc thêm mũi tên và bấm được: <code>14 → 32</code>.</p>
+<hr>
+<h2 id="13-cau-truc-goi">13. Cấu trúc gói</h2>
+<pre><code>com.mittohoa.lyra
+├── service/       Lyra (trạng thái chung), LyraNotificationListener, LyraTileService
+├── media/         MediaSessionWatcher, NowPlaying
+├── lyrics/        Identify, LrcParser, Lyrics, LyricsRepository
+├── sources/       Catalog, ZingClient, NctClient, LrclibClient, LocalLibrary, Http, Crypto
+├── player/        LyraPlaybackService, Playback, StreamResolver, Artwork
+├── translate/     OnDeviceTranslator, TranslationRepository, Languages
+├── data/          LyricCache, OffsetStore, ManualLyricStore, OverlayPrefs,
+│                  TranslatePrefs, TranslationCache, PlaylistStore
+├── overlay/       OverlayHost, OverlayView
+├── download/      DownloadResult · Downloads (mỗi biến thể một bản)
+└── ui/            MainActivity, HomeScreen, PlayerPane, SearchPane, Playlists,
+                   LyricEditor, LyraMark</code></pre>
+<table><thead><tr><th>Gói</th><th>File</th><th>Dòng</th></tr></thead><tbody><tr><td><code>ui</code></td><td>8</td><td>2.849</td></tr><tr><td><code>sources</code></td><td>9</td><td>1.119</td></tr><tr><td><code>lyrics</code></td><td>6</td><td>977</td></tr><tr><td><code>service</code></td><td>3</td><td>721</td></tr><tr><td><code>player</code></td><td>5</td><td>625</td></tr><tr><td><code>data</code></td><td>8</td><td>596</td></tr><tr><td><code>overlay</code></td><td>2</td><td>580</td></tr><tr><td><code>download</code></td><td>5</td><td>409</td></tr><tr><td><code>translate</code></td><td>3</td><td>390</td></tr><tr><td><code>media</code></td><td>2</td><td>227</td></tr><tr><td><strong>Tổng</strong></td><td><strong>51</strong></td><td><strong>~8.500</strong></td></tr></tbody></table>
+<p>Phần chuyển thẳng từ bản Windows: <code>Identify</code> và <code>LrcParser</code> (dịch cú pháp, giữ nguyên thuật toán và cả bộ kiểm tra), ý tưởng ba nguồn lời, bảng diễn giải lỗi.</p>
+<hr>
+<h2 id="14-cho-co-the-vo">14. Chỗ có thể vỡ</h2>
+<ul><li><strong>Bộ diệt nền của hãng.</strong> Xiaomi, Oppo, Vivo, Samsung — mỗi hãng một kiểu, và hung hơn Android gốc nhiều. Người dùng phải tự cho Lyra vào danh sách miễn trừ. Không có cách nào lách, chỉ có cách hướng dẫn. Bản vá khung nổi tự sống lại (§4) đỡ được phần Android gốc, không đỡ được phần này.</li><li><strong>Zing/NCT đổi API.</strong> Hỏng <strong>cả hai</strong> bản Windows và Android. Đây là mặt dễ vỡ nhất, và giờ nó gánh cả phần phát lẫn phần tải chứ không chỉ phần lời.</li><li><strong>App không khai báo metadata tử tế.</strong> <code>Identify</code> đỡ được phần nào, không phải tất cả — chỉ ở vai đồng hành, vì vai trình phát có tên bài gốc.</li><li><strong>Vài chỗ chặn overlay.</strong> Nội dung có DRM, một số game toàn màn hình, và <strong>màn hình khoá</strong> (§6).</li><li><strong>Duyệt Play.</strong> Ngay cả bản <code>play</code>, việc phát nhạc qua API nội bộ của Zing/NCT vẫn là rủi ro khi duyệt. Đây là rủi ro đã được nêu và đã được chấp nhận có ý thức, không phải điều bị bỏ sót.</li></ul>
+<hr>
+<h2 id="15-da-nghiem-thu-toi-dau">15. Đã nghiệm thu tới đâu</h2>
+<p>Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, <code>sw411dp</code>), không phải máy ảo:</p>
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Đọc bài từ app khác</td><td>Zing MP3, YouTube</td></tr><tr><td>Ba nguồn lời</td><td>trúng từ lrclib, zing, nct</td></tr><tr><td>Khung nổi</td><td>nổi trên Play Store, tự sống lại sau khi tiến trình bị giết</td></tr><tr><td>Chạm căn lời</td><td>trên trang Lời và trên chính khung nổi</td></tr><tr><td>Giữ tay để tắt khung</td><td>900 ms → cờ ghi <code>false</code>, cửa sổ biến mất</td></tr><tr><td>Cỡ chữ theo màn hình</td><td><code>14 → 32</code>, một chạm là về đúng cỡ</td></tr><tr><td>Dịch lời</td><td>giao diện đúng; lời tiếng Việt <strong>không bị đụng tới</strong></td></tr><tr><td>Tự phát</td><td>Zing MP3 tự nhường tiếng, lời khớp từng câu</td></tr><tr><td>Lời trên thẻ khoá màn hình</td><td>chạy đúng từng dòng</td></tr><tr><td>Tìm + hàng đợi</td><td>20 kết quả hai nguồn xen kẽ, chuyển bài lấy đường phát đúng lúc</td></tr><tr><td>Thư viện trong máy</td><td>đọc, phát qua <code>content://</code>, tự sang bài kế</td></tr><tr><td>Danh sách phát</td><td>lưu 20 bài, <strong>còn nguyên sau khi cài đè</strong></td></tr><tr><td>Tải nhạc</td><td>file 4,08 MB, <code>USLT</code> 42 dòng lời có mốc, <code>fffb</code> ngay sau thẻ</td></tr><tr><td>Hai biến thể</td><td>bản Play không có <code>Id3</code>/<code>Downloader</code> trong mã dex</td></tr></tbody></table>
+<p><strong>Chưa nghiệm thu:</strong> đường tải gói ngôn ngữ rồi dịch thật (cần một bài tiếng nước ngoài); <code>targetSdk 36</code> cho Play (hiện 34, cần cài gói SDK 36); khoá ký thật.</p>
+<footer>Bản trong repo: <code>docs/kien-truc-android.md</code> · Dựng lại bằng <code>node scripts/make-docs.mjs</code></footer>
+</main>
 </div>
 </body>
 </html>

@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyra — lời bài hát nổi trên mọi app nhạc</title>
+<meta name="description" content="Lyra hiện lời bài hát nổi trên màn hình cho nhạc phát ở bất kỳ app nào, và cũng là một trình nghe nhạc đầy đủ. Cho Windows và Android.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nen: #0E0B14;
+    --nen-2: #16111f;
+    --tim: #6D28D9;
+    --tim-sang: #a78bfa;
+    --chu: #f4f1f8;
+    --chu-mo: #a49bb5;
+    --chu-rat-mo: #6f6780;
+    --vien: rgba(255,255,255,.09);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--nen);
+    color: var(--chu);
+    font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .khung { width: min(1080px, 100% - 44px); margin-inline: auto; }
+  a { color: var(--tim-sang); }
+
+  /* ---- Đầu trang ---- */
+  header {
+    position: relative;
+    overflow: hidden;
+    padding: 76px 0 84px;
+    background:
+      radial-gradient(900px 480px at 50% -160px, rgba(109,40,217,.42), transparent 70%),
+      linear-gradient(180deg, #17102a 0%, var(--nen) 68%);
+  }
+  .dau-hieu { display: flex; align-items: center; gap: 13px; margin-bottom: 44px; }
+  .dau-hieu svg { width: 40px; height: 40px; }
+  .dau-hieu b { font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+  h1 {
+    font-size: clamp(34px, 6vw, 60px);
+    line-height: 1.1;
+    letter-spacing: -.03em;
+    font-weight: 800;
+    margin: 0 0 22px;
+    max-width: 16ch;
+  }
+  h1 em { font-style: normal; color: var(--tim-sang); }
+  .mo-ta { font-size: clamp(16px, 2.2vw, 19px); color: var(--chu-mo); max-width: 58ch; margin: 0 0 36px; }
+
+  .nut-hang { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .nut {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 24px; border-radius: 999px;
+    font-weight: 600; font-size: 15px; text-decoration: none;
+    background: var(--tim); color: #fff;
+    border: 1px solid transparent;
+    transition: transform .12s ease, background .12s ease;
+  }
+  .nut:hover { transform: translateY(-1px); background: #7c3aed; }
+  .nut.phu { background: rgba(255,255,255,.07); color: var(--chu); border-color: var(--vien); }
+  .nut.phu:hover { background: rgba(255,255,255,.12); }
+  .ghi-chu-nut { font-size: 13px; color: var(--chu-rat-mo); margin-top: 14px; }
+
+  /* ---- Minh hoạ khung lời nổi ---- */
+  .minh-hoa {
+    margin-top: 56px;
+    border-radius: 20px;
+    border: 1px solid var(--vien);
+    background: linear-gradient(150deg, #221a33, #140f1e);
+    padding: 30px 24px;
+    text-align: center;
+    box-shadow: 0 30px 70px -30px rgba(0,0,0,.9);
+  }
+  .minh-hoa .nhan { font-size: 11.5px; color: var(--chu-rat-mo); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 20px; }
+  .dong-loi { font-size: clamp(15px, 2.4vw, 20px); color: rgba(255,255,255,.32); margin: 7px 0; }
+  .dong-loi.dang-hat {
+    color: #fff; font-weight: 700;
+    font-size: clamp(19px, 3.4vw, 28px);
+    text-shadow: 0 0 26px rgba(167,139,250,.4);
+  }
+  .dong-loi.dich { color: var(--tim-sang); font-size: clamp(13px, 1.8vw, 15px); margin-top: 4px; }
+
+  /* ---- Phần chung ---- */
+  section { padding: 76px 0; border-top: 1px solid var(--vien); }
+  h2 { font-size: clamp(24px, 3.6vw, 33px); letter-spacing: -.02em; font-weight: 700; margin: 0 0 12px; }
+  .dan-de { color: var(--chu-mo); max-width: 62ch; margin: 0 0 40px; }
+
+  .luoi { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); }
+  .the {
+    background: var(--nen-2);
+    border: 1px solid var(--vien);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .the h3 { margin: 0 0 9px; font-size: 16.5px; font-weight: 600; letter-spacing: -.01em; }
+  .the p { margin: 0; color: var(--chu-mo); font-size: 14.5px; }
+
+  /* ---- Tải về ---- */
+  .nen-tang { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
+  .hop-tai {
+    background: var(--nen-2);
+    border: 1px solid var(--vien);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex; flex-direction: column;
+  }
+  .hop-tai h3 { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-size: 19px; font-weight: 700; }
+  .hop-tai .he { font-size: 13px; color: var(--chu-rat-mo); margin-bottom: 20px; }
+  .hop-tai ul { margin: 0 0 24px; padding-left: 19px; color: var(--chu-mo); font-size: 14.5px; }
+  .hop-tai li { margin-bottom: 5px; }
+  .hop-tai .nut { align-self: flex-start; }
+  .phu-tai { font-size: 13px; color: var(--chu-rat-mo); margin-top: 12px; }
+  .phu-tai a { color: var(--chu-mo); }
+
+  .canh-bao {
+    margin-top: 34px;
+    border: 1px solid rgba(234,179,8,.28);
+    background: rgba(234,179,8,.06);
+    border-radius: 14px;
+    padding: 20px 24px;
+    font-size: 14.5px;
+    color: #e9dcb4;
+  }
+  .canh-bao b { color: #fff; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--vien); }
+  th { color: var(--chu-rat-mo); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .06em; }
+  td:first-child { color: var(--chu); font-weight: 500; }
+  td { color: var(--chu-mo); }
+
+  footer { padding: 46px 0 64px; border-top: 1px solid var(--vien); color: var(--chu-rat-mo); font-size: 13.5px; }
+  footer a { color: var(--chu-mo); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="khung">
+    <div class="dau-hieu">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect width="48" height="48" rx="12" fill="#6D28D9"/>
+        <path d="M18 32.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="#fff"/>
+        <path d="M21.5 29V15.5l11-2.5V26" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32.5 29.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="#fff"/>
+      </svg>
+      <b>Lyra</b>
+    </div>
+
+    <h1>Lời bài hát <em>nổi trên màn hình</em>, dù nhạc phát ở app nào</h1>
+    <p class="mo-ta">
+      Mở Spotify, YouTube, Zing MP3 hay NhacCuaTui — Lyra đọc bài đang phát rồi
+      hiện lời nổi đè lên, chạy theo đúng nhịp. Và khi bạn muốn, chính Lyra cũng
+      là một trình nghe nhạc đầy đủ.
+    </p>
+
+    <div class="nut-hang">
+      <a class="nut" href="#tai-ve">Tải về</a>
+      <a class="nut phu" href="#lyra-lam-gi">Lyra làm được gì</a>
+    </div>
+    <p class="ghi-chu-nut">Miễn phí · Không tài khoản · Không quảng cáo</p>
+
+    <div class="minh-hoa">
+      <div class="nhan">Khung lời nổi</div>
+      <div class="dong-loi">Đỏ thắm những câu chuyện xưa</div>
+      <div class="dong-loi dang-hat">Từng dãy phố mang sắc cờ</div>
+      <div class="dong-loi dich">Every street carries the flag's colour</div>
+      <div class="dong-loi">Đẹp như hoa bay giữa trời</div>
+    </div>
+  </div>
+</header>
+
+<section id="lyra-lam-gi">
+  <div class="khung">
+    <h2>Hai việc, một app</h2>
+    <p class="dan-de">
+      Lyra bắt đầu là công cụ lời cho cả máy, rồi thành cả một trình nghe nhạc.
+      Hai vai dùng chung một bộ não tìm lời.
+    </p>
+
+    <div class="luoi">
+      <div class="the">
+        <h3>Lời nổi cho mọi app nhạc</h3>
+        <p>Khung lời trôi trên màn hình, chạy theo bài đang phát ở bất kỳ app nào.
+           Kéo để dời chỗ, chỉnh cỡ chữ, độ mờ nền, số dòng phụ.</p>
+      </div>
+      <div class="the">
+        <h3>Ba nguồn lời, hỏi cùng lúc</h3>
+        <p>LRCLIB, Zing MP3 và NhacCuaTui được hỏi song song. Chỉ nhận khi tên trả
+           về đủ giống — hiện nhầm lời bài khác còn tệ hơn không hiện gì.</p>
+      </div>
+      <div class="the">
+        <h3>Lệch thì chạm một cái là khớp</h3>
+        <p>Nghe thấy câu nào thì chạm vào câu đó, ngay trên khung nổi. Một cú chạm
+           căn lại cả bài, và nhớ luôn cho lần sau.</p>
+      </div>
+      <div class="the">
+        <h3>Dịch lời ngay trên máy</h3>
+        <p>Nhạc tiếng nước ngoài được dịch bằng ML Kit chạy tại chỗ — không tài
+           khoản, không gửi lời đi đâu, chạy được khi mất mạng.</p>
+      </div>
+      <div class="the">
+        <h3>Tự tìm, tự phát</h3>
+        <p>Tìm ở Zing MP3 và NhacCuaTui cùng lúc, cộng nhạc có sẵn trong máy.
+           Hàng đợi, trộn bài, lặp, danh sách phát.</p>
+      </div>
+      <div class="the">
+        <h3>Lời lên cả màn hình khoá</h3>
+        <p>Khi Lyra tự phát, câu đang hát hiện ngay trên thẻ điều khiển nhạc —
+           đọc được mà không cần mở khoá máy. <em>(Android)</em></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tai-ve">
+  <div class="khung">
+    <h2>Tải về</h2>
+    <p class="dan-de">
+      Bản <b>0.1.0</b> — đang thử nghiệm. Chưa có trên Google Play; xem phần ghi
+      chú bên dưới.
+    </p>
+
+    <div class="nen-tang">
+      <div class="hop-tai">
+        <h3>🪟 Windows</h3>
+        <div class="he">Windows 10 trở lên · 64-bit</div>
+        <ul>
+          <li>Lời nổi cho nhạc phát ở app khác</li>
+          <li>Trình nghe nhạc, thư viện, danh sách phát</li>
+          <li>Phụ đề cho video dài</li>
+          <li>Thanh điều khiển nhanh ở taskbar</li>
+        </ul>
+        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/latest">Tải bộ cài</a>
+        <p class="phu-tai">
+          Có cả bản chạy thẳng không cần cài trong
+          <a href="https://github.com/mittohoa/lyra-player/releases/latest">trang phát hành</a>.
+        </p>
+      </div>
+
+      <div class="hop-tai">
+        <h3>🤖 Android</h3>
+        <div class="he">Android 8.0 trở lên · arm64</div>
+        <ul>
+          <li>Khung lời nổi trên mọi app nhạc</li>
+          <li>Lời trên thẻ màn hình khoá</li>
+          <li>Ô bật/tắt nhanh trong Cài đặt nhanh</li>
+          <li>Dịch lời ngay trên máy</li>
+        </ul>
+        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/latest">Tải APK</a>
+        <p class="phu-tai">
+          Cài tay: mở file APK rồi cho phép cài từ nguồn này khi Android hỏi.
+        </p>
+      </div>
+    </div>
+
+    <div class="canh-bao">
+      <b>Đây là bản thử nghiệm.</b> Lyra chưa được ký bằng chứng chỉ trả phí, nên
+      Windows SmartScreen và Google Play Protect sẽ cảnh báo khi cài — chọn
+      <i>Thêm thông tin → Vẫn chạy</i>. Lyra lấy lời từ API nội bộ của Zing MP3 và
+      NhacCuaTui, những API đó có thể đổi bất cứ lúc nào và khi ấy phần lời sẽ
+      tạm hỏng cho tới khi có bản vá.
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="khung">
+    <h2>Quyền mà Lyra xin</h2>
+    <p class="dan-de">
+      Mỗi quyền được hỏi đúng lúc cần, kèm lời giải thích tại chỗ — không dồn vào
+      một màn hình lúc mở app lần đầu.
+    </p>
+    <table>
+      <thead>
+        <tr><th>Quyền</th><th>Để làm gì</th><th>Bỏ qua được?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Đọc thông báo</td>
+          <td>Điều kiện của Android để biết app nào đang phát bài gì. Lyra <b>không</b> đọc nội dung thông báo.</td>
+          <td>Không — thiếu là mất tính năng chính</td>
+        </tr>
+        <tr>
+          <td>Vẽ đè lên app khác</td>
+          <td>Dựng khung lời nổi</td>
+          <td>Được, nếu không dùng khung nổi</td>
+        </tr>
+        <tr>
+          <td>Đọc nhạc trong máy</td>
+          <td>Thư viện nhạc. Xin đúng quyền <b>nhạc</b>, không đụng ảnh, video hay tài liệu</td>
+          <td>Được</td>
+        </tr>
+        <tr>
+          <td>Thông báo</td>
+          <td>Thẻ điều khiển nhạc. Từ chối thì nhạc vẫn phát, chỉ mất thẻ</td>
+          <td>Được</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="khung">
+    <h2>Tài liệu</h2>
+    <p class="dan-de">Viết cho người sẽ phải sửa nó — gồm cả những chỗ từng làm sai và vì sao.</p>
+    <div class="luoi">
+      <div class="the">
+        <h3><a href="tai-lieu-app.html">Toàn cảnh ứng dụng</a></h3>
+        <p>Bản đồ tính năng, kiến trúc ba tiến trình của bản Windows, và chỗ nào đang phình ra.</p>
+      </div>
+      <div class="the">
+        <h3><a href="kien-truc-android.html">Kiến trúc bản Android</a></h3>
+        <p>Vòng lặp phải cắt, thẻ ID3 ghi đè, bộ lọc MediaStore, hai biến thể phát hành.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="khung">
+    Lyra · <a href="https://github.com/mittohoa/lyra-player">Mã nguồn bản Windows</a> ·
+    <a href="https://github.com/mittohoa/lyra-android">Mã nguồn bản Android</a><br>
+    Lyra không lưu trữ và không phân phối nhạc. Lời bài hát thuộc về tác giả và
+    đơn vị nắm bản quyền.
+  </div>
+</footer>
+
+</body>
+</html>

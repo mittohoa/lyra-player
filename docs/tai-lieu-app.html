@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Tài liệu toàn bộ app Lyra: kiến trúc, từng tính năng kèm số đo, và bản đồ chỉ ra chỗ app đang phình thành hai sản phẩm.">
-<title>Tài liệu Lyra</title>
+<meta name="description" content="Bản đồ tính năng, kiến trúc, và chỗ đang phình ra của Lyra.">
+<title>Lyra — toàn cảnh ứng dụng</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
 
 <style>
   :root {
@@ -26,7 +26,11 @@
     --warn: #A9560B;
     --warn-wash: #FDF3E7;
     --good: #16794C;
+    --good-wash: #ECF7F1;
+    --stop: #B02A37;
     --code-bg: #F4F1F9;
+    --code-ink: #3B3349;
+    --comment: #8E86A0;
 
     --sans: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
     --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -52,7 +56,11 @@
       --warn: #E8A75C;
       --warn-wash: #2C2113;
       --good: #6EE7A5;
+      --good-wash: #16261F;
+      --stop: #FB7185;
       --code-bg: #221D2E;
+      --code-ink: #CFC8DC;
+      --comment: #7C7490;
     }
   }
 
@@ -71,7 +79,11 @@
     --warn: #E8A75C;
     --warn-wash: #2C2113;
     --good: #6EE7A5;
+    --good-wash: #16261F;
+    --stop: #FB7185;
     --code-bg: #221D2E;
+    --code-ink: #CFC8DC;
+    --comment: #7C7490;
   }
 
   * { box-sizing: border-box; }
@@ -87,14 +99,13 @@
 
   .wrap {
     display: grid;
-    grid-template-columns: 232px minmax(0, 1fr);
+    grid-template-columns: 236px minmax(0, 1fr);
     gap: 56px;
-    max-width: 1120px;
+    max-width: 1130px;
     margin: 0 auto;
     padding: 0 32px 120px;
   }
 
-  /* ---- Mục lục dính bên trái ---- */
   nav.toc {
     position: sticky;
     top: 0;
@@ -103,7 +114,7 @@
     overflow-y: auto;
     padding: 40px 0;
     font-family: var(--sans);
-    font-size: 13px;
+    font-size: 12.5px;
   }
   nav.toc .toc-label {
     text-transform: uppercase;
@@ -130,19 +141,18 @@
 
   main { padding-top: 40px; min-width: 0; }
 
-  /* ---- Đầu trang ---- */
   header.head {
     display: flex;
     align-items: center;
     gap: 20px;
     padding-bottom: 26px;
-    margin-bottom: 34px;
+    margin-bottom: 30px;
     border-bottom: 1px solid var(--line);
   }
   header.head h1 {
     font-family: var(--sans);
     font-weight: 700;
-    font-size: clamp(30px, 5vw, 40px);
+    font-size: clamp(29px, 5vw, 38px);
     line-height: 1.1;
     letter-spacing: -0.02em;
     margin: 0 0 6px;
@@ -155,12 +165,7 @@
     margin: 0;
   }
 
-  .facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 40px;
-  }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
   .fact {
     font-family: var(--sans);
     font-size: 12px;
@@ -171,7 +176,6 @@
     color: var(--ink-2);
     background: var(--card);
   }
-  .fact.ok { color: var(--good); border-color: color-mix(in srgb, var(--good) 38%, transparent); }
   .fact b { font-variant-numeric: tabular-nums; font-weight: 600; }
 
   h2 {
@@ -180,7 +184,7 @@
     font-size: 23px;
     letter-spacing: -0.012em;
     line-height: 1.25;
-    margin: 64px 0 18px;
+    margin: 62px 0 18px;
     padding-top: 8px;
     text-wrap: balance;
   }
@@ -193,25 +197,15 @@
   h3 {
     font-family: var(--sans);
     font-weight: 600;
-    font-size: 16px;
-    margin: 38px 0 12px;
-    color: var(--ink);
+    font-size: 15.5px;
+    margin: 36px 0 12px;
   }
 
-  p { max-width: var(--measure); margin: 0 0 16px; }
-  main > p, section > p { color: var(--ink-2); }
-
-  .lede {
-    font-size: 19px;
-    line-height: 1.6;
-    color: var(--ink);
-    max-width: 60ch;
-  }
-  .lede strong { font-weight: 600; }
+  p { max-width: var(--measure); margin: 0 0 16px; color: var(--ink-2); }
+  .lede { font-size: 18.5px; line-height: 1.6; color: var(--ink); max-width: 60ch; }
 
   a { color: var(--accent); }
   strong { color: var(--ink); font-weight: 600; }
-  em { color: var(--ink-2); }
 
   code {
     font-family: var(--mono);
@@ -226,14 +220,30 @@
   li { margin-bottom: 9px; }
   li::marker { color: var(--faint); }
 
-  /* ---- Sơ đồ luồng: hộp thật, không phải ASCII ---- */
+  pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    overflow-x: auto;
+    max-width: 78ch;
+    color: var(--code-ink);
+    margin: 20px 0;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  pre .c { color: var(--comment); font-style: italic; }
+  pre .k { color: var(--accent); font-weight: 500; }
+
+  /* ---- Sơ đồ luồng ---- */
   .flow {
     display: flex;
     flex-direction: column;
-    gap: 0;
-    margin: 26px 0 22px;
+    margin: 24px 0 22px;
     font-family: var(--sans);
-    max-width: 640px;
+    max-width: 620px;
   }
   .flow-step {
     border: 1px solid var(--line-2);
@@ -245,244 +255,88 @@
     border-color: color-mix(in srgb, var(--accent) 42%, transparent);
     background: var(--accent-wash);
   }
-  .flow-who {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 3px;
-  }
+  .flow-who { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
   .flow-what { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
-  .flow-file {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent-ink);
-    margin-top: 5px;
-    word-break: break-all;
-  }
+  .flow-file { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); margin-top: 5px; }
   .flow-arrow {
-    width: 1px;
-    height: 20px;
-    margin-left: 26px;
-    background: var(--line-2);
-    position: relative;
-    flex-shrink: 0;
+    width: 1px; height: 20px; margin-left: 26px;
+    background: var(--line-2); position: relative; flex-shrink: 0;
   }
   .flow-arrow::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: -3.5px;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
+    content: ""; position: absolute; bottom: 0; left: -3.5px;
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
     border-top: 5px solid var(--line-2);
   }
-  .flow-note {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    background: var(--code-bg);
-    border-radius: 6px;
-    padding: 7px 10px;
-    margin: 8px 0 8px 26px;
-    max-width: 560px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  /* ---- Hai sản phẩm: chỗ quan trọng nhất của tài liệu ---- */
-  .split {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
-    gap: 18px;
-    margin: 26px 0 30px;
-  }
-  .prod {
-    border: 1px solid var(--line-2);
-    border-radius: var(--r);
-    background: var(--card);
-    padding: 20px 20px 8px;
-  }
-  .prod.core {
-    border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-    box-shadow: 0 0 0 3px var(--accent-wash);
-  }
-  .prod-tag {
-    font-family: var(--sans);
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--faint);
-    margin-bottom: 5px;
-  }
-  .prod.core .prod-tag { color: var(--accent); }
-  .prod h3 {
-    margin: 0 0 4px;
-    font-size: 17px;
-  }
-  .prod-sub {
-    font-family: var(--sans);
-    font-size: 12.5px;
-    color: var(--muted);
-    margin: 0 0 16px;
-    line-height: 1.5;
-  }
-  .prod ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-family: var(--sans);
-    font-size: 13px;
-  }
-  .prod li {
-    padding: 9px 0;
-    border-top: 1px solid var(--line);
-    margin: 0;
-    color: var(--ink-2);
-  }
-  .prod li b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 1px; }
-  .prod li span { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-  /* ---- Ba hướng chọn ---- */
-  .options { counter-reset: opt; margin: 24px 0 8px; display: grid; gap: 12px; max-width: var(--measure); }
-  .opt {
-    display: grid;
-    grid-template-columns: 30px 1fr;
-    gap: 14px;
-    border: 1px solid var(--line);
-    border-radius: var(--r);
-    padding: 15px 17px;
-    background: var(--card);
-  }
-  .opt::before {
-    counter-increment: opt;
-    content: counter(opt);
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--accent);
-    background: var(--accent-wash);
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    display: grid;
-    place-items: center;
-  }
-  .opt h4 {
-    font-family: var(--sans);
-    font-size: 14.5px;
-    font-weight: 600;
-    margin: 4px 0 4px;
-  }
-  .opt p { font-family: var(--sans); font-size: 13px; color: var(--muted); margin: 0; line-height: 1.6; }
 
   /* ---- Bảng ---- */
   .table-scroll { overflow-x: auto; margin: 22px 0; border: 1px solid var(--line); border-radius: var(--r); }
   table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 13px; }
   th, td { text-align: left; padding: 11px 15px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th {
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--faint);
-    background: var(--code-bg);
-    white-space: nowrap;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+    color: var(--faint); background: var(--code-bg); white-space: nowrap;
   }
   tr:last-child td { border-bottom: 0; }
-  td:first-child { color: var(--ink); font-weight: 500; white-space: nowrap; }
+  td:first-child { color: var(--ink); font-weight: 500; }
   td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-  .yes { color: var(--good); font-weight: 600; }
-  .no { color: var(--faint); }
-  tr.picked td { background: var(--accent-wash); }
-  tr.picked td:first-child { color: var(--accent-ink); font-weight: 600; }
-  tr.picked td::after { }
-  .pick-tag {
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--accent);
-    margin-left: 8px;
-  }
+  td code { font-size: 11.5px; }
 
-  /* ---- Ô cảnh báo ---- */
+  .yes { color: var(--good); font-weight: 600; }
+  .no { color: var(--stop); font-weight: 600; }
+  .maybe { color: var(--warn); font-weight: 600; }
+
+  /* ---- Bậc thang mốc ---- */
+  .steps { counter-reset: step; display: grid; gap: 10px; margin: 24px 0; max-width: var(--measure); }
+  .step {
+    display: grid; grid-template-columns: 30px 1fr; gap: 14px;
+    border: 1px solid var(--line); border-radius: var(--r);
+    padding: 14px 16px; background: var(--card);
+  }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    font-family: var(--sans); font-weight: 700; font-size: 14px;
+    color: var(--accent); background: var(--accent-wash);
+    width: 30px; height: 30px; border-radius: 8px;
+    display: grid; place-items: center;
+  }
+  .step.first { border-color: color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 0 0 3px var(--accent-wash); }
+  .step.first::before { background: var(--accent); color: #fff; }
+  .step h4 { font-family: var(--sans); font-size: 14px; font-weight: 600; margin: 4px 0 3px; }
+  .step p { font-family: var(--sans); font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.6; }
+
+  /* ---- Ô nhấn ---- */
   .callout {
     border-left: 3px solid var(--warn);
     background: var(--warn-wash);
     border-radius: 0 var(--r) var(--r) 0;
-    padding: 15px 18px;
-    margin: 22px 0;
-    max-width: var(--measure);
-    font-family: var(--sans);
-    font-size: 13.5px;
-    line-height: 1.65;
-    color: var(--ink-2);
+    padding: 15px 18px; margin: 22px 0; max-width: var(--measure);
+    font-family: var(--sans); font-size: 13.5px; line-height: 1.65; color: var(--ink-2);
   }
+  .callout.key { border-left-color: var(--accent); background: var(--accent-wash); }
   .callout b { color: var(--ink); }
 
-  /* ---- Danh sách giới hạn ---- */
-  .limits { list-style: none; padding: 0; max-width: var(--measure); }
-  .limits li {
-    font-family: var(--sans);
-    font-size: 13.5px;
-    padding: 13px 0 13px 26px;
-    border-bottom: 1px solid var(--line);
-    position: relative;
-    line-height: 1.6;
+  .risks { list-style: none; padding: 0; max-width: var(--measure); }
+  .risks li {
+    font-family: var(--sans); font-size: 13.5px;
+    padding: 13px 0 13px 26px; border-bottom: 1px solid var(--line);
+    position: relative; line-height: 1.6;
   }
-  .limits li::before {
-    content: "";
-    position: absolute;
-    left: 4px; top: 21px;
-    width: 7px; height: 7px;
-    border-radius: 2px;
-    background: var(--faint);
+  .risks li::before {
+    content: ""; position: absolute; left: 4px; top: 21px;
+    width: 7px; height: 7px; border-radius: 2px; background: var(--warn);
   }
-  .limits li b { display: block; color: var(--ink); margin-bottom: 2px; }
-
-  pre {
-    font-family: var(--mono);
-    font-size: 12.5px;
-    line-height: 1.65;
-    background: var(--code-bg);
-    border: 1px solid var(--line);
-    border-radius: var(--r);
-    padding: 15px 17px;
-    overflow-x: auto;
-    max-width: var(--measure);
-    color: var(--ink-2);
-  }
-  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+  .risks li b { display: block; color: var(--ink); margin-bottom: 2px; }
 
   footer {
-    margin-top: 72px;
-    padding-top: 22px;
-    border-top: 1px solid var(--line);
-    font-family: var(--sans);
-    font-size: 12px;
-    color: var(--faint);
+    margin-top: 70px; padding-top: 22px; border-top: 1px solid var(--line);
+    font-family: var(--sans); font-size: 12px; color: var(--faint);
   }
 
-  /* ---- Dấu hiệu Lyra, đúng bản đang chạy trong app ---- */
   .mark { flex-shrink: 0; }
-  .mark__note {
-    transform-origin: 256px 220px;
-    animation: rock 1.5s cubic-bezier(.4,0,.2,1) infinite;
-  }
-  .mark__bar {
-    transform-box: fill-box;
-    transform-origin: left center;
-    animation: sweep 1.5s cubic-bezier(.4,0,.2,1) infinite;
-  }
-  @keyframes rock {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
-  }
-  @keyframes sweep {
-    0% { transform: scaleX(.12); }
-    55%, 80% { transform: scaleX(1); }
-    100% { transform: scaleX(.12); }
-  }
+  .mark__note { transform-origin: 256px 220px; animation: rock 1.5s cubic-bezier(.4,0,.2,1) infinite; }
+  .mark__bar { transform-box: fill-box; transform-origin: left center; animation: sweep 1.5s cubic-bezier(.4,0,.2,1) infinite; }
+  @keyframes rock { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+  @keyframes sweep { 0% { transform: scaleX(.12); } 55%,80% { transform: scaleX(1); } 100% { transform: scaleX(.12); } }
   @media (prefers-reduced-motion: reduce) {
     .mark__note { animation: none; }
     .mark__bar { animation: none; transform: scaleX(.6); }
@@ -501,302 +355,128 @@
 </head>
 <body>
 <div class="wrap">
+<nav class="toc"><div class="toc-label">Mục lục</div><a href="#1-lyra-la-gi"><span class="num">1</span>Lyra là gì</a><a href="#2-mot-vong-doi-dien-hinh"><span class="num">2</span>Một vòng đời điển hình</a><a href="#3-ban-do-tinh-nang-va-cho-dang-phinh-ra"><span class="num">3</span>Bản đồ tính năng — và chỗ đang phình ra</a><a href="#4-kien-truc"><span class="num">4</span>Kiến trúc</a><a href="#5-tung-phan-va-gioi-han-da-do-duoc"><span class="num">5</span>Từng phần, và giới hạn đã đo được</a><a href="#6-kiem-chung"><span class="num">6</span>Kiểm chứng</a><a href="#7-gioi-han-da-biet"><span class="num">7</span>Giới hạn đã biết</a><a href="#8-chay-thu"><span class="num">8</span>Chạy thử</a></nav>
+<main>
+<h1 id="lyra-tai-lieu-toan-app">Lyra — tài liệu toàn app</h1>
+<blockquote><p>Trạng thái: đang chạy được, 133 phép kiểm tra tự động đều đạt. Quy mô: 12.765 dòng mã nguồn + 2.947 dòng kịch bản kiểm tra. Nền: Electron 38 · React 19 · TypeScript 5.9 · Windows 11.</p></blockquote>
+<hr>
+<h2 id="1-lyra-la-gi">1. Lyra là gì</h2>
+<p><strong>Lời bài hát hiện trên màn hình, cho bất cứ thứ gì đang phát trên máy.</strong></p>
+<p>Đó là câu duy nhất đáng nhớ về app này. Mọi thứ khác trong Lyra hoặc là để phục vụ câu đó, hoặc là một sản phẩm thứ hai đi kèm — phần 3 nói thẳng chỗ nào là chỗ nào.</p>
+<p>Điểm khác biệt so với Zing, NhacCuaTui hay Spotify: các app đó chỉ hiện lời cho nhạc <strong>của chính chúng</strong>. Lyra đọc được nhạc đang phát ở <strong>app khác</strong> — Spotify, Chrome, Edge, Windows Media Player — rồi tự đi dò lời cho bài đó và hiện lên một khung nổi luôn nằm trên cùng màn hình.</p>
+<hr>
+<h2 id="2-mot-vong-doi-dien-hinh">2. Một vòng đời điển hình</h2>
+<p>Đây là đường đi đầy đủ, từ lúc bạn bấm play ở Spotify đến lúc chữ hiện ra:</p>
+<pre><code>Spotify phát nhạc
+   │
+   ▼
+Windows SMTC ──────────► resources/smtc-watch.ps1 ──► src/main/smtc.ts
+(hệ điều hành ghi nhận   (cầu PowerShell + WinRT,     (đọc từng dòng JSON,
+ app nào đang phát gì)    mỗi nhịp một dòng JSON)      bù thời gian trôi)
+   │
+   │  { app: "Spotify", title: "NƠI NÀY CÓ ANH | OFFICIAL MV | SƠN TÙNG M-TP", ... }
+   ▼
+src/main/lyrics/identify.ts
+   │  Bóc rác khỏi tên: ngoặc quảng cáo, "- YouTube", "Official", "【MV】"
+   │  Sinh nhiều phương án (nghệ sĩ, tên bài) vì không thể biết chắc vế nào là vế nào
+   │  → [ ("Sơn Tùng M-TP", "NƠI NÀY CÓ ANH"), ("NƠI NÀY CÓ ANH", "Sơn Tùng M-TP"), ... ]
+   ▼
+src/main/lyrics/external.ts
+   │  Bài ngắn  → thử lời trước:  LRCLIB → Zing MP3 → NhacCuaTui
+   │  Video dài → thử phụ đề trước: YouTube (bản người đăng, rồi bản máy tự nghe)
+   │  Chỉ nhận khi tên trả về đủ giống (≥ 0,6) — hiện nhầm lời bài khác còn tệ hơn không hiện
+   ▼
+Cửa sổ overlay (src/renderer/src/OverlayView.tsx)
+   Khung trong suốt, không viền, luôn trên cùng, chuột đi xuyên qua được</code></pre>
+<p>Vị trí phát là chỗ dễ sai nhất: Windows chỉ đưa một <strong>ảnh chụp</strong> vị trí kèm mốc <code>lastUpdated</code>, không phải vị trí lúc này. Không bù phần thời gian đã trôi thì lời luôn chạy chậm hơn nhạc vài giây. Lyra bù hai lần — một lần ở tiến trình chính lúc gửi, một lần ở giao diện theo từng khung hình — nên đồng hồ chạy mượt.</p>
+<hr>
+<h2 id="3-ban-do-tinh-nang-va-cho-dang-phinh-ra">3. Bản đồ tính năng — và chỗ đang phình ra</h2>
+<p>Đây là phần trả lời trực tiếp cho câu "app đang phình to tính năng".</p>
+<p>Lyra hiện đang là <strong>hai sản phẩm nằm chung một cửa sổ</strong>:</p>
+<h3 id="san-pham-a-cong-cu-loi-cho-ca-may-day-la-lyra">Sản phẩm A — công cụ lời cho cả máy  ← <em>đây là Lyra</em></h3>
+<table><thead><tr><th>Phần</th><th>File chính</th><th>Vì sao nó thuộc lõi</th></tr></thead><tbody><tr><td>Đọc nhạc app khác (SMTC)</td><td><code>main/smtc.ts</code> + <code>resources/smtc-watch.ps1</code></td><td>Không có nó thì không còn app này</td></tr><tr><td>Nhận diện bài từ chuỗi thô</td><td><code>main/lyrics/identify.ts</code></td><td>Tên Windows đưa ra là tên video, đem tra thẳng thì trượt</td></tr><tr><td>Dò lời nhiều nguồn</td><td><code>main/lyrics/external.ts</code>, <code>lrclib.ts</code>, <code>sources/zing.ts</code>, <code>sources/nct.ts</code></td><td>Chính là việc phải làm</td></tr><tr><td>Phụ đề cho video dài</td><td><code>main/subtitles/</code></td><td>Cùng một lời hứa, chỉ khác loại nội dung</td></tr><tr><td>Khung lời nổi</td><td><code>renderer/src/OverlayView.tsx</code>, <code>main/windows.ts</code></td><td>Chỗ chữ hiện ra</td></tr><tr><td>Sửa lời, chỉnh lệch, ghi <code>.lrc</code></td><td><code>components/LyricsEditor.tsx</code>, <code>main/lyrics/index.ts</code></td><td>Khi máy dò sai thì phải sửa được bằng tay</td></tr><tr><td>Căn mốc thời gian bằng AI</td><td><code>main/ai/align.ts</code>, <code>whisper.ts</code></td><td>Lời không mốc thì không chạy theo nhạc được</td></tr><tr><td>Dịch lời</td><td><code>main/ai/translate.ts</code></td><td>Mở rộng hợp lý, nhưng đã là vòng ngoài</td></tr></tbody></table>
+<h3 id="san-pham-b-mot-trinh-nghe-nhac-day-du">Sản phẩm B — một trình nghe nhạc đầy đủ</h3>
+<table><thead><tr><th>Phần</th><th>File chính</th><th>Đánh giá</th></tr></thead><tbody><tr><td>Thư viện nhạc trong máy</td><td><code>main/library.ts</code>, <code>components/LibraryView.tsx</code></td><td>Bạn nói <em>"chủ yếu nghe online"</em> — phần này ít dùng nhất</td></tr><tr><td>Danh sách phát</td><td><code>store/playlists.ts</code>, <code>components/PlaylistView.tsx</code></td><td>Đi kèm thư viện, cùng mức ít dùng</td></tr><tr><td>Hàng đợi, trộn bài, lặp</td><td><code>store/player.ts</code>, <code>components/QueuePanel.tsx</code></td><td>Cần, một khi đã tự phát nhạc</td></tr><tr><td>Tìm và phát online (4 nguồn)</td><td><code>main/sources/</code></td><td>Nhiều mã nhất, dễ hỏng nhất — API nội bộ của Zing/NCT có thể đổi bất cứ lúc nào</td></tr><tr><td>Tải nhạc về máy</td><td><code>main/download.ts</code></td><td>Sản phẩm thứ ba nếu xét cho kỹ</td></tr></tbody></table>
+<p><strong>Nhận định thẳng:</strong> sản phẩm B nặng hơn sản phẩm A về khối lượng mã, nhưng nhẹ hơn hẳn về lý do tồn tại. Bạn đã có Zing và YouTube để nghe nhạc; cái không ai làm thay được là sản phẩm A.</p>
+<p>Ba hướng, tuỳ bạn chọn — tôi <strong>không</strong> tự cắt gì cả:</p>
+<ol><li><strong>Giữ nguyên.</strong> Mọi thứ đang chạy và có kiểm tra tự động. Cái giá là mỗi lần Zing hay NCT đổi API thì phải đi sửa.</li><li><strong>Thu về lõi.</strong> Bỏ thư viện + danh sách phát + tải nhạc, giữ phát online và toàn bộ sản phẩm A. Ước chừng bớt được ~2.500 dòng và ba mặt dễ hỏng.</li><li><strong>Tách đôi.</strong> Lyra = công cụ lời; phần nghe nhạc thành một chế độ tắt được trong Cài đặt. Không mất mã, nhưng mặc định gọn.</li></ol>
+<p><strong>Về đề nghị thêm luồng TV (FPT và nguồn khác):</strong> đó sẽ là sản phẩm thứ ba, và nó kéo theo cả một nhánh mới — Lyra hiện chỉ có thẻ <code>&lt;audio&gt;</code>, muốn xem TV thì phải có <code>&lt;video&gt;</code>, thư viện HLS (<code>hls.js</code>), và cửa sổ video nổi. Việc này khả thi, nhưng nên quyết sau khi đã chốt ba hướng ở trên. Tôi đã dừng lại chưa làm.</p>
+<hr>
+<h2 id="4-kien-truc">4. Kiến trúc</h2>
+<p>Ba tiến trình, ranh giới rõ ràng:</p>
+<pre><code>┌─ Tiến trình chính (Node) ──────────────────────────────────┐
+│  Mọi thứ chạm ra ngoài: mạng, ổ đĩa, hệ điều hành,          │
+│  tiến trình con (PowerShell, yt-dlp, whisper)               │
+│                                                             │
+│  src/main/  ─ sources/    4 nguồn nhạc online              │
+│               lyrics/     dò lời, nhận diện bài            │
+│               subtitles/  đọc và tải phụ đề                │
+│               ai/         whisper.cpp + Claude API         │
+│               logger.ts   nhật ký + diễn giải lỗi          │
+└────────────────────┬────────────────────────────────────────┘
+                     │  IPC (mọi kênh đều được bọc bắt lỗi)
+┌────────────────────┴────────────────────────────────────────┐
+│  src/preload/  Cầu duy nhất; `contextBridge`, không lộ Node │
+└────────────────────┬────────────────────────────────────────┘
+                     │  window.api.*
+┌────────────────────┴────────────────────────────────────────┐
+│  Giao diện (Chromium)          │  Cửa sổ overlay            │
+│  src/renderer/src/App.tsx      │  src/renderer/src/         │
+│  + 5 kho zustand               │    OverlayView.tsx         │
+└─────────────────────────────────────────────────────────────┘
 
-  <nav class="toc">
-    <div class="toc-label">Mục lục</div>
-    <a href="#gi"><span class="num">1</span>Lyra là gì</a>
-    <a href="#vongdoi"><span class="num">2</span>Một vòng đời</a>
-    <a href="#bando"><span class="num">3</span>Bản đồ tính năng</a>
-    <a href="#kientruc"><span class="num">4</span>Kiến trúc</a>
-    <a href="#tungphan"><span class="num">5</span>Từng phần</a>
-    <a href="#kiemchung"><span class="num">6</span>Kiểm chứng</a>
-    <a href="#gioihan"><span class="num">7</span>Giới hạn</a>
-    <a href="#chaythu"><span class="num">8</span>Chạy thử</a>
-  </nav>
-
-  <main>
-    <header class="head">
-      <svg class="mark" width="60" height="60" viewBox="0 0 512 512" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#7C3AED"/><stop offset="1" stop-color="#4338CA"/>
-          </linearGradient>
-          <clipPath id="lb"><rect x="152" y="372" width="208" height="48" rx="24"/></clipPath>
-        </defs>
-        <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#lg)"/>
-        <g class="mark__note" fill="#fff" transform="translate(9 -6)">
-          <path d="M207.4 125 h19 v179 h-19 z"/>
-          <path d="M357.4 97 h19 v179 h-19 z"/>
-          <path d="M207.4 125 L376.4 97 L376.4 137 L207.4 165 Z"/>
-          <ellipse cx="172" cy="300" rx="58" ry="33" transform="rotate(-25 172 300)"/>
-          <ellipse cx="322" cy="272" rx="58" ry="33" transform="rotate(-25 322 272)"/>
-        </g>
-        <g clip-path="url(#lb)">
-          <rect x="152" y="372" width="208" height="48" rx="24" fill="#fff" opacity=".28"/>
-          <rect class="mark__bar" x="152" y="372" width="208" height="48" rx="24" fill="#fff"/>
-        </g>
-      </svg>
-      <div>
-        <h1>Tài liệu Lyra</h1>
-        <p class="tagline">Trình nghe nhạc kèm lời nổi cho Windows — toàn bộ app, và chỗ nó đang phình ra</p>
-      </div>
-    </header>
-
-    <div class="facts">
-      <span class="fact ok"><b>133</b> phép kiểm tra · đều đạt</span>
-      <span class="fact"><b>12.765</b> dòng mã nguồn</span>
-      <span class="fact"><b>2.947</b> dòng kịch bản kiểm tra</span>
-      <span class="fact">Electron 38 · React 19 · TypeScript 5.9</span>
-      <span class="fact">Windows 11</span>
-    </div>
-
-    <section id="gi">
-      <h2><span class="num">1</span>Lyra là gì</h2>
-      <p class="lede"><strong>Lời bài hát hiện trên màn hình, cho bất cứ thứ gì đang phát trên máy.</strong></p>
-      <p>Đó là câu duy nhất đáng nhớ về app này. Mọi thứ khác trong Lyra hoặc là để phục vụ câu đó, hoặc là một sản phẩm thứ hai đi kèm — phần 3 nói thẳng chỗ nào là chỗ nào.</p>
-      <p>Điểm khác biệt so với Zing, NhacCuaTui hay Spotify: các app đó chỉ hiện lời cho nhạc <strong>của chính chúng</strong>. Lyra đọc được nhạc đang phát ở <strong>app khác</strong> — Spotify, Chrome, Edge, Windows Media Player — rồi tự đi dò lời cho bài đó và hiện lên một khung nổi luôn nằm trên cùng màn hình.</p>
-    </section>
-
-    <section id="vongdoi">
-      <h2><span class="num">2</span>Một vòng đời điển hình</h2>
-      <p>Đường đi đầy đủ, từ lúc bạn bấm play ở Spotify đến lúc chữ hiện ra:</p>
-
-      <div class="flow">
-        <div class="flow-step">
-          <div class="flow-who">Spotify phát nhạc</div>
-          <div class="flow-what">Windows SMTC ghi nhận app nào đang phát gì</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">
-          <div class="flow-who">Cầu PowerShell + WinRT</div>
-          <div class="flow-what">Một tiến trình chạy dài, mỗi nhịp in ra một dòng JSON. WinRT không gọi thẳng từ Node được.</div>
-          <div class="flow-file">resources/smtc-watch.ps1 → src/main/smtc.ts</div>
-        </div>
-        <div class="flow-note">{ app: "Spotify", title: "NƠI NÀY CÓ ANH | OFFICIAL MV | SƠN TÙNG M-TP", … }</div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step key">
-          <div class="flow-who">Nhận diện bài</div>
-          <div class="flow-what">Bóc rác khỏi tên — ngoặc quảng cáo, “- YouTube”, “Official”, “【MV】” — rồi sinh nhiều phương án (nghệ sĩ, tên bài), vì không thể biết chắc vế nào là vế nào.</div>
-          <div class="flow-file">src/main/lyrics/identify.ts</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step key">
-          <div class="flow-who">Dò lời</div>
-          <div class="flow-what">Bài ngắn thì thử lời trước: LRCLIB → Zing MP3 → NhacCuaTui. Video dài thì thử phụ đề trước. Chỉ nhận khi tên trả về đủ giống — hiện nhầm lời bài khác còn tệ hơn không hiện.</div>
-          <div class="flow-file">src/main/lyrics/external.ts</div>
-        </div>
-        <div class="flow-arrow"></div>
-        <div class="flow-step">
-          <div class="flow-who">Khung lời nổi</div>
-          <div class="flow-what">Trong suốt, không viền, luôn trên cùng, chuột đi xuyên qua được</div>
-          <div class="flow-file">src/renderer/src/OverlayView.tsx</div>
-        </div>
-      </div>
-
-      <p>Vị trí phát là chỗ dễ sai nhất: Windows chỉ đưa một <strong>ảnh chụp</strong> vị trí kèm mốc <code>lastUpdated</code>, không phải vị trí lúc này. Không bù phần thời gian đã trôi thì lời luôn chạy chậm hơn nhạc vài giây. Lyra bù hai lần — một lần ở tiến trình chính lúc gửi, một lần ở giao diện theo từng khung hình — nên đồng hồ chạy mượt.</p>
-    </section>
-
-    <section id="bando">
-      <h2><span class="num">3</span>Bản đồ tính năng — và chỗ đang phình ra</h2>
-      <p>Phần này trả lời trực tiếp câu “app đang phình to tính năng”. Lyra hiện là <strong>hai sản phẩm nằm chung một cửa sổ</strong>:</p>
-
-      <div class="split">
-        <div class="prod core">
-          <div class="prod-tag">Sản phẩm A · đây là Lyra</div>
-          <h3>Công cụ lời cho cả máy</h3>
-          <p class="prod-sub">Cái không app nào khác làm thay được.</p>
-          <ul>
-            <li><b>Đọc nhạc app khác (SMTC)</b><span>Không có nó thì không còn app này</span></li>
-            <li><b>Nhận diện bài từ chuỗi thô</b><span>Tên Windows đưa ra là tên video, tra thẳng thì trượt</span></li>
-            <li><b>Dò lời nhiều nguồn</b><span>LRCLIB, Zing, NhacCuaTui — chính là việc phải làm</span></li>
-            <li><b>Phụ đề cho video dài</b><span>Cùng một lời hứa, chỉ khác loại nội dung</span></li>
-            <li><b>Khung lời nổi</b><span>Chỗ chữ hiện ra</span></li>
-            <li><b>Sửa lời, chỉnh lệch, ghi .lrc</b><span>Khi máy dò sai thì phải sửa được bằng tay</span></li>
-            <li><b>Căn mốc thời gian bằng AI</b><span>Lời không mốc thì không chạy theo nhạc được</span></li>
-            <li><b>Dịch lời</b><span>Mở rộng hợp lý, nhưng đã là vòng ngoài</span></li>
-          </ul>
-        </div>
-
-        <div class="prod">
-          <div class="prod-tag">Sản phẩm B</div>
-          <h3>Một trình nghe nhạc đầy đủ</h3>
-          <p class="prod-sub">Nặng hơn về khối lượng mã, nhẹ hơn hẳn về lý do tồn tại.</p>
-          <ul>
-            <li><b>Thư viện nhạc trong máy</b><span>Bạn nói “chủ yếu nghe online” — phần này ít dùng nhất</span></li>
-            <li><b>Danh sách phát</b><span>Đi kèm thư viện, cùng mức ít dùng</span></li>
-            <li><b>Hàng đợi, trộn bài, lặp</b><span>Cần, một khi đã tự phát nhạc</span></li>
-            <li><b>Tìm và phát online, 4 nguồn</b><span>Nhiều mã nhất, dễ hỏng nhất — API nội bộ có thể đổi bất cứ lúc nào</span></li>
-            <li><b>Tải nhạc về máy</b><span>Sản phẩm thứ ba nếu xét cho kỹ</span></li>
-          </ul>
-        </div>
-      </div>
-
-      <p><strong>Nhận định thẳng:</strong> bạn đã có Zing và YouTube để nghe nhạc; cái không ai làm thay được là sản phẩm A. Ba hướng, tuỳ bạn chọn — tôi <strong>không</strong> tự cắt gì cả:</p>
-
-      <div class="options">
-        <div class="opt">
-          <div>
-            <h4>Giữ nguyên</h4>
-            <p>Mọi thứ đang chạy và có kiểm tra tự động. Cái giá là mỗi lần Zing hay NhacCuaTui đổi API thì phải đi sửa.</p>
-          </div>
-        </div>
-        <div class="opt">
-          <div>
-            <h4>Thu về lõi</h4>
-            <p>Bỏ thư viện, danh sách phát và tải nhạc; giữ phát online cùng toàn bộ sản phẩm A. Ước chừng bớt ~2.500 dòng và ba mặt dễ hỏng.</p>
-          </div>
-        </div>
-        <div class="opt">
-          <div>
-            <h4>Tách đôi</h4>
-            <p>Lyra là công cụ lời; phần nghe nhạc thành một chế độ tắt được trong Cài đặt. Không mất mã, nhưng mặc định gọn.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="callout">
-        <b>Về đề nghị thêm luồng TV (FPT và nguồn khác):</b> đó sẽ là sản phẩm thứ ba, và nó kéo theo cả một nhánh mới — Lyra hiện chỉ có thẻ <code>&lt;audio&gt;</code>, muốn xem TV thì phải có <code>&lt;video&gt;</code>, thư viện HLS, và cửa sổ video nổi. Khả thi, nhưng nên quyết sau khi đã chốt ba hướng trên. Tôi đã dừng lại chưa làm.
-      </div>
-    </section>
-
-    <section id="kientruc">
-      <h2><span class="num">4</span>Kiến trúc</h2>
-      <p>Ba tiến trình, ranh giới rõ ràng. Tiến trình chính giữ mọi thứ chạm ra ngoài — mạng, ổ đĩa, hệ điều hành, tiến trình con; giao diện không chạm gì trực tiếp.</p>
-
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Tầng</th><th>Đường dẫn</th><th>Giữ việc gì</th></tr></thead>
-          <tbody>
-            <tr><td>Tiến trình chính</td><td><code>src/main/</code></td><td>4 nguồn nhạc, dò lời, phụ đề, whisper.cpp + Claude API, nhật ký</td></tr>
-            <tr><td>Cầu nối</td><td><code>src/preload/</code></td><td>Cầu duy nhất; <code>contextBridge</code>, không lộ Node ra giao diện</td></tr>
-            <tr><td>Giao diện</td><td><code>src/renderer/</code></td><td>Cửa sổ chính + cửa sổ overlay, 5 kho zustand</td></tr>
-            <tr><td>Dùng chung</td><td><code>src/shared/</code></td><td>Kiểu dữ liệu và bảng diễn giải lỗi, cả hai bên đều nhập</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>Vài quyết định đáng ghi lại</h3>
-      <ul>
-        <li><strong>Giao thức <code>media://</code> tự viết</strong> — file nhạc trong máy không đọc thẳng bằng <code>file://</code> được, và thẻ <code>&lt;audio&gt;</code> cần HTTP Range để tua. Tự xử lý 206/416/404.</li>
-        <li><strong>Chèn <code>Referer</code></strong> — CDN của Zing và NhacCuaTui từ chối yêu cầu không có Referer, mà thẻ <code>&lt;audio&gt;</code> thì không tự gửi được.</li>
-        <li><strong>Lấy màu chủ đạo của ảnh bìa ở tiến trình chính</strong> — làm ở giao diện thì vướng CORS với CDN ảnh.</li>
-      </ul>
-    </section>
-
-    <section id="tungphan">
-      <h2><span class="num">5</span>Từng phần, và giới hạn đã đo được</h2>
-
-      <h3>5.1 · Nguồn nhạc online</h3>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Nguồn</th><th>Tìm</th><th>Phát</th><th>Lời</th><th>Ghi chú</th></tr></thead>
-          <tbody>
-            <tr><td>Zing MP3</td><td class="yes">✔</td><td class="yes">✔</td><td class="yes">✔</td><td>API nội bộ. Chữ ký HMAC-SHA512 trên <code>path + sha256(tham số đã sắp)</code> — và <strong>chỉ ký một số tham số nhất định</strong>, ký hết là hỏng</td></tr>
-            <tr><td>NhacCuaTui</td><td class="yes">✔</td><td class="yes">✔</td><td class="yes">✔</td><td>API nội bộ tại <code>graph.nhaccuatui.com</code>. Lời <strong>mã hoá RC4</strong>, khoá nằm trong <code>keyDecryptLyric</code></td></tr>
-            <tr><td>YouTube</td><td class="yes">✔</td><td class="yes">✔</td><td class="yes">✔</td><td>Qua <code>yt-dlp</code>; app tự tải được bản chính thức từ GitHub</td></tr>
-            <tr><td>Spotify</td><td class="yes">✔</td><td class="no">✘</td><td class="no">✘</td><td>Chỉ tra cứu thông tin — Spotify không cho phát ngoài SDK của họ</td></tr>
-            <tr><td>URL / radio</td><td class="no">—</td><td class="yes">✔</td><td class="no">—</td><td>mp3, HLS audio, luồng radio</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Cả Zing và NhacCuaTui đều là API <strong>nội bộ</strong>, không có cam kết nào. Hôm nay chạy, mai họ đổi là hỏng. Đây là mặt dễ vỡ nhất của app.</p>
-
-      <h3>5.2 · Khung lời nổi</h3>
-      <p>Trong suốt, không viền, <code>alwaysOnTop('screen-saver')</code> nên nằm trên cả taskbar. Chỉnh được cỡ chữ, font, màu chữ, màu và độ dày viền chữ (để đọc được trên nền sáng), độ mờ nền, số dòng phụ trước/sau, canh lề, hiện hay ẩn khi tạm dừng. Bật “click xuyên qua” thì chuột đi thẳng xuống cửa sổ bên dưới — khung chỉ còn để nhìn.</p>
-
-      <h3>5.3 · Căn mốc thời gian bằng AI, chạy trên máy</h3>
-      <p>Lời không có mốc thì không chạy theo nhạc được. Lyra dùng <strong>whisper.cpp</strong> nghe lại bài hát rồi khớp bản nghe được với lời có sẵn. Đã đo trên bài có đáp án chuẩn:</p>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Cách khớp từ</th><th>Sai số trung vị</th></tr></thead>
-          <tbody>
-            <tr><td>Chỉ khớp từ giống hệt</td><td class="num">4,2 giây</td></tr>
-            <tr class="picked"><td>Cho lệch 1 ký tự, từ ≥ 3 chữ<span class="pick-tag">đang dùng</span></td><td class="num">2,0 giây</td></tr>
-            <tr><td>Cho lệch 1 ký tự, từ ≥ 2 chữ</td><td class="num">5,6 giây</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Model: <code>tiny</code> 74 MB · <code>base</code> 141 MB (mặc định) · <code>small</code> 465 MB. Một bài 4 phút mất khoảng 110 giây với <code>base</code>.</p>
-
-      <h3>5.4 · Phụ đề cho video</h3>
-      <p>Video dài hơn 8 phút thì Lyra hiểu đó không phải bài hát và đi tìm phụ đề trước. Đọc được <code>.srt</code>, <code>.vtt</code>, <code>.ass</code>. Ba cái bẫy của YouTube, đều đã kiểm chứng trên video thật:</p>
-      <ol>
-        <li>Khi một ngôn ngữ <strong>đã có bản người đăng tải lên</strong>, YouTube trả lại chính bản đó ở ô <code>automatic_captions</code> — nghĩa là với video kiểu ấy <strong>không có đường nào tới bản máy tự nghe</strong>.</li>
-        <li>Có kênh tải lên “phụ đề” chỉ gồm đúng một dòng quảng cáo. Cộng với (1) thì bí thật — nên Lyra <strong>từ chối hẳn</strong>: dưới 3 dòng, hoặc dưới một dòng mỗi 3 phút, thì coi như không có. Hiện một dòng “nhớ like và đăng ký” suốt 16 phút còn tệ hơn không hiện gì.</li>
-        <li>URL <code>vtt</code> của bản máy tự nghe trả về một <strong>playlist HLS</strong>, không phải phụ đề.</li>
-      </ol>
-      <p>Vì thế Lyra <strong>đọc metadata để quyết định</strong> nhưng <strong>giao cho yt-dlp tải</strong> — gọi thẳng URL bằng <code>fetch</code> thì Google trả 429 rất nhanh.</p>
-
-      <h3>5.5 · Tải nhạc</h3>
-      <p>Tải chất lượng cao nhất nguồn cho, ghi tag (tên bài, nghệ sĩ, album, ảnh bìa) và ghi kèm file <code>.lrc</code> cạnh file nhạc. Mặc định vào <code>Music/Lyra</code>.</p>
-      <div class="callout">
-        <b>Lưu ý pháp lý.</b> Tải từ Zing, NhacCuaTui hay YouTube là vi phạm điều khoản dịch vụ của họ. Sao chép cho mục đích cá nhân ở Việt Nam là vùng xám về pháp lý. Bạn đã biết và vẫn muốn có tính năng này — ghi lại đây để sau này không ai quên.
-      </div>
-
-      <h3>5.6 · Hệ thống ghi nhận lỗi</h3>
-      <p>Ba lớp, không lớp nào để lọt:</p>
-      <ol>
-        <li><strong>Bọc toàn bộ IPC.</strong> Cả 51 kênh đều đi qua một lớp bọc chung, nên không thể quên kênh nào. Lỗi được ghi nhật ký, đổi thành câu tiếng Việt, rồi mới trả về giao diện. Preload bóc luôn tiền tố <code>Error invoking remote method '…'</code> mà Electron tự dán vào.</li>
-        <li><strong>Lưới cấp tiến trình.</strong> <code>uncaughtException</code> và <code>unhandledRejection</code> ở tiến trình chính; <code>error</code> và <code>unhandledrejection</code> ở cả hai cửa sổ; <code>render-process-gone</code> tự tải lại cửa sổ. Mặc định của Electron là sập không một lời giải thích.</li>
-        <li><strong>Bảng diễn giải.</strong> <code>ENOENT</code> không giúp được ai. Bảng này đổi mọi lỗi hay gặp — mất mạng, 429, hết ổ đĩa, thiếu quyền, thiếu yt-dlp, sai khoá API — thành một câu nói rõ chuyện gì <strong>và nên làm gì</strong>. 18 phép kiểm tra riêng cho bảng này, trong đó có một phép bảo đảm không chuỗi kỹ thuật nào lọt ra màn hình.</li>
-      </ol>
-      <p>Nơi lỗi hiện ra: toast bốn mức ở góc trên phải, và <strong>Cài đặt → Nhật ký</strong> — xem ngay trong app, bấm từng dòng để mở chi tiết kỹ thuật, chép được cả nhật ký, mở được thư mục file. File nằm ở <code>%APPDATA%/Lyra/logs/</code>, một file mỗi ngày, giữ 7 ngày, tối đa 5 MB.</p>
-      <p>Việc chạy nền có cơ chế riêng vì không có ai đang đứng đợi: cầu SMTC chết thì tự dựng lại 3 lần rồi mới chịu thua và báo; bị YouTube chặn 429 thì nói rõ là tạm thời và sẽ tự hết.</p>
-
-      <h3>5.7 · Logo động</h3>
-      <p>Cùng một hình với logo Lyra — chính là dấu hiệu đang cử động ở đầu trang này — dùng ở mọi trạng thái chờ thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp nhau: <strong>cặp nốt lắc quanh dấu xà</strong> như đang bắt nhịp, <strong>thanh lời chạy từ trái sang</strong> như một dòng lyric đang hiện dần. Máy đặt giảm chuyển động thì bỏ hết phần lắc và xoay, chỉ giữ một nhịp thở rất chậm — im hoàn toàn thì người dùng tưởng app treo.</p>
-    </section>
-
-    <section id="kiemchung">
-      <h2><span class="num">6</span>Kiểm chứng</h2>
-      <p>133 phép kiểm tra, chạy bằng <code>npm test</code>, đều đạt.</p>
-      <div class="table-scroll">
-        <table>
-          <thead><tr><th>Bộ</th><th>Số phép</th><th>Kiểm cái gì</th></tr></thead>
-          <tbody>
-            <tr><td><code>test-lrc</code></td><td class="num">11</td><td>Đọc và ghi <code>.lrc</code></td></tr>
-            <tr><td><code>test-align</code></td><td class="num">14</td><td>Thuật toán căn mốc</td></tr>
-            <tr><td><code>test-identify</code></td><td class="num">14</td><td>Bóc tên bài khỏi chuỗi thô Windows đưa ra</td></tr>
-            <tr><td><code>test-subtitles</code></td><td class="num">13</td><td>Đọc <code>.srt</code> / <code>.vtt</code> / <code>.ass</code></td></tr>
-            <tr><td><code>test-errors</code></td><td class="num">18</td><td>Bảng diễn giải lỗi</td></tr>
-            <tr><td><code>test-protocol</code></td><td class="num">6</td><td>Giao thức <code>media://</code> và HTTP Range</td></tr>
-            <tr><td><code>test-playback</code></td><td class="num">15</td><td>Phát nhạc, hàng đợi, danh sách phát — chạy app thật</td></tr>
-            <tr><td><code>test-smtc</code></td><td class="num">10</td><td>Đọc nhạc app khác — chạy app thật</td></tr>
-            <tr><td><code>test-error-ui</code></td><td class="num">14</td><td>Hệ thống báo lỗi và logo động — chạy app thật</td></tr>
-            <tr><td><code>test-translate</code></td><td class="num">17</td><td>Đường dịch lời</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>Các bộ “chạy app thật” mở Lyra lên và điều khiển qua Chrome DevTools Protocol, không giả lập gì cả. Ngoài ra còn vài kịch bản cần mạng nên không nằm trong <code>npm test</code> — trong đó <code>test-subs-live</code> mở Edge phát một video YouTube thật rồi xem Lyra có nhận ra và dò được lời không.</p>
-    </section>
-
-    <section id="gioihan">
-      <h2><span class="num">7</span>Giới hạn đã biết</h2>
-      <ul class="limits">
-        <li><b>Lyra không hiện trong khay media của Windows</b>Nhạc do chính Lyra phát không xuất hiện ở ô điều khiển media của hệ điều hành. Giới hạn của Electron; đã thử ba cờ Chromium khác nhau, không cờ nào ăn, đã gỡ hết.</li>
-        <li><b>Zing và NhacCuaTui là API nội bộ</b>Không có cam kết. Họ đổi là hỏng.</li>
-        <li><b>Spotify chỉ tra cứu được thông tin</b>Không phát được.</li>
-        <li><b>Căn mốc bằng AI sai trung vị 2 giây</b>Đủ để lời chạy đúng đoạn, không đủ để hát karaoke theo từng chữ.</li>
-        <li><b>Chất lượng bản dịch chưa kiểm chứng</b>Máy này không có khoá API Anthropic; đường đi đã thử bằng máy chủ giả, còn chất lượng chữ nghĩa thì chưa ai đọc.</li>
-        <li><b>Model <code>small</code> chưa đo được độ chính xác</b>Mỗi lần chạy quá lâu.</li>
-        <li><b>Chỉ chạy trên Windows</b>Phần đọc nhạc app khác dựa vào SMTC, là thứ riêng của Windows.</li>
-      </ul>
-    </section>
-
-    <section id="chaythu">
-      <h2><span class="num">8</span>Chạy thử</h2>
+src/shared/  Kiểu dùng chung + bảng diễn giải lỗi (cả hai bên đều nhập)</code></pre>
+<p>Vài quyết định đáng ghi lại, kèm lý do:</p>
+<ul><li><strong>Giao thức <code>media://</code> tự viết</strong> (<code>main/protocol.ts</code>) — file nhạc trong máy không đọc thẳng bằng <code>file://</code> được, và thẻ <code>&lt;audio&gt;</code> cần hỗ trợ HTTP Range để tua. Tự xử lý 206/416/404.</li><li><strong>Chèn <code>Referer</code></strong> (<code>webRequest.onBeforeSendHeaders</code>) — CDN của Zing và NCT từ chối yêu cầu không có Referer, mà thẻ <code>&lt;audio&gt;</code> thì không tự gửi được.</li><li><strong>Lấy màu chủ đạo của ảnh bìa ở tiến trình chính</strong> (<code>main/artwork.ts</code>) — làm ở giao diện thì vướng CORS với CDN ảnh. Dùng <code>nativeImage</code>.</li><li><strong>Cầu PowerShell cho SMTC</strong> — WinRT không gọi thẳng từ Node được. Một tiến trình chạy dài, mỗi nhịp in một dòng JSON.</li></ul>
+<hr>
+<h2 id="5-tung-phan-va-gioi-han-da-do-duoc">5. Từng phần, và giới hạn đã đo được</h2>
+<h3 id="5-1-nguon-nhac-online">5.1 Nguồn nhạc online</h3>
+<table><thead><tr><th>Nguồn</th><th>Tìm</th><th>Phát</th><th>Lời</th><th>Ghi chú</th></tr></thead><tbody><tr><td>Zing MP3</td><td>✔</td><td>✔</td><td>✔</td><td>API nội bộ. Chữ ký HMAC-SHA512 trên <code>path + sha256(tham số đã sắp)</code> — và <strong>chỉ ký một số tham số nhất định</strong>, ký hết là hỏng</td></tr><tr><td>NhacCuaTui</td><td>✔</td><td>✔</td><td>✔</td><td>API nội bộ tại <code>graph.nhaccuatui.com</code>. Lời <strong>mã hoá RC4</strong>, khoá nằm trong <code>keyDecryptLyric</code></td></tr><tr><td>YouTube</td><td>✔</td><td>✔</td><td>✔</td><td>Qua <code>yt-dlp</code>; app tự tải được bản chính thức từ GitHub</td></tr><tr><td>Spotify</td><td>✔</td><td>✘</td><td>✘</td><td>Chỉ tra cứu thông tin — Spotify không cho phát ngoài SDK của họ</td></tr><tr><td>URL / radio</td><td>—</td><td>✔</td><td>—</td><td>mp3, HLS audio, luồng radio</td></tr></tbody></table>
+<p>Cả Zing và NhacCuaTui đều là API <strong>nội bộ</strong>, không có cam kết nào. Hôm nay chạy, mai họ đổi là hỏng. Đây là mặt dễ vỡ nhất của app.</p>
+<h3 id="5-2-khung-loi-noi">5.2 Khung lời nổi</h3>
+<p>Trong suốt, không viền, <code>alwaysOnTop('screen-saver')</code> nên nằm trên cả taskbar. Chỉnh được: cỡ chữ, font, màu chữ, màu viền và độ dày viền (để đọc được trên nền sáng), độ mờ nền, số dòng phụ trước/sau, canh lề, hiện hay ẩn khi tạm dừng.</p>
+<p>Bật "click xuyên qua" thì chuột đi thẳng xuống cửa sổ bên dưới (<code>setIgnoreMouseEvents(true, { forward: true })</code>) — khung chỉ còn để nhìn.</p>
+<h3 id="5-3-can-moc-thoi-gian-bang-ai-chay-tren-may">5.3 Căn mốc thời gian bằng AI (chạy trên máy)</h3>
+<p>Lời không có mốc thời gian thì không chạy theo nhạc được. Lyra dùng <strong>whisper.cpp</strong> nghe lại bài hát rồi khớp bản nghe được với lời có sẵn (LCS + nội suy tuyến tính + khớp từ gần đúng).</p>
+<p>Đã đo trên bài có đáp án chuẩn:</p>
+<table><thead><tr><th>Cách khớp từ</th><th>Sai số trung vị</th></tr></thead><tbody><tr><td>Chỉ khớp từ giống hệt</td><td>4,2 giây</td></tr><tr><td>Cho lệch 1 ký tự, từ ≥ 3 chữ</td><td><strong>2,0 giây</strong> ← đang dùng</td></tr><tr><td>Cho lệch 1 ký tự, từ ≥ 2 chữ</td><td>5,6 giây (tệ hơn)</td></tr></tbody></table>
+<p>Model: <code>tiny</code> 74 MB · <code>base</code> 141 MB (mặc định) · <code>small</code> 465 MB. Một bài 4 phút mất khoảng 110 giây với <code>base</code>.</p>
+<p>Hai cái bẫy đã gặp và đã xử lý: <code>whisper-cli</code> thoát mã 2 khi đường dẫn có dấu tiếng Việt (phải chép sang tên ASCII trước); và <code>-ml 1 -sow</code> chậm đến mức không dùng được (hơn 12 phút cho một bài) nên dùng cách chia đoạn mặc định rồi nội suy thời điểm từng từ trong đoạn.</p>
+<h3 id="5-4-phu-de-cho-video">5.4 Phụ đề cho video</h3>
+<p>Video dài hơn 8 phút thì Lyra hiểu đó không phải bài hát và đi tìm phụ đề trước. Đọc được <code>.srt</code>, <code>.vtt</code>, <code>.ass</code>.</p>
+<p>Ba cái bẫy của YouTube, đều đã kiểm chứng trên video thật:</p>
+<ol><li>Khi một ngôn ngữ <strong>đã có bản người đăng tải lên</strong>, YouTube trả lại chính bản đó ở ô <code>automatic_captions</code> — nghĩa là với video kiểu ấy <strong>không có đường nào tới bản máy tự nghe</strong>.</li><li>Có kênh tải lên "phụ đề" chỉ gồm đúng một dòng quảng cáo. Cộng với (1) thì bí thật — nên Lyra <strong>từ chối hẳn</strong>: dưới 3 dòng, hoặc dưới một dòng mỗi 3 phút, thì coi như không có. Hiện một dòng "nhớ like và đăng ký" suốt 16 phút còn tệ hơn không hiện gì.</li><li>URL <code>vtt</code> của bản máy tự nghe trả về một <strong>playlist HLS</strong>, không phải phụ đề.</li></ol>
+<p>Vì thế Lyra <strong>đọc metadata để quyết định</strong> nhưng <strong>giao cho yt-dlp tải</strong> — gọi thẳng URL bằng <code>fetch</code> thì Google trả 429 rất nhanh.</p>
+<h3 id="5-5-tai-nhac">5.5 Tải nhạc</h3>
+<p>Tải chất lượng cao nhất nguồn cho, ghi tag (tên bài, nghệ sĩ, album, ảnh bìa) và ghi kèm file <code>.lrc</code> cạnh file nhạc. Mặc định vào <code>Music/Lyra</code>.</p>
+<blockquote><p>⚠️ Tải từ Zing, NhacCuaTui hay YouTube là vi phạm điều khoản dịch vụ của họ. Sao chép cho mục đích cá nhân ở Việt Nam là vùng xám về pháp lý. Bạn đã biết và vẫn muốn có tính năng này — ghi lại đây để sau này không ai quên.</p></blockquote>
+<h3 id="5-6-he-thong-ghi-nhan-loi">5.6 Hệ thống ghi nhận lỗi</h3>
+<p>Ba lớp, không lớp nào để lọt:</p>
+<ol><li><strong>Bọc toàn bộ IPC.</strong> Cả 51 kênh đều đi qua một lớp bọc chung (<code>main/ipc.ts</code>), nên không thể quên kênh nào. Lỗi được ghi nhật ký, đổi thành câu tiếng Việt, rồi mới trả về giao diện. Preload bóc luôn tiền tố <code>Error invoking remote method '...'</code> mà Electron tự dán vào.</li><li><strong>Lưới cấp tiến trình.</strong> <code>uncaughtException</code> và <code>unhandledRejection</code> ở tiến trình chính; <code>error</code> và <code>unhandledrejection</code> ở cả hai cửa sổ giao diện; <code>render-process-gone</code> tự tải lại cửa sổ. Mặc định của Electron là sập không một lời giải thích.</li><li><strong>Bảng diễn giải</strong> (<code>shared/errors.ts</code>). <code>ENOENT</code> không giúp được ai. Bảng này đổi mọi lỗi hay gặp — mất mạng, 429, hết ổ đĩa, thiếu quyền, thiếu yt-dlp, sai khoá API — thành một câu nói rõ chuyện gì <strong>và nên làm gì</strong>. Có 18 phép kiểm tra riêng cho bảng này, trong đó có một phép bảo đảm không chuỗi kỹ thuật nào lọt ra màn hình.</li></ol>
+<p>Nơi lỗi hiện ra: toast bốn mức (thông tin / xong việc / cảnh báo / lỗi) ở góc trên phải; và <strong>Cài đặt → Nhật ký</strong>, xem được ngay trong app, bấm vào từng dòng để mở chi tiết kỹ thuật, chép được cả nhật ký, mở được thư mục file. File nhật ký nằm ở <code>%APPDATA%/Lyra/logs/</code>, một file mỗi ngày, giữ 7 ngày, tối đa 5 MB.</p>
+<p>Việc chạy nền có cơ chế riêng vì không có ai đang đứng đợi: cầu SMTC chết thì tự dựng lại 3 lần rồi mới chịu thua và báo; bị YouTube chặn 429 thì nói rõ là tạm thời và sẽ tự hết.</p>
+<h3 id="5-7-logo-dong">5.7 Logo động</h3>
+<p>Cùng một hình với logo Lyra, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp nhau: <strong>cặp nốt lắc quanh dấu xà</strong> như đang bắt nhịp, <strong>thanh lời chạy từ trái sang</strong> như một dòng lyric đang hiện dần. Bản <code>block</code> (dùng ở màn hình khởi động) có thêm một vệt sáng chạy vòng quanh.</p>
+<p>Máy đặt giảm chuyển động (<code>prefers-reduced-motion</code>) thì bỏ hết phần lắc và xoay, chỉ giữ một nhịp thở rất chậm — im hoàn toàn thì người dùng tưởng app treo.</p>
+<hr>
+<h2 id="6-kiem-chung">6. Kiểm chứng</h2>
+<p>133 phép kiểm tra, chạy bằng <code>npm test</code>, đều đạt.</p>
+<table><thead><tr><th>Bộ</th><th>Số phép</th><th>Kiểm cái gì</th></tr></thead><tbody><tr><td><code>test-lrc</code></td><td>11</td><td>Đọc và ghi <code>.lrc</code></td></tr><tr><td><code>test-align</code></td><td>14</td><td>Thuật toán căn mốc</td></tr><tr><td><code>test-identify</code></td><td>14</td><td>Bóc tên bài khỏi chuỗi thô Windows đưa ra</td></tr><tr><td><code>test-subtitles</code></td><td>13</td><td>Đọc <code>.srt</code> / <code>.vtt</code> / <code>.ass</code></td></tr><tr><td><code>test-errors</code></td><td>18</td><td>Bảng diễn giải lỗi</td></tr><tr><td><code>test-protocol</code></td><td>6</td><td>Giao thức <code>media://</code> và HTTP Range</td></tr><tr><td><code>test-playback</code></td><td>15</td><td>Phát nhạc, hàng đợi, danh sách phát — chạy app thật</td></tr><tr><td><code>test-smtc</code></td><td>10</td><td>Đọc nhạc app khác — chạy app thật</td></tr><tr><td><code>test-error-ui</code></td><td>14</td><td>Toàn hệ thống báo lỗi và logo động — chạy app thật</td></tr><tr><td><code>test-translate</code></td><td>17</td><td>Đường dịch lời</td></tr></tbody></table>
+<p>Các bộ "chạy app thật" mở Lyra lên và điều khiển qua Chrome DevTools Protocol, không giả lập gì cả.</p>
+<p>Ngoài ra còn vài kịch bản cần mạng nên không nằm trong <code>npm test</code>: <code>test:subs</code> (phụ đề thật từ YouTube), <code>test:download</code>, <code>test:external</code>, <code>test:whisper</code>, và <code>test-subs-live.mjs</code> — bộ này mở Edge phát một video YouTube thật rồi xem Lyra có nhận ra và dò được lời không.</p>
+<hr>
+<h2 id="7-gioi-han-da-biet">7. Giới hạn đã biết</h2>
+<ul><li><strong>Lyra không hiện trong khay media của Windows.</strong> Nhạc do chính Lyra phát không xuất hiện ở ô điều khiển media của hệ điều hành. Đây là giới hạn của Electron; đã thử ba cờ Chromium khác nhau, không cờ nào ăn, đã gỡ hết.</li><li><strong>Zing và NhacCuaTui là API nội bộ.</strong> Không có cam kết. Họ đổi là hỏng.</li><li><strong>Spotify chỉ tra cứu được thông tin</strong>, không phát được.</li><li><strong>Căn mốc bằng AI sai trung vị 2 giây.</strong> Đủ để lời chạy đúng đoạn, không đủ để hát karaoke theo từng chữ.</li><li><strong>Chất lượng bản dịch chưa kiểm chứng.</strong> Máy này không có khoá API Anthropic; đường đi đã thử bằng máy chủ giả, còn chất lượng chữ nghĩa thì chưa ai đọc.</li><li><strong>Model <code>small</code> chưa đo được độ chính xác</strong> — mỗi lần chạy quá lâu.</li><li><strong>Chỉ chạy trên Windows.</strong> Phần đọc nhạc app khác dựa vào SMTC, là thứ riêng của Windows.</li></ul>
+<hr>
+<h2 id="8-chay-thu">8. Chạy thử</h2>
 <pre><code>npm install
 npm run dev        # chạy chế độ phát triển
 npm test           # 133 phép kiểm tra
 npm run typecheck
 npm run dist       # đóng gói bản cài Windows</code></pre>
-      <p>Đường dẫn dữ liệu: <code>%APPDATA%/Lyra/</code> — cài đặt, danh sách phát, bộ nhớ đệm lời, nhật ký, và <code>bin/</code> chứa yt-dlp cùng model Whisper tải về.</p>
-    </section>
-
-    <footer>
-      Bản trong repo: <code>docs/tai-lieu-app.md</code>
-    </footer>
-  </main>
+<p>Đường dẫn dữ liệu: <code>%APPDATA%/Lyra/</code> — cài đặt, danh sách phát, bộ nhớ đệm lời, nhật ký, và <code>bin/</code> chứa yt-dlp cùng model Whisper tải về.</p>
+<footer>Bản trong repo: <code>docs/tai-lieu-app.md</code> · Dựng lại bằng <code>node scripts/make-docs.mjs</code></footer>
+</main>
 </div>
 </body>
 </html>
