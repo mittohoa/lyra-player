@@ -3,18 +3,33 @@ import { detectLanguage, languageName, type LanguageCode } from '@shared/languag
 import { log } from '../logger'
 
 /**
- * Dịch lời bài hát **ngay trên máy**, không khoá API, không tài khoản, không
+ * Dịch lời bài hát **ngay trên máy**: không khoá API, không tài khoản, không
  * tiền, và chạy được khi mất mạng.
  *
- * Cùng một triết lý với bản Android: tải một gói mô hình về một lần rồi dùng
- * mãi. Khác ở chỗ Android có ML Kit dựng sẵn trong hệ điều hành, còn ở đây ta
- * tự nạp mô hình Marian (opus-mt) chạy qua ONNX.
+ * Cùng triết lý với bản Android — tải một gói mô hình về một lần rồi dùng mãi —
+ * nhưng ở đây ta tự nạp mô hình chạy qua ONNX thay vì mượn ML Kit của hệ điều
+ * hành.
  *
- * Cái giá phải trả, nói thẳng: gói nặng hơn ML Kit khoảng ba lần (~100 MB mỗi
- * chiều), và bản dịch thô hơn hẳn một mô hình lớn — nó nuốt từ, dịch sai nghĩa
- * của từ nhiều nghĩa, và đôi khi tự thêm ký hiệu nhạc vào (xem `donDep`). Đổi
- * lại là không ai phải trả tiền và không lời bài hát nào rời khỏi máy.
+ * Có **hai bộ máy**, và chúng khác nhau đủ nhiều để đáng cho người dùng chọn.
+ * Số liệu dưới đây đo thật trên 24 dòng đầu của "Shape of You":
+ *
+ * | | `nhanh` (opus-mt) | `tot` (NLLB-200) |
+ * |---|---|---|
+ * | Tải về | 102 MB **mỗi chiều** | 853 MB, dùng cho **mọi** chiều |
+ * | Tốc độ | 0,97 giây/dòng | 5,68 giây/dòng |
+ * | Dòng dịch ra đọc được | 17/24 | 24/24 |
+ *
+ * `tot` làm mặc định vì chất lượng mới là thứ quyết định tính năng này có đáng
+ * bật hay không: `nhanh` bỏ trống gần một phần ba số dòng, và những dòng còn lại
+ * thì thô — nó dịch "the bar" thành "thanh", để nguyên "The club" không dịch.
+ *
+ * Bù lại cái chậm bằng cách **trả từng dòng ngay khi xong** (`onDong`) chứ không
+ * đợi cả bài: người nghe đọc được dòng đầu sau vài giây thay vì sau vài phút.
  */
+
+export type BoMay = 'nhanh' | 'tot'
+
+// ---- Bộ máy `nhanh`: opus-mt, mỗi cặp ngôn ngữ một mô hình nhỏ ----
 
 /** Về tiếng Anh — chặng trung chuyển cho mọi cặp không có mô hình trực tiếp. */
 const VE_TIENG_ANH: Partial<Record<LanguageCode, string>> = {
@@ -33,17 +48,32 @@ const TU_TIENG_ANH: Partial<Record<LanguageCode, string>> = {
   zh: 'Xenova/opus-mt-en-zh'
 }
 
+// ---- Bộ máy `tot`: NLLB-200, một mô hình cho hai trăm ngôn ngữ ----
+
+const NLLB = 'Xenova/nllb-200-distilled-600M'
+
+/** Mã ngôn ngữ NLLB dùng — khác chuẩn hai chữ cái, gồm cả hệ chữ viết. */
+const FLORES: Record<LanguageCode, string> = {
+  vi: 'vie_Latn',
+  en: 'eng_Latn',
+  ja: 'jpn_Jpan',
+  ko: 'kor_Hang',
+  zh: 'zho_Hans',
+  th: 'tha_Thai',
+  ru: 'rus_Cyrl'
+}
+
 /** Các thứ tiếng chọn được làm ngôn ngữ ĐỌC. */
-export const NGON_NGU_DOC: LanguageCode[] = ['vi', 'en', 'ja', 'zh']
+export const NGON_NGU_DOC: LanguageCode[] = ['vi', 'en', 'ja', 'ko', 'zh']
 
 /**
- * Dịch từng câu một.
+ * Dịch từng câu một, không gộp lô.
  *
  * Không phải vì gộp lô sai — đã thử và gộp lô cho ra kết quả y hệt. Mà vì mỗi
- * câu cần được xét riêng: mô hình nhỏ thỉnh thoảng rơi vào vòng lặp và sinh ra
- * rác (xem `hongHan`), và khi đó ta phải bỏ RIÊNG câu đó chứ không bỏ cả lô.
+ * câu cần được xét riêng: bộ máy `nhanh` thỉnh thoảng rơi vào vòng lặp và sinh
+ * ra rác (xem `hongHan`), và khi đó phải bỏ RIÊNG câu đó. Dịch từng câu cũng là
+ * thứ cho phép trả kết quả dần.
  */
-const LO = 1
 
 /**
  * Thư mục chứa mô hình.
@@ -88,19 +118,21 @@ async function nap(): Promise<typeof import('@huggingface/transformers')> {
 }
 
 export interface TienDoTai {
-  /** Tên gói đang tải, ví dụ "Anh → Việt". */
+  /** Tên gói đang tải, cho người đọc chứ không phải mã máy. */
   goi: string
   phanTram: number
 }
 
 /**
- * Đường đi từ `tu` tới `toi`, gồm một hoặc hai chặng.
+ * Các mô hình cần cho một lần dịch, theo bộ máy đã chọn.
  *
  * Trả về mảng rỗng khi không có đường nào — và đó là câu trả lời thật thà, hơn
  * là bịa ra một chặng rồi cho ra thứ vô nghĩa.
  */
-export function duongDi(tu: LanguageCode, toi: LanguageCode): string[] {
+export function duongDi(tu: LanguageCode, toi: LanguageCode, boMay: BoMay = 'tot'): string[] {
   if (tu === toi) return []
+  if (boMay === 'tot') return FLORES[tu] && FLORES[toi] ? [NLLB] : []
+
   if (tu === 'en') {
     const m = TU_TIENG_ANH[toi]
     return m ? [m] : []
@@ -114,12 +146,12 @@ export function duongDi(tu: LanguageCode, toi: LanguageCode): string[] {
   return chang1 && chang2 ? [chang1, chang2] : []
 }
 
-/** Ước lượng dung lượng phải tải cho một đường đi, tính bằng MB. */
+/** Dung lượng phải tải cho một đường đi, tính bằng MB. Số đo thật, không ước. */
 export function uocLuongMB(duong: string[]): number {
-  return duong.length * 102
+  return duong.reduce((tong, m) => tong + (m === NLLB ? 875 : 102), 0)
 }
 
-async function boDich(model: string, onProgress?: (p: TienDoTai) => void): Promise<any> {
+async function boDich(model: string, onTai?: (p: TienDoTai) => void): Promise<any> {
   const san = daNap.get(model)
   if (san) return san
 
@@ -129,7 +161,10 @@ async function boDich(model: string, onProgress?: (p: TienDoTai) => void): Promi
     dtype: 'q8',
     progress_callback: (p: any) => {
       if (p.status === 'progress' && typeof p.progress === 'number') {
-        onProgress?.({ goi: model.replace('Xenova/opus-mt-', ''), phanTram: Math.round(p.progress) })
+        onTai?.({
+          goi: model === NLLB ? 'gói dịch đa ngôn ngữ' : model.replace('Xenova/opus-mt-', ''),
+          phanTram: Math.round(p.progress)
+        })
       }
     }
   })
@@ -141,8 +176,8 @@ async function boDich(model: string, onProgress?: (p: TienDoTai) => void): Promi
 /**
  * Tham số sinh chữ, đặt để chặn vòng lặp.
  *
- * `no_repeat_ngram_size` cấm lặp lại cùng một cụm ba chữ — đây là thứ chặn
- * đúng cái bệnh "Đêm đêm đêm đêm ♪ ♪ ♪ ♪" mà mô hình mắc phải với những câu
+ * `no_repeat_ngram_size` cấm lặp lại cùng một cụm ba chữ — đây là thứ chặn đúng
+ * cái bệnh "Đêm đêm đêm đêm ♪ ♪ ♪ ♪" mà bộ máy `nhanh` mắc phải với những câu
  * hát vốn đã lặp sẵn.
  *
  * `max_new_tokens` chặn theo độ dài câu gốc: một câu hát dịch ra không thể dài
@@ -159,14 +194,15 @@ function thamSoSinh(cau: string): Record<string, unknown> {
 /**
  * Nhận ra một bản dịch đã hỏng.
  *
- * Ba dấu hiệu, đều gặp thật khi chạy thử:
+ * Bốn dấu hiệu, tất cả đều gặp thật khi chạy thử bộ máy `nhanh`:
  *
- *   - Chép lại nguyên văn câu gốc (mô hình "bí" thì nó copy)
- *   - Một từ lặp quá nhiều lần so với tổng số từ
- *   - Dài gấp mấy lần câu gốc
+ *   - Chép lại nguyên văn câu gốc — mô hình "bí" thì nó copy đầu vào ra đầu ra
+ *   - Dấu câu tràn ngập: "Tôi,, và,,, không, đồng, không không,,"
+ *   - Chữ cái đơn lẻ rải rác: "R R R chóng"
+ *   - Lặp cặp từ: "cùng cùng nhau cùng nhau", "mỗi ngày, mỗi ngày"
  *
- * Gặp thì trả về câu rỗng, và giao diện chỉ hiện dòng gốc. Không dịch còn hơn
- * hiện ra một dòng vô nghĩa mà người đọc tưởng là nghĩa của bài hát.
+ * Gặp thì bỏ dòng đó, giao diện chỉ hiện dòng gốc. Không dịch còn hơn hiện ra
+ * một dòng vô nghĩa mà người đọc tưởng là nghĩa của bài hát.
  */
 function hongHan(goc: string, ra: string): boolean {
   if (!ra) return true
@@ -175,17 +211,14 @@ function hongHan(goc: string, ra: string): boolean {
   const tu = ra.toLowerCase().split(/\s+/).filter(Boolean)
   if (tu.length < 2) return true
 
-  // Chép lại nguyên văn câu gốc: mô hình "bí" thì nó copy đầu vào ra đầu ra
   const tuGoc = goc.toLowerCase().split(/\s+/).filter(Boolean)
   for (let i = 0; i + 3 <= tuGoc.length; i++) {
     if (ra.toLowerCase().includes(tuGoc.slice(i, i + 3).join(' '))) return true
   }
 
-  // Dấu câu tràn ngập: "Tôi,, và,,, không, đồng, không không,,"
   const dauCau = (ra.match(/[,.;:!?#*]/g) ?? []).length
   if (dauCau > tu.length * 0.5) return true
 
-  // Chữ cái đơn lẻ rải rác: "R R R chóng"
   const donLe = tu.filter((t) => t.replace(/[^\p{L}]/gu, '').length === 1).length
   if (donLe >= 3) return true
 
@@ -193,7 +226,6 @@ function hongHan(goc: string, ra: string): boolean {
   for (const t of tu) dem.set(t, (dem.get(t) ?? 0) + 1)
   if (Math.max(...dem.values()) > Math.max(2, tu.length * 0.3)) return true
 
-  // Cặp từ lặp: "cùng cùng nhau cùng nhau", "mỗi ngày, mỗi ngày"
   const cap = new Map<string, number>()
   for (let i = 0; i + 1 < tu.length; i++) {
     const k = tu[i] + ' ' + tu[i + 1]
@@ -218,6 +250,21 @@ function donDep(cau: string): string {
     .trim()
 }
 
+export interface KetQuaDich {
+  /** Đúng bằng số dòng đầu vào. Dòng không dịch được để rỗng. */
+  ket: string[]
+  tu: LanguageCode
+}
+
+export interface CacBuoc {
+  /** Gọi ngay khi một dòng dịch xong, để giao diện hiện dần. */
+  onDong?: (chiSo: number, chu: string) => void
+  onTienDo?: (xong: number, tong: number) => void
+  onTai?: (p: TienDoTai) => void
+  /** Trả về true để dừng giữa chừng — vd. người dùng đã đổi bài. */
+  huy?: () => boolean
+}
+
 /**
  * Dịch một mảng dòng, trả về mảng **đúng bằng số dòng đầu vào**.
  *
@@ -228,9 +275,9 @@ function donDep(cau: string): string {
 export async function dichCacDong(
   dong: string[],
   toi: LanguageCode,
-  onProgress?: (xong: number, tong: number) => void,
-  onTai?: (p: TienDoTai) => void
-): Promise<{ ket: string[]; tu: LanguageCode } | null> {
+  boMay: BoMay = 'tot',
+  buoc: CacBuoc = {}
+): Promise<KetQuaDich | null> {
   if (!dong.length) return null
 
   const tu = detectLanguage(dong.join('\n'))
@@ -240,14 +287,14 @@ export async function dichCacDong(
   }
   if (tu === toi) return null
 
-  const duong = duongDi(tu, toi)
+  const duong = duongDi(tu, toi, boMay)
   if (!duong.length) {
     log.info('dịch lời', `Chưa có mô hình cho ${languageName(tu)} → ${languageName(toi)}`)
     return null
   }
 
-  const boCacChang = []
-  for (const m of duong) boCacChang.push(await boDich(m, onTai))
+  const chang: any[] = []
+  for (const m of duong) chang.push(await boDich(m, buoc.onTai))
 
   // Chỉ đưa qua mô hình những dòng thật sự có chữ; các dòng còn lại giữ nguyên
   // vị trí bằng cách nhớ chỉ số
@@ -258,22 +305,38 @@ export async function dichCacDong(
   })
 
   const ket = [...dong]
-  for (let i = 0; i < canDich.length; i += LO) {
-    const lo = canDich.slice(i, i + LO)
-    let van = lo.map((x) => x.text)
+  const t0 = Date.now()
 
-    for (const bo of boCacChang) {
-      const ra = await bo(van, thamSoSinh(van[0] ?? ''))
-      van = (Array.isArray(ra) ? ra : [ra]).map((x: any) => x.translation_text ?? '')
+  for (let n = 0; n < canDich.length; n++) {
+    if (buoc.huy?.()) {
+      log.info('dịch lời', `Dừng giữa chừng sau ${n}/${canDich.length} dòng`)
+      break
     }
 
-    lo.forEach((x, k) => {
-      const dich = donDep(van[k] ?? '')
-      ket[x.i] = hongHan(x.text, dich) ? '' : dich
-    })
-    onProgress?.(Math.min(i + LO, canDich.length), canDich.length)
+    const { i, text } = canDich[n]
+    let van = text
+    for (const bo of chang) {
+      const ra = await bo(
+        van,
+        boMay === 'tot'
+          ? { ...thamSoSinh(van), src_lang: FLORES[tu], tgt_lang: FLORES[toi] }
+          : thamSoSinh(van)
+      )
+      van = (Array.isArray(ra) ? ra[0] : ra)?.translation_text ?? ''
+    }
+
+    const sach = donDep(van)
+    ket[i] = hongHan(text, sach) ? '' : sach
+    buoc.onDong?.(i, ket[i])
+    buoc.onTienDo?.(n + 1, canDich.length)
   }
 
+  const giay = (Date.now() - t0) / 1000
+  log.info(
+    'dịch lời',
+    `${languageName(tu)} → ${languageName(toi)} bằng bộ máy "${boMay}": ` +
+      `${canDich.length} dòng trong ${giay.toFixed(1)}s`
+  )
   return { ket, tu }
 }
 

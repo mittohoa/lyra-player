@@ -6,6 +6,27 @@ directories:
 files:
   - out/**
   - package.json
+
+  # Bộ chạy ONNX (dùng cho dịch lời) mang theo bản nhị phân của MỌI hệ điều
+  # hành và MỌI kiến trúc — hơn 200 MB, mà bộ cài Windows x64 chỉ dùng đúng hai
+  # file trong số đó. Không lọc thì người dùng tải về một đống thứ không bao giờ
+  # chạy được trên máy họ.
+  - '!node_modules/onnxruntime-node/bin/napi-v6/darwin/**'
+  - '!node_modules/onnxruntime-node/bin/napi-v6/linux/**'
+  - '!node_modules/onnxruntime-node/bin/napi-v6/win32/arm64/**'
+
+  # DirectML là bộ tăng tốc bằng GPU. Lyra dịch trên CPU, nên ba file này (38 MB)
+  # chỉ nằm đó chiếm chỗ.
+  - '!node_modules/onnxruntime-node/bin/napi-v6/win32/x64/DirectML.dll'
+  - '!node_modules/onnxruntime-node/bin/napi-v6/win32/x64/dxcompiler.dll'
+  - '!node_modules/onnxruntime-node/bin/napi-v6/win32/x64/dxil.dll'
+
+  # Bản chạy trong trình duyệt (WASM) — 130 MB, và tiến trình chính không dùng
+  - '!node_modules/onnxruntime-web/**'
+
+# Bản nhị phân gốc không nạp được từ trong file nén asar, phải để ngoài
+asarUnpack:
+  - node_modules/onnxruntime-node/**
 extraResources:
   - from: resources/icon.png
     to: icon.png

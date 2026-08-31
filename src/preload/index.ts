@@ -176,8 +176,6 @@ const api = {
         IPC.aiTranslateProgress,
         handler
       ),
-
-    checkKey: (): Promise<{ ok: boolean; error?: string }> => invoke(IPC.aiCheckKey)
   },
 
   /** Mau chu dao cua anh bia - de nen app doi mau theo bai dang phat. */

@@ -35,25 +35,30 @@ async function chay() {
 
   try {
     // ---- 1. Chon duong di ----
-    check('Anh -> Viet di thang mot chang', duongDi('en', 'vi').length === 1)
+    check('bo may nhanh: Anh -> Viet di thang mot chang', duongDi('en', 'vi', 'nhanh').length === 1)
     check(
       'Han -> Viet phai vong qua tieng Anh',
-      duongDi('ko', 'vi').length === 2,
-      duongDi('ko', 'vi')
+      duongDi('ko', 'vi', 'nhanh').length === 2,
+      duongDi('ko', 'vi', 'nhanh')
         .map((m) => m.replace('Xenova/opus-mt-', ''))
         .join(' → ')
     )
-    check('cung mot thu tieng thi khong co duong nao', duongDi('vi', 'vi').length === 0)
+    check('cung mot thu tieng thi khong co duong nao', duongDi('vi', 'vi', 'nhanh').length === 0)
     check(
       'Anh -> Han: chua co mo hinh, tra ve rong chu khong bia',
-      duongDi('en', 'ko').length === 0
+      duongDi('en', 'ko', 'nhanh').length === 0
     )
     check(
       'uoc luong dung luong theo so chang',
-      uocLuongMB(duongDi('ko', 'vi')) === 204,
-      uocLuongMB(duongDi('ko', 'vi')) + ' MB'
+      uocLuongMB(duongDi('ko', 'vi', 'nhanh')) === 204,
+      uocLuongMB(duongDi('ko', 'vi', 'nhanh')) + ' MB'
     )
-    check('bon ngon ngu doc', NGON_NGU_DOC.length === 4, NGON_NGU_DOC.join(', '))
+    check('nam ngon ngu doc', NGON_NGU_DOC.length === 5, NGON_NGU_DOC.join(', '))
+
+    // Bo may tot: mot mo hinh lo moi cap, ke ca Anh -> Han von khong co o bo nhanh
+    check('bo may tot: Han -> Viet chi mot mo hinh', duongDi('ko', 'vi', 'tot').length === 1)
+    check('bo may tot: Anh -> Han lam duoc', duongDi('en', 'ko', 'tot').length === 1)
+    check('bo may tot: 875 MB cho moi chieu', uocLuongMB(duongDi('en', 'vi', 'tot')) === 875)
 
     // ---- 2. Dich that ----
     const dong = [
@@ -66,7 +71,10 @@ async function chay() {
 
     console.log('\n  … nap mo hinh (lan dau se tai ve, cho mot chut)\n')
     const t0 = Date.now()
-    const ra = await dichCacDong(dong, 'vi')
+    const hienDan = []
+    const ra = await dichCacDong(dong, 'vi', 'nhanh', {
+      onDong: (i) => hienDan.push(i)
+    })
     const giay = ((Date.now() - t0) / 1000).toFixed(1)
 
     check('co tra ve ket qua', !!ra)
@@ -85,6 +93,11 @@ async function chay() {
         JSON.stringify(ra.ket[0])
       )
       check('cau dau da thanh tieng Viet', /[àáảãạăâêôơưđ]/i.test(ra.ket[0]))
+      check(
+        'tra ket qua dan tung dong chu khong doi ca bai',
+        hienDan.length === 3,
+        hienDan.length + ' lan goi'
+      )
 
       console.log('\n  Ban dich:')
       dong.forEach((d, i) => {
@@ -97,7 +110,8 @@ async function chay() {
     // ---- 3. Loi da dung thu tieng thi khong dich ----
     const viet = await dichCacDong(
       ['Nhà tôi có treo một lá cờ', 'Đỏ thắm những câu chuyện xưa'],
-      'vi'
+      'vi',
+      'nhanh'
     )
     check('loi tieng Viet, doc tieng Viet -> khong dich gi ca', viet === null)
   } catch (err) {

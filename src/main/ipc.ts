@@ -352,12 +352,6 @@ export function registerIpc(): void {
     getCachedTranslation(trackId, lang ?? getSettings().translateTo)
   )
 
-  ipc.handle(IPC.aiCheckKey, async () => {
-    // Nap muon: chi keo SDK vao khi nguoi dung bam kiem tra khoa
-    const { checkApiKey } = await import('./ai/translate')
-    return checkApiKey()
-  })
-
   // ---- Lyric cho bai dang phat o app khac -------------------------------
   ipc.handle(
     IPC.lyricsForExternal,

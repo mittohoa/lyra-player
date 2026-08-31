@@ -15,7 +15,7 @@ const DEFAULTS: AppSettings = {
   ytDlpPath: '',
   ffmpegPath: '',
   spotify: { clientId: '', clientSecret: '' },
-  anthropicApiKey: '',
+  translateEngine: 'tot',
   translateTo: 'vi',
   whisperModel: 'base',
   whisperLanguage: 'auto',
