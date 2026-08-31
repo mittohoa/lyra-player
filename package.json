@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "description": "Trinh nghe nhac offline + online cho Windows, kem lyric noi trong suot",
   "main": "./out/main/index.js",
-  "author": "hoadu",
+  "author": "mittohoa",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -52,5 +52,10 @@
     "esbuild@0.28.2": true,
     "electron-winstaller@5.4.0": true
   },
-  "productName": "Lyra"
+  "productName": "Lyra",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mittohoa/lyra-player.git"
+  },
+  "homepage": "https://mittohoa.github.io/lyra-player/"
 }

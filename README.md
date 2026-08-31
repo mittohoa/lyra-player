@@ -27,7 +27,7 @@ Các lệnh khác:
 | `npm run build` | Build 3 bundle (main / preload / renderer) vào `out/` |
 | `npm run dist` | Đóng gói installer NSIS + bản portable vào `release/` |
 | `npm run typecheck` | Kiểm tra kiểu cả hai phía |
-| `npm test` | 73 test. Gồm test đơn vị (parse `.lrc`, thuật toán căn mốc), test scheme `media://`, và test đầu-cuối bật app thật qua CDP: quét thư viện → phát ra tiếng → lyric chạy → playlist → bắt được nhạc từ app khác → đường đi dịch lyric |
+| `npm test` | Bộ kiểm tra đầy đủ. Gồm test đơn vị (parse `.lrc`, thuật toán căn mốc), test scheme `media://`, và test đầu-cuối bật app thật qua CDP: quét thư viện → phát ra tiếng → lyric chạy → playlist → bắt được nhạc từ app khác |
 | `npm run test:download` | Tải thật một bài từ NCT và Zing rồi kiểm tra file, tag, ảnh bìa, `.lrc` (cần mạng) |
 | `npm run test:whisper` | Đo độ chính xác căn mốc: tải bài có `.lrc` chuẩn làm đáp án, bóc timestamp đi, bắt AI dựng lại rồi so sai số (cần mạng, mất vài phút) |
 | `npm run tune:align` | Chạy Whisper một lần rồi thử nhiều biến thể thuật toán căn chỉnh trên cùng dữ liệu |
@@ -139,13 +139,18 @@ rõ, hay tiếng Anh sẽ tốt hơn.
 Chi phí: một bài 4 phút mất khoảng **7 phút** với model `base` (mớm lời làm nó chậm hơn ~4 lần
 nhưng đổi lại sai số giảm 8 lần — đáng). Chạy `npm run tune:align` để tự đo lại trên bài của bạn.
 
-### Dịch lyric bằng AI
-Nút 🌐 trong bảng lời bài hát dịch toàn bộ lyric và hiện bản dịch **ngay dưới mỗi dòng**, cả trong
-app lẫn trên khung lyric nổi. Bản dịch được lưu lại nên chỉ tốn tiền gọi API một lần cho mỗi bài.
+### Dịch lyric
 
-Cần khoá API Anthropic của bạn (Cài đặt → Dịch lyric). **Lời bài hát được gửi đi; file nhạc thì
-không.** Dùng `claude-opus-5` với structured output nên số dòng dịch luôn khớp số dòng gốc — nếu
-mô hình trả lệch, app tự căn lại để overlay không bị trượt dòng.
+Nút 🌐 trong bảng lời bài hát dịch toàn bộ lyric và hiện bản dịch **ngay dưới mỗi dòng**, cả trong
+app lẫn trên khung lyric nổi. Bản dịch được lưu lại nên chỉ phải dịch một lần cho mỗi bài.
+
+**Chạy hoàn toàn trên máy** — không khoá API, không tài khoản, không tốn tiền, dùng được cả khi mất
+mạng, và lời bài hát không rời khỏi máy. Hai bộ máy chọn được trong Cài đặt: bản chất lượng
+(NLLB-200, một gói dùng cho mọi ngôn ngữ) và bản nhanh nhẹ (opus-mt, mỗi chiều một gói nhỏ). Gói
+ngôn ngữ tải một lần rồi dùng mãi.
+
+Bản dịch hiện dần từng dòng ngay khi xong chứ không đợi cả bài. Dòng nào máy dịch hỏng thì để trống
+và hiện dòng gốc — không dịch còn hơn hiện một câu vô nghĩa mà người đọc tưởng là nghĩa của bài hát.
 
 ### Playlist
 - Tạo / đổi tên / xoá playlist ngay ở thanh bên.

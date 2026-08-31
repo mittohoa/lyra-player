@@ -79,17 +79,17 @@ Lyra hiện đang là **hai sản phẩm nằm chung một cửa sổ**:
 
 | Phần | File chính | Đánh giá |
 |---|---|---|
-| Thư viện nhạc trong máy | `main/library.ts`, `components/LibraryView.tsx` | Bạn nói *"chủ yếu nghe online"* — phần này ít dùng nhất |
+| Thư viện nhạc trong máy | `main/library.ts`, `components/LibraryView.tsx` | Ít dùng nhất khi người nghe chủ yếu nghe online |
 | Danh sách phát | `store/playlists.ts`, `components/PlaylistView.tsx` | Đi kèm thư viện, cùng mức ít dùng |
 | Hàng đợi, trộn bài, lặp | `store/player.ts`, `components/QueuePanel.tsx` | Cần, một khi đã tự phát nhạc |
 | Tìm và phát online (4 nguồn) | `main/sources/` | Nhiều mã nhất, dễ hỏng nhất — API nội bộ của Zing/NCT có thể đổi bất cứ lúc nào |
 | Tải nhạc về máy | `main/download.ts` | Sản phẩm thứ ba nếu xét cho kỹ |
 
 **Nhận định thẳng:** sản phẩm B nặng hơn sản phẩm A về khối lượng mã, nhưng nhẹ
-hơn hẳn về lý do tồn tại. Bạn đã có Zing và YouTube để nghe nhạc; cái không ai
-làm thay được là sản phẩm A.
+hơn hẳn về lý do tồn tại. Zing và YouTube đã làm tốt việc nghe nhạc; cái không
+ai làm thay được là sản phẩm A.
 
-Ba hướng, tuỳ bạn chọn — tôi **không** tự cắt gì cả:
+Ba hướng, chưa chọn hướng nào:
 
 1. **Giữ nguyên.** Mọi thứ đang chạy và có kiểm tra tự động. Cái giá là mỗi lần
    Zing hay NCT đổi API thì phải đi sửa.
@@ -218,9 +218,10 @@ thẳng URL bằng `fetch` thì Google trả 429 rất nhanh.
 Tải chất lượng cao nhất nguồn cho, ghi tag (tên bài, nghệ sĩ, album, ảnh bìa) và
 ghi kèm file `.lrc` cạnh file nhạc. Mặc định vào `Music/Lyra`.
 
-> ⚠️ Tải từ Zing, NhacCuaTui hay YouTube là vi phạm điều khoản dịch vụ của họ.
-> Sao chép cho mục đích cá nhân ở Việt Nam là vùng xám về pháp lý. Bạn đã biết và
-> vẫn muốn có tính năng này — ghi lại đây để sau này không ai quên.
+> ⚠️ Tải nội dung từ Zing, NhacCuaTui hay YouTube vi phạm điều khoản dịch vụ của
+> họ, và sao chép cho mục đích cá nhân ở Việt Nam là vùng xám về pháp lý. Vì vậy
+> tính năng này **chỉ có ở bản cài tay**, không có ở bản phát hành qua cửa hàng
+> ứng dụng — chính sách của các cửa hàng cấm thẳng.
 
 ### 5.6 Hệ thống ghi nhận lỗi
 
