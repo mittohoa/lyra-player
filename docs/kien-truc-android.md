@@ -1,376 +1,516 @@
 # Lyra cho Android — kiến trúc
 
-> Phạm vi: **chỉ sản phẩm A** — công cụ lời cho cả máy. Không phát nhạc, không
-> thư viện, không tải nhạc. Xem `docs/tai-lieu-app.md` phần 3 để biết vì sao.
+> Phạm vi: **công cụ lời cho cả máy, cộng một trình nghe nhạc đầy đủ.** Đọc bài
+> đang phát ở app khác và hiện lời nổi; tự tìm, tự phát, tự tải nhạc; thư viện
+> trong máy; danh sách phát; dịch lời ngay trên máy.
 >
-> Stack: Kotlin thuần · minSdk 26 (Android 8) · coroutines + StateFlow ·
-> Compose cho màn hình cài đặt, View thuần cho khung nổi.
+> Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 34 · coroutines +
+> StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho
+> phần phát · ML Kit cho phần dịch.
+>
+> **Hai biến thể phát hành, một mã nguồn** — xem §11.
+
+Tài liệu này thay thế bản phác thảo trước. Bản đó ghi *"chỉ sản phẩm A — không
+phát nhạc, không thư viện, không tải nhạc"*, và điều đó **không còn đúng**: từ
+đó tới nay app đã đi qua chín mốc và trở thành cả hai sản phẩm.
 
 ---
 
-## 1. Vì sao Android hợp hơn Windows
+## 1. Hai vai của cùng một app
 
-Ba điều, và điều thứ ba mới là điều đáng nói:
+Lyra làm hai việc, và ranh giới giữa chúng chạy xuyên qua gần như mọi phần:
+
+**Vai đồng hành** — nhạc phát ở Spotify, YouTube, Zing MP3, NhacCuaTui. Lyra chỉ
+đọc xem đang phát gì rồi hiện lời nổi đè lên. Đây là vai không ai làm thay được.
+
+**Vai trình phát** — Lyra tự tìm, tự phát. Lúc đó nó **sở hữu đồng hồ phát**, và
+đó không phải chi tiết nhỏ: toàn bộ chuyện lời chạy lệch chỉ tồn tại ở vai thứ
+nhất.
+
+Hai vai gặp nhau ở một chỗ duy nhất — `Lyra.now` (§3). Mọi thứ phía sau đó
+(tìm lời, dịch, khung nổi, thẻ màn hình khoá) không biết nhạc đang đến từ đâu.
+
+### Vì sao vai đồng hành trên Android tốt hơn hẳn trên Windows
 
 1. **Nguồn dữ liệu tốt hơn.** `MediaSessionManager` trả về nghệ sĩ, tên bài,
-   album, ảnh bìa, vị trí, trạng thái và cả tên app nguồn — ở các trường
-   **riêng biệt**. Trên Windows ta chỉ có một chuỗi thô, phải đoán.
+   album, ảnh bìa, vị trí, trạng thái và tên app nguồn — ở các trường **riêng
+   biệt**. Trên Windows chỉ có một chuỗi thô, phải đoán.
 2. **Đẩy thay vì hỏi.** Đăng ký `MediaController.Callback` là hệ thống tự gọi
    lại khi có gì đổi. Bản Windows phải nuôi một tiến trình PowerShell hỏi liên
    tục 2 lần/giây.
-3. **Cái giới hạn khó chịu nhất biến mất.** Trên Windows, Lyra không vào được ô
-   media của hệ điều hành — nhưng vì Lyra ở đó cũng tự phát nhạc nên nó thành
-   một thiếu sót thấy rõ. Trên Android ta **không phát gì cả**, nên chuyện đó
-   không còn là vấn đề nữa.
+3. **Vào được ô media của hệ điều hành.** Đây là thứ bản Windows không có. Khi
+   Lyra tự phát, nó sở hữu thẻ trên màn hình khoá — và **câu đang hát được đưa
+   thẳng vào đó** (§6).
 
 ---
 
 ## 2. Bản đồ luồng dữ liệu
 
 ```
-Spotify / YouTube Music / Zing / NCT đang phát
-   │
-   ▼
-NotificationListenerService  ← hệ thống tự dựng và giữ sống
-   │  (đây là cái neo của cả app, xem §4)
-   ▼
-MediaSessionWatcher
-   │  msm.getActiveSessions(component)
-   │  + MediaController.Callback cho từng phiên
-   │  → NowPlaying(app, title, artist, album, art, position, isPlaying)
-   ▼
-NowPlayingRepository ── StateFlow<NowPlaying?>
-   │
-   ▼
-LyricsRepository
-   │  1. Identify.candidatesFrom(now)      ← chuyển thẳng từ bản Windows
-   │  2. LRCLIB → Zing → NCT               ← chuyển ý tưởng, viết lại
-   │  3. Chỉ nhận khi tên đủ giống
-   │  → StateFlow<Lyrics>
-   ▼
-OverlayHost ── WindowManager.addView(overlayView, params)
-   │
-   ▼
-OverlayView (View thuần, tự vẽ)
+  ┌─ VAI ĐỒNG HÀNH ────────────┐   ┌─ VAI TRÌNH PHÁT ──────────────┐
+  │ Spotify / YouTube / Zing…  │   │ Catalog: Zing + NCT + MediaStore │
+  │            │               │   │            │                  │
+  │            ▼               │   │            ▼                  │
+  │ NotificationListenerService│   │ Playback ──► LyraPlaybackService │
+  │   (neo của cả app, §4)     │   │              ExoPlayer + MediaSession │
+  │            ▼               │   │            │                  │
+  │  MediaSessionWatcher       │   │  localNow  │                  │
+  │  (BỎ QUA gói của chính ta) │   │            │                  │
+  └────────────┬───────────────┘   └────────────┬──────────────────┘
+               └──────────► Lyra.now ◄──────────┘
+                              │
+              ┌───────────────┼────────────────┐
+              ▼               ▼                ▼
+      LyricsRepository  TranslationRepository  Artwork
+       (§5)              (ML Kit, §7)          (màu nền)
+              │               │
+              └───────┬───────┘
+                      ▼
+     ┌────────────────┼────────────────┐
+     ▼                ▼                ▼
+  OverlayHost    Thẻ media        Trang "Lời"
+  (khung nổi)    (màn hình khoá)  (Compose)
 ```
 
-Vị trí phát là chỗ dễ sai nhất, **y hệt bản Windows**: `PlaybackState` chỉ đưa
-một ảnh chụp kèm mốc thời gian, không phải vị trí lúc này.
-
-```kotlin
-/**
- * Vị trí phát ở thời điểm hiện tại.
- *
- * `position` là ảnh chụp tại `lastPositionUpdateTime`, không phải bây giờ.
- * Không bù phần đã trôi thì lời luôn chạy chậm hơn nhạc vài giây — đúng cái
- * bẫy đã gặp ở bản Windows.
- *
- * `lastPositionUpdateTime` dùng đồng hồ `elapsedRealtime`, không phải
- * `currentTimeMillis` — so nhầm hai thang này ra sai lệch hàng chục năm.
- */
-fun PlaybackState.currentPosition(): Long {
-    if (state != PlaybackState.STATE_PLAYING) return position
-    val drift = SystemClock.elapsedRealtime() - lastPositionUpdateTime
-    return position + (drift * playbackSpeed).toLong()
-}
-```
+Điểm mấu chốt: **`Lyra.now` là hợp lưu**. Lyra đang phát thì Lyra thắng; Lyra
+tạm dừng mà app khác đang phát thì nhường.
 
 ---
 
-## 3. Cấu trúc gói
+## 3. Vòng lặp phải cắt: Lyra đọc chính mình
+
+Đây là lỗi tốn một vòng gỡ nhất trong cả dự án, và nó chỉ xuất hiện sau khi
+Lyra vừa tự phát vừa ghi lời lên thẻ media.
+
+Lyra ghi **câu đang hát** vào phần mô tả phiên media của mình để nó hiện trên
+màn hình khoá. `MediaSessionWatcher` đọc mọi phiên media trên máy — kể cả phiên
+của chính Lyra. Nên câu hát trở thành "tên bài mới", app đi tra lời cho một câu
+hát, kết quả lại ghi đè lên, và vòng tiếp:
 
 ```
-app/src/main/java/com/mittohoa/lyra/
-│
-├── service/
-│   ├── LyraNotificationListener.kt   Neo của cả app — §4
-│   ├── OverlayHost.kt                Dựng, gỡ, cập nhật khung nổi
-│   └── LyraTileService.kt            Ô Quick Settings bật/tắt nhanh
-│
-├── media/
-│   ├── MediaSessionWatcher.kt        Bám các phiên media đang chạy
-│   ├── NowPlaying.kt                 Kiểu dữ liệu + bù vị trí
-│   └── AppLabels.kt                  packageName → tên app đọc được
-│
-├── lyrics/
-│   ├── Identify.kt        ← CHUYỂN THẲNG từ identify.ts (265 dòng)
-│   ├── LrcParser.kt       ← CHUYỂN THẲNG từ lrc.ts (122 dòng)
-│   ├── LyricsRepository.kt           Điều phối nguồn, chấm điểm khớp
-│   └── LyricLine.kt
-│
-├── sources/
-│   ├── LrclibClient.kt
-│   ├── ZingClient.kt                 HMAC-SHA512, xem §6
-│   ├── NctClient.kt                  RC4, xem §6
-│   └── Http.kt                       OkHttp + kotlinx.serialization
-│
-├── overlay/
-│   ├── OverlayView.kt                Tự vẽ, có viền chữ — §5
-│   ├── OverlayParams.kt              LayoutParams theo cài đặt
-│   ├── DragHandler.kt                Kéo thả, khoá vị trí
-│   └── TuneSheet.kt                  Bảng tinh chỉnh font/cỡ/nền
-│
-├── data/
-│   ├── SettingsStore.kt              DataStore Preferences
-│   └── LyricCache.kt                 Room, hoặc file .lrc trong thư mục app
-│
-└── ui/
-    ├── MainActivity.kt               Compose
-    ├── OnboardingScreen.kt           Dẫn qua hai quyền — §7
-    ├── SettingsScreen.kt
-    └── LyricEditorScreen.kt          Sửa lời tay, chỉnh lệch
+Tim loi: 'Nhà Tôi Có Treo Một Lá Cờ — DTAP, Hà Anh Tuấn' - 'Nơi đâu tôi cũng bên mình lá cờ'
 ```
+
+Cách sửa gồm hai nửa, thiếu một nửa là vẫn hỏng:
+
+- `MediaSessionWatcher` **bỏ qua gói của chính mình** (`ownPackage`).
+- Bài Lyra tự phát đi một dòng riêng, `Lyra.localNow`, lấy thẳng từ
+  `Playback.currentTrack` — tên bài, nghệ sĩ, độ dài đều là **bản gốc từ nguồn
+  nhạc**, không đoán từ chuỗi thô. Đọc `player.mediaMetadata` là đọc lại chính
+  kết quả của mình.
+
+Hệ quả tốt: bài Lyra tự phát **không cần `Identify` đoán** gì cả. Cùng một bài,
+qua YouTube sinh 4 phương án và trượt; qua Lyra sinh 2 phương án và trúng ngay
+phương án đầu.
 
 ---
 
 ## 4. Neo của cả app: `NotificationListenerService`
 
-Đây là quyết định kiến trúc quan trọng nhất, và nó ngược với trực giác.
+Không dùng foreground service tự viết. `NotificationListenerService` tự nó là
+một service do hệ thống dựng và giữ sống khi người dùng đã cấp quyền đọc thông
+báo, và nó **sống dai hơn** foreground service của chính ta. Đổi lại được một
+chỗ trú chạy nền mà không phải hiện thông báo thường trực.
 
-Phản xạ thường là dựng một foreground service để chạy nền. **Không cần.**
-`NotificationListenerService` tự nó đã là một service do hệ thống dựng và giữ
-sống khi người dùng đã cấp quyền đọc thông báo. Nó sống dai hơn foreground
-service của chính ta, và **không phải hiện thông báo thường trực** — không phải
-cắm một dòng "Lyra đang chạy" vào thanh thông báo của người dùng suốt ngày.
+Ta **không đọc nội dung thông báo**. Lớp này tồn tại chỉ để hệ thống cho gọi
+`getActiveSessions`.
 
-```kotlin
-/**
- * Neo của cả app.
- *
- * Ta không quan tâm tới thông báo — chỉ cần lớp này tồn tại thì hệ thống mới
- * cho gọi `getActiveSessions`. Đổi lại được luôn một chỗ trú chạy nền mà không
- * phải hiện thông báo thường trực.
- *
- * Hệ thống có thể giết và dựng lại lớp này bất cứ lúc nào, nên mọi trạng thái
- * phải nằm ở singleton bên ngoài, không nằm trong chính nó.
- */
-class LyraNotificationListener : NotificationListenerService() {
+Hệ thống giết và dựng lại lớp này bất cứ lúc nào, nên **mọi trạng thái nằm ở
+`Lyra`** (singleton ngoài service), không nằm trong nó.
 
-    override fun onListenerConnected() {
-        watcher.start(this)
-        overlayHost.attach(this)
-    }
+### Khung nổi phải tự sống lại
 
-    override fun onListenerDisconnected() {
-        watcher.stop()
-        overlayHost.detach()
-    }
+Tiến trình Lyra chỉ được neo bởi service này. Android giết nó khi máy thiếu bộ
+nhớ — mà thời điểm dễ bị giết nhất chính là lúc người dùng đang ở trong app nhạc,
+tức đúng lúc khung lời nổi cần có mặt nhất.
 
-    // Không cần onNotificationPosted — ta đọc phiên media, không đọc thông báo
-}
-```
-
-Manifest:
-
-```xml
-<service
-    android:name=".service.LyraNotificationListener"
-    android:exported="false"
-    android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-    <intent-filter>
-        <action android:name="android.service.notification.NotificationListenerService" />
-    </intent-filter>
-</service>
-```
-
-**Chỉ dựng thêm foreground service khi** cần chắc chắn sống trên máy Xiaomi /
-Oppo / Vivo — hãng nào cũng có bộ diệt nền riêng, hung hơn Android gốc nhiều.
-Để đó làm bước sau, đo trên máy thật rồi hẵng quyết.
+Nên trạng thái "đang bật khung nổi" phải **lưu xuống đĩa**
+(`OverlayPrefs.isEnabled`), và `onListenerConnected` gọi `Lyra.restoreOverlay`.
+Chỉ ghi cờ khi `show()` thành công thật — thiếu quyền vẽ đè thì `show()` lặng lẽ
+không làm gì, và ghi bừa sẽ thành một lần thử dựng khung vô ích mỗi lần hệ thống
+nối lại service.
 
 ---
 
-## 5. Khung lời nổi
+## 5. Tìm lời
 
-### 5.1 Cửa sổ
+Thứ tự các chặng xếp theo **giá phải trả, rẻ trước đắt sau**:
 
-```kotlin
-val params = WindowManager.LayoutParams(
-    WindowManager.LayoutParams.MATCH_PARENT,
-    WindowManager.LayoutParams.WRAP_CONTENT,
-    // API 26+; TYPE_PHONE cũ đã bị chặn
-    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-    // NOT_FOCUSABLE: không cướp bàn phím của app đang dùng
-    // NOT_TOUCH_MODAL: chạm ra ngoài khung thì rơi xuống app bên dưới
-    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-    PixelFormat.TRANSLUCENT
-).apply {
-    gravity = Gravity.TOP or Gravity.START
-    x = settings.x
-    y = settings.y
-}
-```
+1. Lời **tự nhập** — người dùng đã bỏ công gõ thì không một lần tra mạng nào
+   được ghi đè lên.
+2. Bộ nhớ đệm — trả về **ngay**, không qua trạng thái "đang tìm". Nháy một khung
+   trống rồi mới hiện chữ là cảm giác chậm nhất, dù thật ra chỉ tốn vài mili-giây.
+3. Gọi mạng: `candidatesFrom` sinh tối đa 4 phương án, mỗi phương án hỏi **cả ba
+   nguồn cùng lúc**. Hỏi lần lượt thì thời gian chờ là tổng của ba lần gọi.
 
-"Chạm xuyên qua" = thêm `FLAG_NOT_TOUCHABLE`; bỏ cờ đó đi thì kéo thả được lại.
-Đúng vai trò `setIgnoreMouseEvents` bên Windows.
+### `titleSimilarity` — chỗ từng sai và hậu quả
 
-### 5.2 Vẽ chữ
+Bản đầu chia cho tập nhỏ hơn. Nghĩa là tên bài ngắn nằm gọn trong một tên video
+dài sẽ đạt điểm tuyệt đối — và app hiện lời của **tên concert** thay vì tên bài.
+Nay dùng trung bình điều hoà của cả hai chiều phủ (F1), nên cả hai phía đều phải
+giống mới đạt điểm cao.
 
-Dùng **View thuần, tự vẽ** chứ không dùng Compose. Lý do cụ thể: `ComposeView`
-đặt trong cửa sổ của `WindowManager` không có sẵn `ViewTreeLifecycleOwner` và
-`SavedStateRegistryOwner`, phải tự gắn tay — thêm một tầng dễ hỏng mà đổi lại
-chẳng được gì, vì khung nổi chỉ vẽ vài dòng chữ.
+### Mốc thời gian đáng ngờ
 
-Viền chữ làm đúng như bản Windows (`paint-order: stroke fill`): vẽ hai lượt,
-**viền trước, thân chữ sau**. Vẽ ngược lại thì viền ăn lẹm vào nét chữ.
+Tìm đúng **tên** bài không có nghĩa là đúng **bản thu**. Lời của bản thu phòng
+đắp lên một bản hát live thì lệch từ đầu tới cuối. Độ dài bài là manh mối rẻ nhất
+và đáng tin nhất: lệch quá 15 giây thì bật `timingSuspect`, và giao diện chuyển
+sang hiện lời dạng chữ trơn — không tô sáng, không tự cuộn, và nói rõ mốc có thể
+lệch. **Hiện sai một cách tự tin còn tệ hơn hiện thật thà là không chắc.**
 
-```kotlin
-override fun onDraw(canvas: Canvas) {
-    lines.forEachIndexed { i, line ->
-        val y = baselineOf(i)
+### Chạm để căn lại
 
-        if (strokeWidth > 0f) {
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = strokeWidth * 2f  // nửa nét bị thân chữ đè lên
-            paint.color = strokeColor
-            canvas.drawText(line.text, x, y, paint)
-        }
+Chạm vào câu đang nghe — **trên trang Lời hoặc ngay trên khung nổi** — là căn lại
+cả bài. Một cú chạm thay cho hàng chục lần bấm ±0,5 giây.
 
-        paint.style = Paint.Style.FILL
-        paint.color = if (line.isActive) activeColor else dimColor
-        canvas.drawText(line.text, x, y, paint)
-    }
-}
-```
-
-### 5.3 Bảng tinh chỉnh
-
-Font, cỡ chữ, độ trong suốt nền, màu chữ — mặc định đóng, chạm nút mới mở, y
-như bản Windows. Nhưng ở đây là một `BottomSheetDialog` của một Activity trong
-suốt, không nhét vào chính khung nổi: khung nổi phải mỏng và không được cướp
-focus, mà bảng tinh chỉnh thì cần cả hai thứ ngược lại.
+Chạm ngay trên khung nổi là đường sửa **tại chỗ phát hiện ra lỗi**: đang xem
+YouTube, thấy lời lệch, chạm vào câu mình đang nghe là xong — không phải thoát
+app nhạc, mở Lyra, rồi tìm tới trang Lời.
 
 ---
 
-## 6. Phần chuyển từ bản Windows
+## 6. Khung lời nổi và thẻ màn hình khoá
 
-| Chuyển sang | Từ | Dòng | Việc phải làm |
-|---|---|---:|---|
-| `Identify.kt` | `identify.ts` | 265 | Dịch thẳng. Regex tương đương, `Normalizer.normalize(NFD)` thay cho `normalize('NFD')` |
-| `LrcParser.kt` | `lrc.ts` | 122 | Dịch thẳng |
-| Bù vị trí | `smtc.ts` | ~20 | Đổi sang `elapsedRealtime` |
-| `LrclibClient.kt` | `lrclib.ts` | 110 | OkHttp thay `fetch` |
-| `ZingClient.kt` | `zing.ts` | 188 | HMAC: `Mac.getInstance("HmacSHA512")`. **Nhớ: chỉ ký một số tham số nhất định**, ký hết là hỏng |
-| `NctClient.kt` | `nct.ts` | 192 | RC4 tự viết ~20 dòng — đừng dựa vào `Cipher.getInstance("ARCFOUR")`, có máy không có |
-| `LyricsRepository.kt` | `external.ts` | 202 | Bỏ hết nhánh phụ đề |
-| Bảng diễn giải lỗi | `errors.ts` | 77 | Dịch thẳng, đổi mẫu khớp sang lỗi của Android |
+### Cửa sổ
 
-**Bỏ hẳn:** whisper (không lấy được âm thanh của app khác), yt-dlp và mọi thứ
-dựa vào nó (phụ đề, phát và tải YouTube), giao thức `media://`, thanh taskbar.
+`TYPE_APPLICATION_OVERLAY` (API 26+; các kiểu cũ hơn đều đã bị Android chặn), với
+`FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_NO_LIMITS`.
 
-`Identify.kt` là phần đáng giá nhất chuyển sang. Trên Android metadata sạch hơn
-nhiều, nhưng **app YouTube vẫn đưa nguyên tên video** — đúng loại rác mà nó
-sinh ra để bóc.
+View thuần chứ không Compose: `ComposeView` đặt trong cửa sổ của `WindowManager`
+không có sẵn `ViewTreeLifecycleOwner` và `SavedStateRegistryOwner`, phải tự gắn
+tay — thêm một tầng dễ hỏng mà chỗ này chỉ vẽ vài dòng chữ.
 
----
+### Vẽ
 
-## 7. Quyền và luồng dẫn nhập
+Viền trước, thân chữ sau — vẽ ngược lại thì viền ăn lem vào nét chữ. Và vì nửa
+trong của nét viền bị thân chữ đè, phải **nhân đôi** độ dày thì nhìn mới đúng như
+đã đặt.
 
-Hai quyền, cả hai đều phải người dùng tự bật tay trong Cài đặt Android. Không
-có `requestPermissions()` cho loại này — chỉ mở được đúng trang cài đặt rồi chờ.
+Chỉ vẽ lại khi **đổi dòng**, dù nhịp cập nhật là 10 lần/giây. Vẽ lại vô ích mỗi
+100 ms là một đồng hồ đánh thức GPU suốt cả bài hát.
 
-```kotlin
-// 1. Đọc thông báo — không có thì không đọc được nhạc app khác
-val enabled = NotificationManagerCompat
-    .getEnabledListenerPackages(context)
-    .contains(context.packageName)
-startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+Câu dài hơn khung thì **thu chữ lại cho vừa**, không xuống dòng. Xuống dòng làm
+số hàng đổi theo từng câu, khung sẽ phồng lên xẹp xuống suốt bài, và phép đổi
+chạm-thành-số-dòng cũng không còn đúng.
 
-// 2. Vẽ đè lên app khác — không có thì không hiện được lời
-Settings.canDrawOverlays(context)
-startActivity(
-    Intent(
-        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-        Uri.parse("package:${context.packageName}")
-    )
-)
-```
+### Ba đường tắt nhanh, xếp theo mức nhanh
 
-Màn hình dẫn nhập nên nói **vì sao** cần từng quyền bằng đúng một câu, rồi tự
-kiểm lại khi quay về app. Xin hai quyền nhạy cảm mà không giải thích thì người
-ta thoát ngay — đây là hai quyền đáng ngờ nhất trên Android.
+1. **Giữ tay ngay trên khung** — ngón tay đang ở sẵn trên đúng thứ cần tắt. Máy
+   rung một cái báo đã nhận. Ngưỡng dài hơn ngưỡng giữ thông thường 250 ms: tắt
+   nhầm giữa bài khó chịu hơn phải giữ thêm một phần tư giây.
+2. **Ô Quick Settings** — với Android 13+ có nút xin thêm ô bằng một chạm
+   (`requestAddTileService`). Bản cũ hơn thì Android không cho app tự thêm ô, và
+   đúng ra là vậy: bảng đó là chỗ của người dùng.
+3. Nút trong app.
 
-> Google Play soi rất kỹ cả hai quyền này, phải khai báo và biện minh. Cài
-> riêng cho mình thì không vướng gì.
+### Thẻ trên màn hình khoá
 
----
+**Khung nổi không lên được màn hình khoá.** Keyguard nằm ở lớp cửa sổ cao hơn
+`TYPE_APPLICATION_OVERLAY`; không có cờ nào lách được. Đã kiểm chứng bằng ảnh
+chụp lúc khoá máy.
 
-## 8. Ô Quick Settings
+Đường đi được là thẻ media — và nó chỉ mở ra khi **Lyra tự phát**, vì thẻ thuộc
+về app đang phát. Lúc đó câu đang hát được đặt vào **dòng tiêu đề** của thẻ (chỗ
+chữ to nhất), tên bài và nghệ sĩ dồn xuống dòng dưới.
 
-Vuốt xuống, chạm một cái để bật/tắt lời nổi. Gọn hơn hẳn phím tắt của bản
-Windows, và không thể bị app khác chiếm mất — đúng cái vừa xảy ra với
-`Ctrl+Alt+←/→`.
+Ba chi tiết phải đúng, thiếu một là hỏng:
 
-```kotlin
-class LyraTileService : TileService() {
-    override fun onClick() {
-        val on = overlayHost.toggle()
-        qsTile.state = if (on) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
-        qsTile.updateTile()
-    }
-}
-```
+- Dùng `replaceMediaItem`, **không** `setMediaItem`. Cùng một đường dẫn thì
+  ExoPlayer chỉ đổi phần mô tả, không nạp lại. `setMediaItem` là ngắt nhạc một
+  nhịp **mỗi câu hát**.
+- **Tắt đọc thẻ ID3** (`Mp3Extractor.FLAG_DISABLE_ID3_METADATA`). ExoPlayer đọc
+  thẻ ID3 trong file rồi ghi đè lên phần mô tả ta vừa đặt, kể cả khi ta đặt sau —
+  nên cứ vài giây câu hát lại bị kéo ngược về tên bài.
+- **Dòng trống trong .lrc thì giữ nguyên câu vừa hát.** File .lrc nào cũng có
+  dòng trống giữa các đoạn; trả thẻ về tên bài ở đó biến màn hình khoá thành một
+  chỗ nhấp nháy.
 
 ---
 
-## 9. Kiểm chứng
+## 7. Dịch lời — ML Kit trên máy
 
-Bản Windows mạnh là nhờ 171 phép kiểm tra chạy trên app thật. Giữ đúng tinh
-thần đó:
+Không nguồn nào (LRCLIB, Zing, NCT) có sẵn bản dịch — đã dò tận nơi. Nên dịch máy
+là đường duy nhất.
 
-| Tầng | Cách | Kiểm gì |
+Chạy **ngay trên máy**: không khoá API, không quota, không trả tiền, không gửi
+lời bài hát ra ngoài, và chạy được khi mất mạng. Đổi lại bản dịch thô hơn bản
+trên máy chủ — với lời bài hát vốn nhiều ẩn dụ thì càng thô. Nhưng mục tiêu
+không phải một bản dịch đẹp, mà là để người nghe **hiểu nghĩa** câu đang hát.
+
+Thứ tự chặng, cũng rẻ trước đắt sau:
+
+1. Tắt, hoặc không có lời → không làm gì
+2. Đoán ngôn ngữ (trên máy, vài mili-giây, không tải gì)
+3. **Lời đã đúng thứ tiếng người dùng đọc → không làm gì.** Đây là trường hợp
+   thường gặp nhất với người Việt nghe nhạc Việt, và nó không tốn một byte nào
+4. Đã dịch lần trước → lấy trong bộ nhớ đệm
+5. Gói ngôn ngữ có sẵn trên máy → dịch ngay
+6. Chưa có gói → **hỏi người dùng rồi mới tải**
+
+Dịch **từng dòng** chứ không gộp cả bài: gộp thì mô hình tự quyết định xuống dòng
+ở đâu và số dòng trả về không còn khớp — mà khớp dòng mới là thứ ta cần.
+
+Khoá bộ nhớ đệm là **băm của chính nội dung lời** cộng mã ngôn ngữ, không phải
+tên bài. Nhờ vậy không thể có cảnh lời đã đổi nguồn (chia dòng khác) mà bản dịch
+cũ vẫn còn nằm đó và ghép lệch từng dòng.
+
+ML Kit đi **vòng qua tiếng Anh** cho mọi cặp ngôn ngữ, nên dịch Hàn sang Việt cần
+cả hai gói. Đổi lại n ngôn ngữ chỉ tốn n gói chứ không phải n².
+
+---
+
+## 8. Phần trình phát
+
+### Bộ máy
+
+`MediaSessionService` của Media3, không phải foreground service tự viết. Hệ thống
+tự lo thông báo, thẻ màn hình khoá, nút trên tai nghe, ô điều khiển âm thanh.
+
+Giao diện nối vào bằng `MediaController` chứ không giữ thẳng `ExoPlayer`, dù cả
+hai cùng một tiến trình: hệ thống có thể giết và dựng lại service bất cứ lúc nào,
+và `MediaController` tự nối lại được.
+
+Vuốt app khỏi danh sách gần đây mà **đang phát thì giữ nguyên** — vuốt app đi
+không có nghĩa là "dừng nhạc".
+
+### Đường phát lấy muộn
+
+Hàng đợi chứa địa chỉ giả `lyra://<nguồn>/<mã>`; đường phát thật được hỏi **ngay
+trước khi mở byte đầu tiên**, qua `ResolvingDataSource`. Hai lý do:
+
+- Đường phát của cả Zing lẫn NCT **đều có hạn**. Xếp hai chục bài rồi nghe tới
+  bài cuối sau một tiếng thì đường ấy đã chết.
+- Zing phải gọi mạng một lần cho **mỗi** bài. Gọi hai chục lần chỉ để xếp hàng
+  đợi là bắt người dùng trả giá cho những bài chưa chắc nghe tới.
+
+Nhạc trong máy không đi qua đường này — địa chỉ `content://` dùng được ngay.
+
+### Tìm
+
+Zing và NCT được hỏi **cùng lúc** rồi trộn kiểu cài răng lược, không nối đuôi:
+một nguồn trả nhiều kết quả kém mà xếp trước sẽ đẩy hết kết quả tốt của nguồn kia
+xuống dưới màn hình. Nhạc trong máy xếp **trước** cả hai và không tính vào hạn
+mức trộn — không tốn mạng, phát được khi mất sóng, và người dùng đã có nó rồi.
+
+### Thư viện trong máy
+
+Đọc qua `MediaStore`, không tự quét thư mục — Android từ 10 không cho app đi lang
+thang trong bộ nhớ ngoài, và `MediaStore` chỉ cần quyền đọc **nhạc**.
+
+Bộ lọc phải là **bỏ thứ chắc chắn không phải nhạc**, không phải đòi thứ chắc chắn
+là nhạc. `is_music != 0` sai theo một kiểu rất khó thấy: cột đó có thể là `NULL`
+khi máy chưa phân loại xong, mà trong SQL `NULL != 0` không phải "đúng" — nó là
+`NULL`. File vừa chép vào máy sẽ biến mất khỏi thư viện không dấu vết.
+
+### Giao diện
+
+**Sân khấu là một chỗ cắm, không phải khung ảnh.** Hôm nay dựng ảnh bìa vuông;
+có video thì cùng chỗ ấy đổi sang 16:9 và nhận một bề mặt vẽ. Thanh tua, nút bấm,
+hàng đợi quanh nó không biết bên trong là gì. `MediaKind { AUDIO, VIDEO }` đã cắm
+sẵn vào `Track` và `Playable` — ranh giới nhạc/video đi xuyên qua cả app, và sửa
+một ranh giới đã chạy khắp nơi thì đắt hơn nhiều so với khai nó ra từ đầu.
+
+**Thanh tua là cạnh dưới của sân khấu**, không phải một thanh trượt đặt ở đâu đó.
+Kéo thì hiện vị trí *đang kéo* chứ không phải vị trí đang phát.
+
+Màu chủ đạo lấy từ ảnh bìa nhuộm cả màn hình — tính trên **luồng nền**, vì đọc
+điểm ảnh là việc của CPU và làm trong thân composable nghĩa là làm trên luồng
+chính đúng lúc người dùng đang nhìn nhất.
+
+### Hàng đợi và danh sách phát
+
+Hàng đợi là **chỗ làm việc**; danh sách phát là thứ **giữ lại**. Một nút nối hai
+cái đó.
+
+Danh sách phát **không lưu đường phát** (`@Transient`): một danh sách mở lại sau
+một tuần mà mang theo hai chục đường đã chết thì tệ hơn hẳn mang theo không gì
+cả. Khoá là mã riêng chứ không phải tên — được phép trùng tên và đổi tên.
+
+Lưu vào `filesDir` chứ không `cacheDir`: đây là dữ liệu người dùng tự tạo, khác
+hẳn bộ nhớ đệm lời hay bản dịch vốn lúc nào cũng lấy lại được từ mạng.
+
+---
+
+## 9. Tải nhạc — chỉ có ở bản sideload
+
+File đi vào `Music/Lyra/` của bộ nhớ chung, không phải thư mục riêng của app. Tải
+về là để **sở hữu**: gỡ Lyra ra thì nhạc vẫn còn, và mọi trình phát khác đều thấy.
+Không cần quyền ghi — từ Android 10, app được phép chèn file media của chính nó
+vào bộ sưu tập chung. Cờ `is_pending` bật suốt lúc ghi, nên máy sập nguồn giữa
+chừng thì bản ghi treo bị hệ thống dọn.
+
+**Lời nằm trong chính file nhạc**, dạng thẻ ID3v2.3 khung `USLT`. File `.lrc` để
+cạnh sẽ bị bộ nhớ giới hạn từ chối — thư mục `Music/` không nhận file chữ. Nhúng
+vào lại là cách đúng hơn: lời đi theo bài sang mọi trình phát, không riêng Lyra.
+
+Ba lựa chọn trong đó:
+
+- **v2.3 chứ không v2.4** — bản được đọc rộng rãi nhất, kể cả đầu phát cũ và dàn
+  xe hơi.
+- **`USLT` mang cả mốc thời gian**, dù theo chuẩn USLT là lời không mốc. Khung
+  `SYLT` đúng chuẩn cho lời có mốc thì gần như không nơi nào hỗ trợ — đúng chuẩn
+  mà không ai đọc được thì không giúp gì ai.
+- **UTF-16 chứ không Latin-1**, nếu không "Nàng Thơ" thành một chuỗi dấu hỏi.
+
+Thẻ cũ của nguồn bị **bỏ đi**: hai thẻ chồng lên nhau thì trình phát đọc cái đầu
+tiên rồi bỏ cái sau — mà cái sau mới là của ta. Phải đọc 10 byte để biết có thẻ
+hay không, và nếu **không** có thì 10 byte ấy là nhạc thật, phải ghi lại chứ
+không được nuốt.
+
+---
+
+## 10. Quyền
+
+| Quyền | Vì sao | Bắt buộc? |
 |---|---|---|
-| Logic thuần | Unit test JVM, không cần máy ảo | `Identify`, `LrcParser`, bù vị trí, chấm điểm khớp tên — chạy trong mili-giây |
-| Nguồn mạng | Unit test + MockWebServer | Chữ ký Zing, giải mã RC4 của NCT, đọc phản hồi |
-| Bám phiên media | Instrumented + `MediaSession` giả | Dựng một phiên giả rồi đổi trạng thái, xem repository có theo kịp |
-| Khung nổi | Instrumented, chụp màn hình | Vẽ đúng dòng đang hát, viền chữ, chạm xuyên qua |
+| Đọc thông báo | Điều kiện để gọi `getActiveSessions`. Không đọc nội dung thông báo | Có — thiếu là mất vai đồng hành |
+| Vẽ đè lên app khác | Khung lời nổi | Chỉ khi dùng khung nổi |
+| `READ_MEDIA_AUDIO` (33+) | Thư viện trong máy. Xin đúng quyền **nhạc**, không đụng ảnh/video/tài liệu | Chỉ khi dùng thư viện |
+| `FOREGROUND_SERVICE_MEDIA_PLAYBACK` | Phát khi màn hình tắt. Bắt buộc khai từ Android 14 | Có, nếu tự phát |
+| `POST_NOTIFICATIONS` (33+) | Thẻ điều khiển nhạc. Từ chối thì nhạc vẫn phát, chỉ mất thẻ | Không |
+| `INTERNET` | Tra lời, tìm và phát nhạc | Có |
 
-Phần logic thuần chuyển sang cũng nên chuyển **luôn cả bộ kiểm tra** của nó —
-14 phép cho `Identify` và 11 phép cho `LrcParser` đã có sẵn, chỉ dịch cú pháp.
-
----
-
-## 10. Làm theo thứ tự nào
-
-Mỗi mốc tự nó kiểm chứng được, và mốc đầu tiên là mốc rủi ro nhất — làm trước
-để biết sớm nếu có gì chặn.
-
-1. **Đọc được nhạc app khác.** Chỉ một Activity hiện chữ thô. Đi qua trọn vẹn
-   đường quyền khó nhất. *Nếu bước này không xong thì cả dự án không có nghĩa.*
-2. **Khung nổi hiện chữ tĩnh.** Quyền vẽ đè, kéo thả, chạm xuyên qua.
-3. **Nối LRCLIB.** Lần đầu thấy lời chạy theo nhạc thật.
-4. **`Identify` + Zing + NCT.** Chỗ này quyết định tỉ lệ tìm ra lời.
-5. **Bảng tinh chỉnh + ô Quick Settings.** Phần dùng hằng ngày.
-6. **Sửa lời tay, chỉnh lệch, nhớ lại.** Đường cứu khi máy dò sai.
-7. **Dịch lời.** Nếu vẫn muốn.
+Cả ba quyền đầu đều **hỏi đúng lúc cần**, kèm một câu giải thích tại chỗ — không
+dồn vào một màn hình dẫn nhập lúc mở app lần đầu, khi người dùng chưa hiểu vì sao.
 
 ---
 
-## 11. Chỗ có thể vỡ
+## 11. Hai biến thể phát hành
+
+| | `sideload` | `play` |
+|---|---|---|
+| Tải nhạc | Có | **Không có** |
+| Mọi thứ khác | Đầy đủ | Đầy đủ |
+| `applicationId` | `com.mittohoa.lyra_player` | như nhau |
+
+Chính sách Google Play cấm app cho tải nội dung từ dịch vụ phát trực tuyến. Nên
+bản lên Play không mang phần đó.
+
+**Tách bằng bộ mã nguồn, không bằng cờ bật/tắt.** Toàn bộ phần tải nằm trong
+`app/src/sideload/`; bản Play không *tắt* tính năng mà **không mang** tính năng.
+Một cái cờ chạy lúc chạy vẫn để lại toàn bộ mã trong file cài đặt, và người duyệt
+Play mở file ra xem thì thấy. Khác biệt giữa "không dùng" và "không có" là khác
+biệt thật — đã kiểm chứng bằng cách tìm tên lớp trong mã dex:
+
+| Lớp | sideload | play |
+|---|---|---|
+| `download/Id3` | 2 | **0** |
+| `download/Downloader` | 5 | **0** |
+| `download/Downloads` (vỏ) | 3 | 3 |
+| `player/Playback` | 6 | 6 |
+
+Cùng `applicationId`: đây là **một app, hai đường phát hành**. Không cài được cả
+hai cùng lúc, và đúng ra là vậy.
+
+```
+./gradlew assembleSideloadDebug     # cài tay, có tải nhạc
+./gradlew assemblePlayRelease       # lên Play
+./gradlew bundlePlayRelease         # bản gộp, Play giao đúng một kiến trúc CPU
+```
+
+### Cỡ app
+
+`libtranslate_jni.so` của ML Kit nặng **15,6 MB cho mỗi kiến trúc CPU**. Đã bật
+tách gói theo kiến trúc, nên bản phát hành arm64 là **19,8 MB**; Play chỉ giao
+đúng gói máy người dùng cần. Bản gộp cả bốn kiến trúc (69 MB) chỉ là hiện vật
+đóng gói cho ai cài tay.
+
+---
+
+## 12. Cỡ chữ đo từ màn hình
+
+Một con số chốt cứng không thể vừa cho mọi máy. Khung lời nổi là thứ để **liếc
+mắt đọc** trong lúc đang làm việc khác, nên chữ nhỏ quá thì nó vô dụng — mà người
+dùng thường không nghĩ tới việc vào chỉnh, họ chỉ thấy tính năng này dở.
+
+`sp` không lo được việc này: `sp` chỉ lo mật độ điểm ảnh và cỡ chữ hệ thống, tức
+26sp trên máy nào cũng to bằng nhau tính theo xen-ti-met. Nhưng khung nổi chiếm
+trọn bề ngang, nên trên máy gập mở ra cùng cỡ chữ ấy lại hoá bé so với khung.
+
+Nên đo **bề ngang nhỏ nhất** của màn hình (không đổi khi xoay máy) rồi suy ra cỡ
+chữ: 320dp → 25sp, 411dp → 32sp, tối đa 44sp. Cùng một phép đo, cùng một cách
+nghĩ với bản Windows (`@shared/overlay-size.ts`).
+
+Cài đặt đã lưu thì mặc định mới không đụng tới — thay vào đó, khi giá trị đang
+lệch với cỡ đo được, chính con số ấy mọc thêm mũi tên và bấm được: `14 → 32`.
+
+---
+
+## 13. Cấu trúc gói
+
+```
+com.mittohoa.lyra
+├── service/       Lyra (trạng thái chung), LyraNotificationListener, LyraTileService
+├── media/         MediaSessionWatcher, NowPlaying
+├── lyrics/        Identify, LrcParser, Lyrics, LyricsRepository
+├── sources/       Catalog, ZingClient, NctClient, LrclibClient, LocalLibrary, Http, Crypto
+├── player/        LyraPlaybackService, Playback, StreamResolver, Artwork
+├── translate/     OnDeviceTranslator, TranslationRepository, Languages
+├── data/          LyricCache, OffsetStore, ManualLyricStore, OverlayPrefs,
+│                  TranslatePrefs, TranslationCache, PlaylistStore
+├── overlay/       OverlayHost, OverlayView
+├── download/      DownloadResult · Downloads (mỗi biến thể một bản)
+└── ui/            MainActivity, HomeScreen, PlayerPane, SearchPane, Playlists,
+                   LyricEditor, LyraMark
+```
+
+| Gói | File | Dòng |
+|---|---:|---:|
+| `ui` | 8 | 2.849 |
+| `sources` | 9 | 1.119 |
+| `lyrics` | 6 | 977 |
+| `service` | 3 | 721 |
+| `player` | 5 | 625 |
+| `data` | 8 | 596 |
+| `overlay` | 2 | 580 |
+| `download` | 5 | 409 |
+| `translate` | 3 | 390 |
+| `media` | 2 | 227 |
+| **Tổng** | **51** | **~8.500** |
+
+Phần chuyển thẳng từ bản Windows: `Identify` và `LrcParser` (dịch cú pháp, giữ
+nguyên thuật toán và cả bộ kiểm tra), ý tưởng ba nguồn lời, bảng diễn giải lỗi.
+
+---
+
+## 14. Chỗ có thể vỡ
 
 - **Bộ diệt nền của hãng.** Xiaomi, Oppo, Vivo, Samsung — mỗi hãng một kiểu, và
-  hung hơn Android gốc nhiều. Người dùng phải tự cho Lyra vào danh sách miễn
-  trừ. Không có cách nào lách, chỉ có cách hướng dẫn.
-- **App không khai báo metadata tử tế.** Có app chỉ đưa tên bài, không đưa nghệ
-  sĩ. `Identify` đỡ được phần nào nhưng không phải tất cả.
-- **Vài chỗ chặn overlay.** Nội dung có DRM, một số game toàn màn hình.
-- **Zing/NCT có thể kiểm khác trên di động.** User-Agent, khu vực, hoặc bắt
-  buộc dùng app của họ. Phải thử thật rồi mới biết.
-- **Đây là nền tảng thứ hai phải chăm.** Zing hay NCT đổi API là hỏng **cả
-  hai** bản. Nếu làm, nên tách hẳn thành repo riêng và chốt luôn hướng thu về
-  lõi cho bản Windows, để hai bên cùng một hình dạng.
+  hung hơn Android gốc nhiều. Người dùng phải tự cho Lyra vào danh sách miễn trừ.
+  Không có cách nào lách, chỉ có cách hướng dẫn. Bản vá khung nổi tự sống lại
+  (§4) đỡ được phần Android gốc, không đỡ được phần này.
+- **Zing/NCT đổi API.** Hỏng **cả hai** bản Windows và Android. Đây là mặt dễ vỡ
+  nhất, và giờ nó gánh cả phần phát lẫn phần tải chứ không chỉ phần lời.
+- **App không khai báo metadata tử tế.** `Identify` đỡ được phần nào, không phải
+  tất cả — chỉ ở vai đồng hành, vì vai trình phát có tên bài gốc.
+- **Vài chỗ chặn overlay.** Nội dung có DRM, một số game toàn màn hình, và **màn
+  hình khoá** (§6).
+- **Duyệt Play.** Ngay cả bản `play`, việc phát nhạc qua API nội bộ của Zing/NCT
+  vẫn là rủi ro khi duyệt. Đây là rủi ro đã được nêu và đã được chấp nhận có ý
+  thức, không phải điều bị bỏ sót.
 
 ---
 
-## 12. Quy mô thật
+## 15. Đã nghiệm thu tới đâu
+
+Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, `sw411dp`), không phải máy ảo:
 
 | | |
 |---|---|
-| Kotlin viết mới | ~1.500–2.000 dòng |
-| Chuyển từ TypeScript | ~1.000 dòng logic thuần |
-| Bỏ hẳn không mang sang | ~1.200 dòng dính Windows |
-| Rủi ro lớn nhất | Bộ diệt nền của hãng, và Zing/NCT trên di động |
+| Đọc bài từ app khác | Zing MP3, YouTube |
+| Ba nguồn lời | trúng từ lrclib, zing, nct |
+| Khung nổi | nổi trên Play Store, tự sống lại sau khi tiến trình bị giết |
+| Chạm căn lời | trên trang Lời và trên chính khung nổi |
+| Giữ tay để tắt khung | 900 ms → cờ ghi `false`, cửa sổ biến mất |
+| Cỡ chữ theo màn hình | `14 → 32`, một chạm là về đúng cỡ |
+| Dịch lời | giao diện đúng; lời tiếng Việt **không bị đụng tới** |
+| Tự phát | Zing MP3 tự nhường tiếng, lời khớp từng câu |
+| Lời trên thẻ khoá màn hình | chạy đúng từng dòng |
+| Tìm + hàng đợi | 20 kết quả hai nguồn xen kẽ, chuyển bài lấy đường phát đúng lúc |
+| Thư viện trong máy | đọc, phát qua `content://`, tự sang bài kế |
+| Danh sách phát | lưu 20 bài, **còn nguyên sau khi cài đè** |
+| Tải nhạc | file 4,08 MB, `USLT` 42 dòng lời có mốc, `fffb` ngay sau thẻ |
+| Hai biến thể | bản Play không có `Id3`/`Downloader` trong mã dex |
 
-Đây không phải "port". Đây là **app thứ hai dùng chung bộ não** — và bộ não đó
-là phần đã được kiểm chứng kỹ nhất của bản Windows.
+**Chưa nghiệm thu:** đường tải gói ngôn ngữ rồi dịch thật (cần một bài tiếng nước
+ngoài); `targetSdk 36` cho Play (hiện 34, cần cài gói SDK 36); khoá ký thật.
