@@ -1,6 +1,6 @@
 {
   "name": "lyra",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Trinh nghe nhac offline + online cho Windows, kem lyric noi trong suot",
   "main": "./out/main/index.js",
   "author": "hoadu",
