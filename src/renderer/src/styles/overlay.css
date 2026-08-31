@@ -232,6 +232,27 @@ body {
   color: rgba(255, 255, 255, 0.95);
 }
 
+/*
+  Cỡ gợi ý: đứng đúng chỗ con số vẫn đứng, nên nó chỉ là con số ấy mọc thêm mũi
+  tên chứ không phải một nút mới chen vào hàng — bảng chỉnh này hẹp, thêm một ô
+  nữa là vỡ dòng.
+*/
+.ov__tune-suggest {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 6px;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+.ov__tune-suggest:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .ov__tune input[type='range'] {
   flex: 1;
   min-width: 0;

@@ -23,6 +23,7 @@ import { applyThumbar, resetThumbar } from './thumbar'
 import {
   broadcast,
   createMainWindow,
+  resolveOverlayFontSize,
   createOverlayWindow,
   destroyOverlayWindow,
   getMainWindow,
@@ -169,6 +170,15 @@ if (!app.requestSingleInstanceLock()) {
       )
       app.exit(1)
       return
+    }
+
+    // Truoc khi dung bat ky cua so nao: lan dau chay thi co chu khung loi noi
+    // van con la 0 (chua ai chon), phai do man hinh roi chot lai. Lam o day de
+    // man hinh Cai dat mo ra da thay dung con so, khong phai so 0.
+    try {
+      resolveOverlayFontSize()
+    } catch (err) {
+      log.warn('khởi động', 'Không đo được màn hình để chọn cỡ chữ lời nổi', err)
     }
 
     // Bat cung Windows thi thu thang xuong khay, khong chan man hinh luc dang nhap

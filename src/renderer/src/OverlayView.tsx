@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type JSX } from 'react'
 import type { OverlayState } from '@shared/ipc'
 import type { OverlaySettings } from '@shared/types'
+import { suggestOverlayFontSize } from '@shared/overlay-size'
 import { activeLineIndex } from '@/lib/lyrics'
 import {
   IconClose,
@@ -118,6 +119,11 @@ export default function OverlayView(): JSX.Element | null {
   }
 
   if (!settings) return null
+
+  // Do man hinh dang chua CHINH khung noi nay - no co the da bi keo sang man
+  // hinh phu, va co chu hop voi man hinh do moi la co dung.
+  const suggestedFontSize = suggestOverlayFontSize(window.screen.availWidth)
+
   // Đang mở bảng tinh chỉnh thì giữ khung lại: biến mất giữa lúc người dùng
   // đang kéo thanh cỡ chữ vì nhạc vừa tạm dừng thì không còn đường nào chỉnh nữa
   if (!settings.showWhenPaused && !state.isPlaying && !tuning) return null
@@ -314,7 +320,17 @@ export default function OverlayView(): JSX.Element | null {
                 value={settings.fontSize}
                 onChange={(e) => void patch({ fontSize: Number(e.target.value) })}
               />
-              <b>{settings.fontSize}</b>
+              {suggestedFontSize === settings.fontSize ? (
+                <b>{settings.fontSize}</b>
+              ) : (
+                <button
+                  className="ov__tune-suggest"
+                  onClick={() => void patch({ fontSize: suggestedFontSize })}
+                  title={`Cỡ hợp với màn hình này: ${suggestedFontSize}`}
+                >
+                  {settings.fontSize} → {suggestedFontSize}
+                </button>
+              )}
             </div>
           </label>
 
