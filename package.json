@@ -1,6 +1,6 @@
 {
   "name": "lyra",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Trinh nghe nhac offline + online cho Windows, kem lyric noi trong suot",
   "main": "./out/main/index.js",
   "author": "mittohoa",

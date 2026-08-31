@@ -234,7 +234,7 @@
   <div class="khung">
     <h2>Tải về</h2>
     <p class="dan-de">
-      Bản <b>0.1.3</b> — đang thử nghiệm. Chưa có trên Google Play; xem phần ghi
+      Bản <b>0.1.4</b> — đang thử nghiệm. Chưa có trên Google Play; xem phần ghi
       chú bên dưới.
     </p>
 
@@ -248,9 +248,9 @@
           <li>Phụ đề cho video dài</li>
           <li>Thanh điều khiển nhanh ở taskbar</li>
         </ul>
-        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.3/Lyra-0.1.3-windows-setup.exe">Tải bộ cài · 105 MB</a>
+        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.4/Lyra-0.1.4-windows-setup.exe">Tải bộ cài · 105 MB</a>
         <p class="phu-tai">
-          Hoặc <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.3/Lyra-0.1.3-windows-portable.exe">bản chạy thẳng không cần cài</a>.
+          Hoặc <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.4/Lyra-0.1.4-windows-portable.exe">bản chạy thẳng không cần cài</a>.
         </p>
       </div>
 
@@ -263,51 +263,57 @@
           <li>Ô bật/tắt nhanh trong Cài đặt nhanh</li>
           <li>Dịch lời ngay trên máy</li>
         </ul>
-        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.3/Lyra-0.1.3-android-arm64.apk">Tải APK · 20 MB</a>
+        <a class="nut" href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.4/Lyra-0.1.4-android-arm64.apk">Tải APK · 20 MB</a>
         <p class="phu-tai">
           Cài tay: mở file APK rồi cho phép cài từ nguồn này khi Android hỏi.<br>
           Máy đời cũ hoặc máy ảo thì lấy
-          <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.3/Lyra-0.1.3-android-universal.apk">bản mọi kiến trúc</a> (67 MB).
+          <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.4/Lyra-0.1.4-android-universal.apk">bản mọi kiến trúc</a> (67 MB).
         </p>
       </div>
     </div>
 
     <div class="canh-bao" style="border-color:rgba(167,139,250,.3);background:rgba(109,40,217,.08);color:#d9d2ea">
-      <b>Máy báo &ldquo;ứng dụng này yêu cầu quyền truy cập dữ liệu nhạy cảm&rdquo;?</b>
-      Đó là hành vi đúng của máy, không phải lỗi tải file — và <b>cảnh báo đó
-      nói đúng</b>. Nên đọc kỹ chỗ này trước khi bấm tiếp.
+      <b>Google Play Protect chặn không cho cài?</b>
+      Màn hình xanh ghi <i>&ldquo;Đã chặn ứng dụng để bảo vệ thiết bị của bạn&rdquo;</i>,
+      và chỉ có một nút <i>Tôi hiểu</i> — không có đường đi tiếp. Đây là cửa khó
+      nhất, và nó nằm ở Google chứ không phải ở Samsung hay hãng máy nào.
       <br><br>
-      Để biết app nào đang phát bài gì, Android chỉ cho đúng một đường:
-      <code>NotificationListenerService</code>. Đường đó không đọc riêng thông báo
-      nhạc — nó mở ra <b>mọi</b> thông báo trên máy, kể cả tin nhắn ngân hàng và
-      mã OTP. Hệ thống thấy app khai đường này là cảnh báo ngay, bất kể app định
-      làm gì với nó, vì hệ thống không có cách nào biết.
+      <b>Không phải do quyền của Lyra.</b> Chỗ này đã đo hẳn hoi: dựng năm bản
+      APK khác nhau, lần lượt gỡ quyền đọc thông báo, gỡ quyền vẽ đè, gỡ quyền
+      cài đặt — kể cả bản chỉ còn <i>truy cập mạng</i> và <i>đọc nhạc trong
+      máy</i> — cả năm đều bị chặn y hệt. Play Protect chặn vì nó <b>chưa từng
+      thấy app này bao giờ</b>, không phải vì Lyra xin gì. Câu &ldquo;dữ liệu
+      nhạy cảm&rdquo; là chữ mẫu, không phải kết luận về Lyra.
       <br><br>
-      Lyra chỉ lấy <i>tên bài, tên ca sĩ, vị trí phát</i> và bỏ hết phần còn lại;
-      không có nội dung thông báo nào rời khỏi máy bạn. Nhưng đó là lời của người
-      viết app, còn thứ kiểm chứng được thì nằm ở
-      <a href="https://github.com/mittohoa/lyra-android">mã nguồn mở</a> và ở danh
-      sách quyền ngay bên dưới. Không tin thì đừng bật — Lyra vẫn tự phát nhạc và
-      hiện lời cho nhạc của chính nó mà không cần quyền này.
+      <b>Hai cách cài được, đã thử trên máy thật:</b>
       <br><br>
-      <b>Cách cài, theo thứ tự dễ trước:</b>
+      <b>1. Tạm tắt quét Play Protect</b> — cách duy nhất không cần máy tính.
+      Mở <i>CH Play → bấm ảnh đại diện → Play Protect → bánh răng ⚙ →
+      tắt &ldquo;Quét ứng dụng bằng Play Protect&rdquo;</i>. Cài Lyra xong thì
+      <b>bật lại ngay</b> — nó là lớp bảo vệ thật, và tắt vĩnh viễn để cài một
+      app nghe nhạc là cái giá quá đắt.
+      <br><br>
+      <b>2. Cài qua máy tính bằng adb</b> — không phải tắt gì cả. Bật
+      <i>Tuỳ chọn nhà phát triển → Gỡ lỗi USB</i>, cắm dây, rồi chạy:
       <br>
-      1. Có máy tính thì cắm dây rồi <code>adb install Lyra-0.1.3-android-arm64.apk</code>.
-      Đường này đi qua cơ chế cài theo phiên nên né được cả hai lớp chặn bên dưới.
+      <code>adb install Lyra-0.1.4-android-arm64.apk</code>
       <br>
-      2. <b>Samsung</b>: Cài đặt → Bảo mật và quyền riêng tư → <i>Auto Blocker</i>
-      → tắt, rồi cài lại. Máy khác thì bật <i>Cài ứng dụng không rõ nguồn gốc</i>
-      cho trình duyệt hoặc trình quản lý tệp. Play Protect hỏi thì chọn
-      <i>Vẫn cài đặt</i>.
-      <br>
-      3. <b>Sau khi cài</b> — bước hay mắc nhất: Android không cho bật quyền đọc
-      thông báo cho app cài tay. Vào Cài đặt → Ứng dụng → Lyra → dấu <b>⋮</b> góc
-      trên → <i>Cho phép cài đặt bị hạn chế</i>. Mục này <b>chỉ hiện sau khi bạn
-      đã thử bật quyền một lần và bị chặn</b> — chưa thử thì không thấy nó, và đó
-      là chỗ nhiều người tưởng máy mình không có.
+      Đường này Play Protect không soi, vì nó chỉ soi app tải từ internet.
+      <br><br>
+      Trước hai cửa đó còn hai cửa nhẹ hơn, cứ đi tiếp: Android hỏi
+      <i>cho phép cài từ nguồn này</i> thì đồng ý; máy Samsung hiện thêm một
+      cảnh báo có nút <i>Tiếp tục cài đặt</i> thì bấm tiếp.
+      <br><br>
+      <b>Sau khi cài</b>, muốn dùng phần lời cho app nhạc khác thì vào
+      <i>Cài đặt → Ứng dụng → Lyra → ⋮ → Cho phép cài đặt bị hạn chế</i>, rồi
+      mới bật được quyền đọc thông báo. Mục <i>⋮</i> đó chỉ hiện <b>sau khi</b>
+      bạn đã thử bật quyền một lần và bị chặn.
+      <br><br>
+      Không làm gì trong số trên thì Lyra vẫn dùng được như một trình phát nhạc
+      đầy đủ, có lời khớp giờ và dịch — chỉ thiếu phần lời cho nhạc ở app khác.
       <br><br>
       Từ bản 0.1.3, các bản sau Lyra tự tải và tự cài nên chuỗi này chỉ phải làm
-      một lần. Khi Lyra lên Google Play thì không còn bước nào.
+      một lần.
     </div>
 
     <div class="canh-bao">
@@ -317,7 +323,7 @@
       NhacCuaTui, những API đó có thể đổi bất cứ lúc nào và khi ấy phần lời sẽ
       tạm hỏng cho tới khi có bản vá.
       Mã băm SHA-256 của cả bốn file nằm ở
-      <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.3/SHA256SUMS.txt">SHA256SUMS.txt</a>.
+      <a href="https://github.com/mittohoa/lyra-player/releases/download/v0.1.4/SHA256SUMS.txt">SHA256SUMS.txt</a>.
     </div>
   </div>
 </section>
