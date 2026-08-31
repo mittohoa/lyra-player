@@ -337,15 +337,28 @@ Ba chỗ dễ sai, đều đã tránh:
   thái của một máy vừa cài xong — người cần biết tin này nhất lại là người không
   thấy nó.
 
-### Máy Samsung
+### Hai lớp chặn, không phải một
 
-Auto Blocker chặn **mọi** đường cài không đi qua Galaxy Store hay Play Store, kể
-cả `PackageInstaller` do chính app gọi. Cơ chế tự cập nhật ở trên đi đúng con
-đường mà nó sinh ra để chặn, nên trên máy Samsung bật Auto Blocker thì nó không
-chạy. Không có cách nào lách từ phía mã nguồn, và cũng không nên có.
+Người dùng gặp cả hai cùng lúc nên dễ tưởng là một, mà cách xử lại khác nhau.
 
-Người dùng tắt Auto Blocker thì cài được. Cách dứt điểm là phát hành qua Play —
-bản `play` không mang quyền cài đặt và không cần cơ chế này.
+| | Chặn gì | Cơ chế tự cập nhật có né được? |
+|---|---|---|
+| **Auto Blocker** (Samsung) | Không cho **cài** APK ngoài cửa hàng | Không |
+| **Restricted settings** (Android 13+, mọi máy) | Cài được nhưng không **bật được** quyền đọc thông báo | Có |
+
+Lớp thứ hai chỉ áp lên app cài bằng đường **không phải phiên** — trình duyệt hay
+trình quản lý file mở thẳng file APK. Cài bằng phiên `PackageInstaller`, đúng
+thứ cơ chế tự cập nhật dùng, thì không bị. Nên nó không vô dụng với máy Samsung
+như thoạt nhìn: nó không mở được cửa, nhưng qua được cửa rồi thì không vướng
+lớp thứ hai nữa.
+
+Cái kích hoạt lớp thứ hai **không phải một quyền** mà là khai báo dịch vụ
+`BIND_NOTIFICATION_LISTENER_SERVICE` — nên soi danh sách quyền sẽ không thấy gì,
+và cắt bớt quyền cũng không làm nó im. Bỏ dịch vụ đó thì app không còn lý do tồn
+tại. Xem README bản Android để biết chi tiết.
+
+Cách dứt điểm cho cả hai lớp là phát hành qua Play — bản `play` không mang quyền
+cài đặt và không cần cơ chế này.
 
 ---
 
