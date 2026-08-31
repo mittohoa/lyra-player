@@ -359,7 +359,7 @@
 <main>
 <h1 id="lyra-cho-android-kien-truc">Lyra cho Android — kiến trúc</h1>
 <blockquote><p>Phạm vi: <strong>công cụ lời cho cả máy, cộng một trình nghe nhạc đầy đủ.</strong> Đọc bài đang phát ở app khác và hiện lời nổi; tự tìm, tự phát, tự tải nhạc; thư viện trong máy; danh sách phát; dịch lời ngay trên máy.</p>
-<p>Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 34 · coroutines + StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho phần phát · ML Kit cho phần dịch.</p>
+<p>Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 36 (Android 16) · coroutines + StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho phần phát · ML Kit cho phần dịch.</p>
 <p><strong>Hai biến thể phát hành, một mã nguồn</strong> — xem §11.</p></blockquote>
 <p>Tài liệu này thay thế bản phác thảo trước. Bản đó ghi <em>"chỉ sản phẩm A — không phát nhạc, không thư viện, không tải nhạc"</em>, và điều đó <strong>không còn đúng</strong>: từ đó tới nay app đã đi qua chín mốc và trở thành cả hai sản phẩm.</p>
 <hr>
@@ -492,6 +492,13 @@
 <pre><code>./gradlew assembleSideloadDebug     # cài tay, có tải nhạc
 ./gradlew assemblePlayRelease       # lên Play
 ./gradlew bundlePlayRelease         # bản gộp, Play giao đúng một kiến trúc CPU</code></pre>
+<h3 id="nham-android-16">Nhắm Android 16</h3>
+<p><code>targetSdk 36</code>. Google Play đòi targetSdk không được cũ hơn một năm so với bản Android mới nhất, nên con số này phải theo kịp hằng năm.</p>
+<p>Nâng nó kéo theo cả chuỗi: AGP 8.5.2 chỉ hỗ trợ tới API 35, nên phải lên <strong>AGP 8.13.2</strong> và <strong>Gradle 8.13</strong>. Chọn bản 8.x cuối chứ không nhảy lên AGP 9 — 9.x đã ra nhưng mang nhiều thay đổi phá vỡ mà ở đây không cần gì của nó.</p>
+<p>AGP 8.13 bắt được một mâu thuẫn có sẵn từ trước: <strong>không được tách gói theo kiến trúc CPU khi dựng bản gộp <code>.aab</code></strong>. Nó đúng — bản gộp tự làm việc tách đó, và làm cả hai là hai cơ chế giẫm lên nhau. Nay phần tách chỉ bật khi lệnh đang chạy không phải dựng bản gộp, nên bản cài tay vẫn có gói riêng cho từng kiến trúc.</p>
+<h3 id="khoa-ky">Khoá ký</h3>
+<p>Khoá nằm <strong>ngoài kho mã nguồn</strong> (<code>~/.lyra-keys/</code>), và <code>keystore.properties</code> trỏ tới nó thì nằm trong <code>.gitignore</code>. Không có file đó thì bản phát hành vẫn dựng được, chỉ là không được ký — để người khác clone về vẫn build được, và họ phải tự tạo khoá của mình. Khoá ký là danh tính của người phát hành, không phải của mã nguồn.</p>
+<p>Đây là <strong>khoá tải lên</strong>, không phải khoá ký cuối cùng: khi bật Play App Signing thì Google giữ khoá ký thật, còn khoá này chỉ dùng để tải bản dựng lên — mất thì xin cấp lại được. Dù vậy vẫn nên sao lưu.</p>
 <h3 id="co-app">Cỡ app</h3>
 <p><code>libtranslate_jni.so</code> của ML Kit nặng <strong>15,6 MB cho mỗi kiến trúc CPU</strong>. Đã bật tách gói theo kiến trúc, nên bản phát hành arm64 là <strong>19,8 MB</strong>; Play chỉ giao đúng gói máy người dùng cần. Bản gộp cả bốn kiến trúc (69 MB) chỉ là hiện vật đóng gói cho ai cài tay.</p>
 <hr>
@@ -524,7 +531,7 @@
 <h2 id="15-da-nghiem-thu-toi-dau">15. Đã nghiệm thu tới đâu</h2>
 <p>Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, <code>sw411dp</code>), không phải máy ảo:</p>
 <table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Đọc bài từ app khác</td><td>Zing MP3, YouTube</td></tr><tr><td>Ba nguồn lời</td><td>trúng từ lrclib, zing, nct</td></tr><tr><td>Khung nổi</td><td>nổi trên Play Store, tự sống lại sau khi tiến trình bị giết</td></tr><tr><td>Chạm căn lời</td><td>trên trang Lời và trên chính khung nổi</td></tr><tr><td>Giữ tay để tắt khung</td><td>900 ms → cờ ghi <code>false</code>, cửa sổ biến mất</td></tr><tr><td>Cỡ chữ theo màn hình</td><td><code>14 → 32</code>, một chạm là về đúng cỡ</td></tr><tr><td>Dịch lời</td><td>giao diện đúng; lời tiếng Việt <strong>không bị đụng tới</strong></td></tr><tr><td>Tự phát</td><td>Zing MP3 tự nhường tiếng, lời khớp từng câu</td></tr><tr><td>Lời trên thẻ khoá màn hình</td><td>chạy đúng từng dòng</td></tr><tr><td>Tìm + hàng đợi</td><td>20 kết quả hai nguồn xen kẽ, chuyển bài lấy đường phát đúng lúc</td></tr><tr><td>Thư viện trong máy</td><td>đọc, phát qua <code>content://</code>, tự sang bài kế</td></tr><tr><td>Danh sách phát</td><td>lưu 20 bài, <strong>còn nguyên sau khi cài đè</strong></td></tr><tr><td>Tải nhạc</td><td>file 4,08 MB, <code>USLT</code> 42 dòng lời có mốc, <code>fffb</code> ngay sau thẻ</td></tr><tr><td>Hai biến thể</td><td>bản Play không có <code>Id3</code>/<code>Downloader</code> trong mã dex</td></tr></tbody></table>
-<p><strong>Chưa nghiệm thu:</strong> đường tải gói ngôn ngữ rồi dịch thật (cần một bài tiếng nước ngoài); <code>targetSdk 36</code> cho Play (hiện 34, cần cài gói SDK 36); khoá ký thật.</p>
+<p><strong>Chưa nghiệm thu:</strong> đường tải gói ngôn ngữ rồi dịch thật — cần một bài tiếng nước ngoài đang phát.</p>
 <footer>Bản trong repo: <code>docs/kien-truc-android.md</code> · Dựng lại bằng <code>node scripts/make-docs.mjs</code></footer>
 </main>
 </div>

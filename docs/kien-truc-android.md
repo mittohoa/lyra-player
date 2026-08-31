@@ -4,7 +4,7 @@
 > đang phát ở app khác và hiện lời nổi; tự tìm, tự phát, tự tải nhạc; thư viện
 > trong máy; danh sách phát; dịch lời ngay trên máy.
 >
-> Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 34 · coroutines +
+> Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 36 (Android 16) · coroutines +
 > StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho
 > phần phát · ML Kit cho phần dịch.
 >
@@ -408,6 +408,32 @@ hai cùng lúc, và đúng ra là vậy.
 ./gradlew bundlePlayRelease         # bản gộp, Play giao đúng một kiến trúc CPU
 ```
 
+### Nhắm Android 16
+
+`targetSdk 36`. Google Play đòi targetSdk không được cũ hơn một năm so với bản
+Android mới nhất, nên con số này phải theo kịp hằng năm.
+
+Nâng nó kéo theo cả chuỗi: AGP 8.5.2 chỉ hỗ trợ tới API 35, nên phải lên **AGP
+8.13.2** và **Gradle 8.13**. Chọn bản 8.x cuối chứ không nhảy lên AGP 9 — 9.x đã
+ra nhưng mang nhiều thay đổi phá vỡ mà ở đây không cần gì của nó.
+
+AGP 8.13 bắt được một mâu thuẫn có sẵn từ trước: **không được tách gói theo kiến
+trúc CPU khi dựng bản gộp `.aab`**. Nó đúng — bản gộp tự làm việc tách đó, và
+làm cả hai là hai cơ chế giẫm lên nhau. Nay phần tách chỉ bật khi lệnh đang chạy
+không phải dựng bản gộp, nên bản cài tay vẫn có gói riêng cho từng kiến trúc.
+
+### Khoá ký
+
+Khoá nằm **ngoài kho mã nguồn** (`~/.lyra-keys/`), và `keystore.properties` trỏ
+tới nó thì nằm trong `.gitignore`. Không có file đó thì bản phát hành vẫn dựng
+được, chỉ là không được ký — để người khác clone về vẫn build được, và họ phải
+tự tạo khoá của mình. Khoá ký là danh tính của người phát hành, không phải của
+mã nguồn.
+
+Đây là **khoá tải lên**, không phải khoá ký cuối cùng: khi bật Play App Signing
+thì Google giữ khoá ký thật, còn khoá này chỉ dùng để tải bản dựng lên — mất thì
+xin cấp lại được. Dù vậy vẫn nên sao lưu.
+
 ### Cỡ app
 
 `libtranslate_jni.so` của ML Kit nặng **15,6 MB cho mỗi kiến trúc CPU**. Đã bật
@@ -512,5 +538,5 @@ Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, `sw411dp`), khôn
 | Tải nhạc | file 4,08 MB, `USLT` 42 dòng lời có mốc, `fffb` ngay sau thẻ |
 | Hai biến thể | bản Play không có `Id3`/`Downloader` trong mã dex |
 
-**Chưa nghiệm thu:** đường tải gói ngôn ngữ rồi dịch thật (cần một bài tiếng nước
-ngoài); `targetSdk 36` cho Play (hiện 34, cần cài gói SDK 36); khoá ký thật.
+**Chưa nghiệm thu:** đường tải gói ngôn ngữ rồi dịch thật — cần một bài tiếng
+nước ngoài đang phát.
