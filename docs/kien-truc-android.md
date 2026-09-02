@@ -143,6 +143,41 @@ Thứ tự các chặng xếp theo **giá phải trả, rẻ trước đắt sau
 3. Gọi mạng: `candidatesFrom` sinh tối đa 4 phương án, mỗi phương án hỏi **cả ba
    nguồn cùng lúc**. Hỏi lần lượt thì thời gian chờ là tổng của ba lần gọi.
 
+### Ghi lời ra tệp `.lrc` — và bốn thư mục Android cho phép
+
+Đọc lời thì đọc thẳng bằng `File` được ở gần như mọi nơi. **Ghi thì không.**
+Android chặn tạo tệp `.lrc` ở phần lớn thư mục phương tiện, kể cả khi app có đủ
+quyền đọc. Đo bằng chính app trên Pixel 6 Pro / Android 17:
+
+| | Tạo `.lrc` |
+|---|---|
+| `Music` · `Movies` · `Download` · `Documents` (kể cả thư mục con) | được |
+| `DCIM` · `Pictures` · `Recordings` · `Audiobooks` · `Podcasts` · `Notifications` · `Alarms` | `EPERM` |
+
+**Chỉ bốn thư mục** nhận tệp `.lrc`. Và đây **không** phải chuyện "thư mục ảnh
+chỉ nhận ảnh": `Recordings`, `Podcasts`, `Alarms` đều là thư mục âm thanh mà
+vẫn chặn.
+
+Bị chặn thì **không có quyền nào xin thêm được** — đây là luật hệ thống. Nên
+màn hình không dừng ở câu báo lỗi mà mời người dùng **chọn chỗ khác để lưu**,
+qua bộ chọn tệp của hệ thống. Đường đó không cần quyền gì và luôn đi được.
+
+Ba chỗ đã sai và cách sửa, ghi lại vì cả ba đều dễ lặp:
+
+- **Đoán nguyên nhân thay vì đo.** Câu báo từng đổ cho thẻ nhớ ngoài — trên một
+  máy không có khe thẻ. Sửa lần hai thì đổ cho "thư mục ảnh như DCIM", trong khi
+  `Recordings` cũng chặn. Câu báo bây giờ **kể ra chỗ được phép**, thứ đã đo
+  được, chứ không đoán chỗ đang hỏng là loại gì.
+- **`dich.exists()` nói dối khi bị chặn.** Nó trả về `false` dù tệp có thật, nên
+  đừng dùng nó để phân biệt "đã có tệp" với "không được ghi".
+- **Khai `text/plain` cho bộ chọn tệp thì nó tự thêm `.txt`**, ra
+  `bài hát.lrc.txt` mà không trình phát nào nhận là lời. Dùng
+  `application/octet-stream` thì tên giữ nguyên.
+
+Bài đo nằm ở `DuongGhiLrcTest` (chạy trên máy thật). **Đừng rút ngắn danh sách
+thư mục trong đó** — hai lần kết luận sai ở trên đều bắt đầu từ việc chỉ đo mấy
+thư mục "chắc là được".
+
 ### `titleSimilarity` — chỗ từng sai và hậu quả
 
 Bản đầu chia cho tập nhỏ hơn. Nghĩa là tên bài ngắn nằm gọn trong một tên video

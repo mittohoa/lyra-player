@@ -308,11 +308,57 @@ thật rồi xem AURA có nhận ra và dò được lời không.
 
 ---
 
+## 7b. Đổi tên Lyra → AURA, và cái bẫy thư mục dữ liệu
+
+App đổi tên ở Android 0.3.8 và Windows 0.1.6. Chuyện tưởng chỉ là sửa chữ, thực
+tế có hai chỗ làm hỏng dữ liệu hoặc làm chết app.
+
+**Windows: `productName` trong `package.json` phải giữ nguyên là `Lyra`.**
+Electron lấy `app.getPath('userData')` từ đúng trường đó. Đổi nó thành `AURA` là
+thư mục dữ liệu nhảy từ `%APPDATA%/Lyra` sang `%APPDATA%/AURA`, và mọi thứ người
+dùng đã có — cài đặt, thư viện, danh sách phát, lời tự nhập, độ lệch giờ từng
+bài, bộ nhớ đệm lời, mô hình dịch đã tải hàng trăm MB — nằm lại chỗ cũ mà app
+không còn nhìn thấy. Đã thử thật một lần và thấy `settings.json` rơi sang thư
+mục mới.
+
+Tên hiển thị đặt ở `electron-builder.yml`: `productName: AURA` lo tên exe, thư
+mục cài, lối tắt; `artifactName` ghi cứng tiền tố `AURA-`. Không cần dòng mã nào.
+
+**Cách chữa bằng mã đã thử rồi bỏ:** gọi `app.setPath('userData', ...)` lúc khởi
+động. Vừa thừa vừa hỏng — nó đè lên cả `--user-data-dir` mà người dùng tự chỉ,
+tức là lặng lẽ phớt lờ lựa chọn của họ. Bộ kiểm bắt được ngay: `test-error-ui`
+chạy app với thư mục riêng rồi không thấy tệp nhật ký nào ở đó.
+
+**Giữ nguyên có chủ ý, đừng "dọn cho nhất quán":**
+
+| Thứ | Vì sao giữ |
+|---|---|
+| `appId: com.mittohoa.lyra_player` | Google Play nhận diện app bằng nó, và không đổi được sau khi đã đăng ký |
+| Gói mã nguồn Android `com.mittohoa.lyra.*` | Đổi là tên thành phần dịch vụ đọc thông báo đổi theo, người đang thử **bị thu hồi quyền** đó |
+| Scheme `lyra://` | Đã đăng ký với hệ điều hành |
+| Kho `mittohoa/lyra-player` | Địa chỉ trang phát hành và trang web |
+| Thư mục tải nhạc `Music/Lyra` | Đổi là nhạc người dùng đã tải nằm ngoài tầm nhìn của app |
+| Tên nội bộ `LyraLoader` | Chỉ là tên biến, đổi chỉ tạo nhiễu trong lịch sử |
+
+**Android: chỗ đổi tên từng làm app chết.** Manifest gọi thành phần bằng tên
+tương đối (`.service.LyraNotificationListener`), nên một lượt đổi tên tràn lan
+đã đổi luôn ba tên đó trong khi lớp Kotlin giữ nguyên → `ClassNotFoundException`,
+mất cả đọc thông báo, phát nhạc và ô cài đặt nhanh. Giờ có
+`ThanhPhanManifestTest` nạp thử từng lớp manifest khai — và nó đã được chứng
+minh là **bắt được lỗi** bằng cách cố tình tái tạo lỗi đó.
+
+---
+
 ## 8. Cập nhật
 
 AURA không nằm trong cửa hàng nào, nên phải tự lo việc báo có bản mới. Không lo
 thì một người cài tay bản 0.1.0 sẽ dùng nó mãi mãi, kể cả sau khi lỗi họ gặp đã
 được sửa từ lâu — và họ không có cách nào biết.
+
+Một **bản phát hành GitHub mang cả hai nền tảng**: APK Android và exe Windows
+nằm chung một thẻ, kèm `SHA256SUMS.txt` và `latest.yml`. Số hiệu hai bên đi
+riêng — `v0.3.11` mang Android 0.3.11 và Windows 0.1.6 — nên bộ dò bản mới phải
+đọc **tên tệp**, không đọc tên thẻ.
 
 **Windows** dùng `electron-updater` đọc trang phát hành GitHub: tải ngầm, cài
 lúc thoát app. Nhờ `.blockmap`, lần cập nhật sau thường chỉ tải vài MB chứ

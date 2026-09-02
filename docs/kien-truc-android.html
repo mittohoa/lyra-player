@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<meta name="description" content="Kiến trúc bản Android của AURA: hai vai của cùng một app, vòng lặp phải cắt, lời trên thẻ màn hình khoá, và hai biến thể phát hành.">
-<title>AURA cho Android</title>
+<meta name="description" content="Kiến trúc bản Android của Lyra: hai vai của cùng một app, vòng lặp phải cắt, lời trên thẻ màn hình khoá, và hai biến thể phát hành.">
+<title>Lyra cho Android</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
@@ -355,9 +355,9 @@
 </head>
 <body>
 <div class="wrap">
-<nav class="toc"><div class="toc-label">Mục lục</div><a href="#1-hai-vai-cua-cung-mot-app"><span class="num">1</span>Hai vai của cùng một app</a><a href="#2-ban-do-luong-du-lieu"><span class="num">2</span>Bản đồ luồng dữ liệu</a><a href="#3-vong-lap-phai-cat-lyra-doc-chinh-minh"><span class="num">3</span>Vòng lặp phải cắt: AURA đọc chính mình</a><a href="#4-neo-cua-ca-app-notificationlistenerservice"><span class="num">4</span>Neo của cả app: `NotificationListenerService`</a><a href="#5-tim-loi"><span class="num">5</span>Tìm lời</a><a href="#6-khung-loi-noi-va-the-man-hinh-khoa"><span class="num">6</span>Khung lời nổi và thẻ màn hình khoá</a><a href="#7-dich-loi-ml-kit-tren-may"><span class="num">7</span>Dịch lời — ML Kit trên máy</a><a href="#8-phan-trinh-phat"><span class="num">8</span>Phần trình phát</a><a href="#9-tai-nhac-chi-co-o-ban-sideload"><span class="num">9</span>Tải nhạc — chỉ có ở bản sideload</a><a href="#10-quyen"><span class="num">10</span>Quyền</a><a href="#11-hai-bien-the-phat-hanh"><span class="num">11</span>Hai biến thể phát hành</a><a href="#12-co-chu-do-tu-man-hinh"><span class="num">12</span>Cỡ chữ đo từ màn hình</a><a href="#13-cau-truc-goi"><span class="num">13</span>Cấu trúc gói</a><a href="#14-cho-co-the-vo"><span class="num">14</span>Chỗ có thể vỡ</a><a href="#15-da-nghiem-thu-toi-dau"><span class="num">15</span>Đã nghiệm thu tới đâu</a></nav>
+<nav class="toc"><div class="toc-label">Mục lục</div><a href="#1-hai-vai-cua-cung-mot-app"><span class="num">1</span>Hai vai của cùng một app</a><a href="#2-ban-do-luong-du-lieu"><span class="num">2</span>Bản đồ luồng dữ liệu</a><a href="#3-vong-lap-phai-cat-aura-doc-chinh-minh"><span class="num">3</span>Vòng lặp phải cắt: AURA đọc chính mình</a><a href="#4-neo-cua-ca-app-notificationlistenerservice"><span class="num">4</span>Neo của cả app: `NotificationListenerService`</a><a href="#5-tim-loi"><span class="num">5</span>Tìm lời</a><a href="#6-khung-loi-noi-va-the-man-hinh-khoa"><span class="num">6</span>Khung lời nổi và thẻ màn hình khoá</a><a href="#7-dich-loi-ml-kit-tren-may"><span class="num">7</span>Dịch lời — ML Kit trên máy</a><a href="#8-phan-trinh-phat"><span class="num">8</span>Phần trình phát</a><a href="#9-tai-nhac-chi-co-o-ban-sideload"><span class="num">9</span>Tải nhạc — chỉ có ở bản sideload</a><a href="#10-quyen"><span class="num">10</span>Quyền</a><a href="#11-hai-bien-the-phat-hanh"><span class="num">11</span>Hai biến thể phát hành</a><a href="#12-co-chu-do-tu-man-hinh"><span class="num">12</span>Cỡ chữ đo từ màn hình</a><a href="#13-cau-truc-goi"><span class="num">13</span>Cấu trúc gói</a><a href="#14-cho-co-the-vo"><span class="num">14</span>Chỗ có thể vỡ</a><a href="#15-da-nghiem-thu-toi-dau"><span class="num">15</span>Đã nghiệm thu tới đâu</a></nav>
 <main>
-<h1 id="lyra-cho-android-kien-truc">AURA cho Android — kiến trúc</h1>
+<h1 id="aura-cho-android-kien-truc">AURA cho Android — kiến trúc</h1>
 <blockquote><p>Phạm vi: <strong>công cụ lời cho cả máy, cộng một trình nghe nhạc đầy đủ.</strong> Đọc bài đang phát ở app khác và hiện lời nổi; tự tìm, tự phát, tự tải nhạc; thư viện trong máy; danh sách phát; dịch lời ngay trên máy.</p>
 <p>Stack: Kotlin thuần · minSdk 26 (Android 8) · targetSdk 36 (Android 16) · coroutines + StateFlow · Compose cho màn hình, View thuần cho khung lời nổi · Media3 cho phần phát · ML Kit cho phần dịch.</p>
 <p><strong>Hai biến thể phát hành, một mã nguồn</strong> — xem §11.</p></blockquote>
@@ -397,7 +397,7 @@
   (khung nổi)    (màn hình khoá)  (Compose)</code></pre>
 <p>Điểm mấu chốt: <strong><code>AURA.now</code> là hợp lưu</strong>. AURA đang phát thì AURA thắng; AURA tạm dừng mà app khác đang phát thì nhường.</p>
 <hr>
-<h2 id="3-vong-lap-phai-cat-lyra-doc-chinh-minh">3. Vòng lặp phải cắt: AURA đọc chính mình</h2>
+<h2 id="3-vong-lap-phai-cat-aura-doc-chinh-minh">3. Vòng lặp phải cắt: AURA đọc chính mình</h2>
 <p>Đây là lỗi tốn một vòng gỡ nhất trong cả dự án, và nó chỉ xuất hiện sau khi AURA vừa tự phát vừa ghi lời lên thẻ media.</p>
 <p>AURA ghi <strong>câu đang hát</strong> vào phần mô tả phiên media của mình để nó hiện trên màn hình khoá. <code>MediaSessionWatcher</code> đọc mọi phiên media trên máy — kể cả phiên của chính AURA. Nên câu hát trở thành "tên bài mới", app đi tra lời cho một câu hát, kết quả lại ghi đè lên, và vòng tiếp:</p>
 <pre><code>Tim loi: 'Nhà Tôi Có Treo Một Lá Cờ — DTAP, Hà Anh Tuấn' - 'Nơi đâu tôi cũng bên mình lá cờ'</code></pre>
@@ -416,6 +416,14 @@
 <h2 id="5-tim-loi">5. Tìm lời</h2>
 <p>Thứ tự các chặng xếp theo <strong>giá phải trả, rẻ trước đắt sau</strong>:</p>
 <ol><li>Lời <strong>tự nhập</strong> — người dùng đã bỏ công gõ thì không một lần tra mạng nào được ghi đè lên.</li><li>Bộ nhớ đệm — trả về <strong>ngay</strong>, không qua trạng thái "đang tìm". Nháy một khung trống rồi mới hiện chữ là cảm giác chậm nhất, dù thật ra chỉ tốn vài mili-giây.</li><li>Gọi mạng: <code>candidatesFrom</code> sinh tối đa 4 phương án, mỗi phương án hỏi <strong>cả ba nguồn cùng lúc</strong>. Hỏi lần lượt thì thời gian chờ là tổng của ba lần gọi.</li></ol>
+<h3 id="ghi-loi-ra-tep-lrc-va-bon-thu-muc-android-cho-phep">Ghi lời ra tệp <code>.lrc</code> — và bốn thư mục Android cho phép</h3>
+<p>Đọc lời thì đọc thẳng bằng <code>File</code> được ở gần như mọi nơi. <strong>Ghi thì không.</strong> Android chặn tạo tệp <code>.lrc</code> ở phần lớn thư mục phương tiện, kể cả khi app có đủ quyền đọc. Đo bằng chính app trên Pixel 6 Pro / Android 17:</p>
+<table><thead><tr><th></th><th>Tạo <code>.lrc</code></th></tr></thead><tbody><tr><td><code>Music</code> · <code>Movies</code> · <code>Download</code> · <code>Documents</code> (kể cả thư mục con)</td><td>được</td></tr><tr><td><code>DCIM</code> · <code>Pictures</code> · <code>Recordings</code> · <code>Audiobooks</code> · <code>Podcasts</code> · <code>Notifications</code> · <code>Alarms</code></td><td><code>EPERM</code></td></tr></tbody></table>
+<p><strong>Chỉ bốn thư mục</strong> nhận tệp <code>.lrc</code>. Và đây <strong>không</strong> phải chuyện "thư mục ảnh chỉ nhận ảnh": <code>Recordings</code>, <code>Podcasts</code>, <code>Alarms</code> đều là thư mục âm thanh mà vẫn chặn.</p>
+<p>Bị chặn thì <strong>không có quyền nào xin thêm được</strong> — đây là luật hệ thống. Nên màn hình không dừng ở câu báo lỗi mà mời người dùng <strong>chọn chỗ khác để lưu</strong>, qua bộ chọn tệp của hệ thống. Đường đó không cần quyền gì và luôn đi được.</p>
+<p>Ba chỗ đã sai và cách sửa, ghi lại vì cả ba đều dễ lặp:</p>
+<ul><li><strong>Đoán nguyên nhân thay vì đo.</strong> Câu báo từng đổ cho thẻ nhớ ngoài — trên một máy không có khe thẻ. Sửa lần hai thì đổ cho "thư mục ảnh như DCIM", trong khi <code>Recordings</code> cũng chặn. Câu báo bây giờ <strong>kể ra chỗ được phép</strong>, thứ đã đo được, chứ không đoán chỗ đang hỏng là loại gì.</li><li><strong><code>dich.exists()</code> nói dối khi bị chặn.</strong> Nó trả về <code>false</code> dù tệp có thật, nên đừng dùng nó để phân biệt "đã có tệp" với "không được ghi".</li><li><strong>Khai <code>text/plain</code> cho bộ chọn tệp thì nó tự thêm <code>.txt</code></strong>, ra <code>bài hát.lrc.txt</code> mà không trình phát nào nhận là lời. Dùng <code>application/octet-stream</code> thì tên giữ nguyên.</li></ul>
+<p>Bài đo nằm ở <code>DuongGhiLrcTest</code> (chạy trên máy thật). <strong>Đừng rút ngắn danh sách thư mục trong đó</strong> — hai lần kết luận sai ở trên đều bắt đầu từ việc chỉ đo mấy thư mục "chắc là được".</p>
 <h3 id="titlesimilarity-cho-tung-sai-va-hau-qua"><code>titleSimilarity</code> — chỗ từng sai và hậu quả</h3>
 <p>Bản đầu chia cho tập nhỏ hơn. Nghĩa là tên bài ngắn nằm gọn trong một tên video dài sẽ đạt điểm tuyệt đối — và app hiện lời của <strong>tên concert</strong> thay vì tên bài. Nay dùng trung bình điều hoà của cả hai chiều phủ (F1), nên cả hai phía đều phải giống mới đạt điểm cao.</p>
 <h3 id="moc-thoi-gian-dang-ngo">Mốc thời gian đáng ngờ</h3>
