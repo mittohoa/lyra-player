@@ -81,7 +81,7 @@ function mediaErrorReason(error: MediaError | null): string {
     case MediaError.MEDIA_ERR_NETWORK:
       return 'Mất kết nối trong lúc tải.'
     case MediaError.MEDIA_ERR_DECODE:
-      return 'File nhạc hỏng hoặc dùng định dạng nén Lyra chưa đọc được.'
+      return 'File nhạc hỏng hoặc dùng định dạng nén AURA chưa đọc được.'
     case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
       return 'Không mở được nguồn nhạc này. File có thể đã bị xoá, đổi tên, hoặc đường dẫn đã hết hạn.'
     default:

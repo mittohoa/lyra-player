@@ -7,7 +7,7 @@ import { report } from '@/lib/report'
  * Nhac dang phat o app KHAC (Spotify, trinh duyet, Windows Media Player...),
  * doc qua System Media Transport Controls cua Windows.
  *
- * Day la thu bien Lyra tu "mot trinh nghe nhac nua" thanh "cong cu lyric cho ca may":
+ * Day la thu bien AURA tu "mot trinh nghe nhac nua" thanh "cong cu lyric cho ca may":
  * khung lyric noi van chay du ban nghe nhac o dau.
  */
 

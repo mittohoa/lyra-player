@@ -77,7 +77,7 @@ export function startSmtcWatch(): void {
   } catch (err) {
     notify('nhạc ở app khác', err, {
       fallback:
-        'Không chạy được PowerShell nên Lyra không đọc được nhạc đang phát ở app khác.'
+        'Không chạy được PowerShell nên AURA không đọc được nhạc đang phát ở app khác.'
     })
     return
   }

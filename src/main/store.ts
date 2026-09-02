@@ -137,6 +137,10 @@ function mergeSettings(loaded: unknown, fallback: AppSettings): AppSettings {
   }
 }
 
+// Thu muc nay do Electron quyet dinh tu `productName` trong package.json - va
+// no van la "Lyra" du app da doi ten thanh AURA. Xem `electron-builder.yml`:
+// doi no thanh AURA la du lieu cu cua nguoi dung nam lai o %APPDATA%/Lyra ma
+// app khong con nhin thay.
 const dir = app.getPath('userData')
 
 export const settingsStore = new JsonStore<AppSettings>(

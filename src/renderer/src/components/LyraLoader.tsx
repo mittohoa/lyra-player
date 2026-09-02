@@ -1,10 +1,10 @@
 import type { JSX } from 'react'
 
 /**
- * Dau hieu Lyra o trang thai dang lam viec.
+ * Dau hieu AURA o trang thai dang lam viec.
  *
  * Thay cho vong xoay chung chung: cung mot hinh voi \`Logo\`, chi khac la no
- * cu dong. Nguoi dung thay ngay day la Lyra dang ban chu khong phai mot thanh
+ * cu dong. Nguoi dung thay ngay day la AURA dang ban chu khong phai mot thanh
  * phan web bat ky.
  *
  * Hinh dong theo dung nghia cua chinh no, khong phai hieu ung dan vao:

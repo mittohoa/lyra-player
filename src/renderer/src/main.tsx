@@ -14,7 +14,7 @@ if (!root) {
   // Khong the co, nhung neu co that thi man hinh trang tron khong mot loi giai
   // thich - it ra cung noi duoc mot cau
   logToMain('error', 'khởi động', 'Không tìm thấy thẻ gốc để dựng giao diện')
-  document.body.textContent = 'Lyra không dựng được giao diện. Xin khởi động lại app.'
+  document.body.textContent = 'AURA không dựng được giao diện. Xin khởi động lại app.'
 } else {
   createRoot(root).render(
     <StrictMode>

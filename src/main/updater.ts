@@ -57,7 +57,7 @@ export async function batTuCapNhat(): Promise<void> {
     pushNotice({
       level: 'success',
       scope: 'cập nhật',
-      message: `Đã tải xong Lyra ${info.version}. Bản mới sẽ được cài khi bạn đóng app.`
+      message: `Đã tải xong AURA ${info.version}. Bản mới sẽ được cài khi bạn đóng app.`
     })
   })
 

@@ -2,7 +2,7 @@ import type { LyricsQuery } from '@shared/types'
 import { log } from '../logger'
 
 const BASE = 'https://lrclib.net/api'
-const USER_AGENT = 'Lyra/0.1.0 (trinh nghe nhac desktop)'
+const USER_AGENT = 'AURA/0.1.6 (trinh nghe nhac desktop)'
 
 export interface LrclibRecord {
   id: number

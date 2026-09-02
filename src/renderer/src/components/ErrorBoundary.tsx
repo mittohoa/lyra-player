@@ -78,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <IconRefresh size={15} /> Thử lại
           </button>
           <button type="button" className="btn" onClick={() => window.location.reload()}>
-            Tải lại Lyra
+            Tải lại AURA
           </button>
         </div>
       </div>

@@ -18,7 +18,7 @@ export function TitleBar(): JSX.Element {
     <header className="titlebar">
       <div className="titlebar__brand">
         <Logo size={17} />
-        Lyra
+        AURA
       </div>
 
       <div className="titlebar__spacer" />

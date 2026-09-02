@@ -68,7 +68,7 @@ export function installGlobalErrorHandlers(): void {
       return
     }
     report('giao diện', event.error ?? event.message, {
-      fallback: 'Giao diện gặp lỗi. Nếu lặp lại, xin khởi động lại Lyra.'
+      fallback: 'Giao diện gặp lỗi. Nếu lặp lại, xin khởi động lại AURA.'
     })
   })
 

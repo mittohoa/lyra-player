@@ -46,7 +46,7 @@ setLogBroadcaster(broadcast)
  * gi, va trong file nhat ky co du stack de lan ra nguyen nhan.
  */
 process.on('uncaughtException', (err) => {
-  notify('hệ thống', err, { fallback: 'Lyra gặp lỗi ngoài dự tính nhưng vẫn chạy tiếp.' })
+  notify('hệ thống', err, { fallback: 'AURA gặp lỗi ngoài dự tính nhưng vẫn chạy tiếp.' })
 })
 
 process.on('unhandledRejection', (reason) => {
@@ -77,7 +77,7 @@ function showMainWindow(): void {
 function createTray(): void {
   const image = nativeImage.createFromPath(iconPath()).resize({ width: 16, height: 16 })
   tray = new Tray(image)
-  tray.setToolTip('Lyra')
+  tray.setToolTip('AURA')
 
   const rebuildMenu = (): void => {
     tray?.setContextMenu(
@@ -117,13 +117,13 @@ function createTray(): void {
 
 /** Chi cho phep mot ban chay; ban thu hai chi dua cua so cu len. */
 if (!app.requestSingleInstanceLock()) {
-  // Đã có một bản Lyra đang chạy: bản đó sẽ nhận `second-instance` và tự đưa
+  // Đã có một bản AURA đang chạy: bản đó sẽ nhận `second-instance` và tự đưa
   // cửa sổ lên, nên bản này rút lui.
   //
   // Phải ghi lại một dòng. Không có nó thì mở app từ dòng lệnh chỉ thấy thoát
   // ngay với mã 0, không một lời giải thích — và nếu bản đang chạy là bản đóng
   // gói cũ nằm ở `release/` thì càng khó ngờ tới.
-  log.info('khởi động', 'Đã có một bản Lyra đang chạy — nhường chỗ cho bản đó')
+  log.info('khởi động', 'Đã có một bản AURA đang chạy — nhường chỗ cho bản đó')
   app.quit()
 } else {
   app.on('second-instance', showMainWindow)
@@ -155,7 +155,7 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     app.setAppUserModelId('com.mittohoa.lyra_player')
-    log.info('khởi động', `Lyra ${app.getVersion()} trên ${process.platform} ${process.arch}`)
+    log.info('khởi động', `AURA ${app.getVersion()} trên ${process.platform} ${process.arch}`)
 
     // Hai buoc BAT BUOC: khong co giao thuc media va khong co IPC thi cua so mo
     // ra cung chi la mot o trang - tha bao loi ro rang roi thoat con hon
@@ -166,7 +166,7 @@ if (!app.requestSingleInstanceLock()) {
     } catch (err) {
       log.error('khởi động', 'Không dựng được nền tảng của app', err)
       dialog.showErrorBox(
-        'Lyra không khởi động được',
+        'AURA không khởi động được',
         `${describe(err)}\n\nNhật ký: ${logFolder()}`
       )
       app.exit(1)

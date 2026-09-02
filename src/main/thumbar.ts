@@ -8,7 +8,7 @@ import { getMainWindow, toggleOverlay } from './windows'
 /**
  * Thanh điều khiển dưới ô xem trước ở taskbar.
  *
- * Rê chuột lên icon Lyra dưới taskbar là Windows hiện một ô xem trước cửa sổ;
+ * Rê chuột lên icon AURA dưới taskbar là Windows hiện một ô xem trước cửa sổ;
  * thanh này nằm ngay dưới ô đó, đúng kiểu Windows Media Player. Đây là chỗ gần
  * nhất với ô media của hệ điều hành mà Electron với tới được — ô media thật
  * (bấm nút âm lượng ra) thì không vào được, xem ghi chú trong README.

@@ -143,7 +143,7 @@ export interface AppSettings {
   /** Thu nho xuong khay he thong thay vi thoat han. */
   minimizeToTray: boolean
   globalMediaKeys: boolean
-  /** Hien lyric cho nhac phat o app khac (Spotify, trinh duyet...) khi Lyra dang ranh. */
+  /** Hien lyric cho nhac phat o app khac (Spotify, trinh duyet...) khi AURA dang ranh. */
   followSystemMedia: boolean
   /** Lay ca phu de video, khong chi lyric bai hat. */
   externalSubtitles: boolean

@@ -7,7 +7,18 @@ publish:
   provider: github
   owner: mittohoa
   repo: lyra-player
-productName: Lyra
+# TEN HIEN RA la AURA - dat o day chu KHONG dat trong package.json.
+#
+# Electron lay `app.getPath('userData')` tu `productName` cua package.json.
+# Doi cho do thanh AURA la thu muc du lieu nhay tu %APPDATA%/Lyra sang
+# %APPDATA%/AURA, va moi thu nguoi dung da co - cai dat, thu vien, danh sach
+# phat, loi tu nhap, do lech gio, bo nho dem loi, mo hinh dich hang tram MB -
+# nam lai o thu muc cu ma app khong con nhin thay.
+#
+# Da thu cach khac: goi `app.setPath` luc khoi dong. Cach do vua thua vua hong
+# - no de len ca `--user-data-dir` nguoi dung tu chi, va bo kiem bat duoc ngay.
+# De productName cua package.json nguyen la "Lyra" thi khong can dong ma nao.
+productName: AURA
 directories:
   buildResources: resources
   output: release
@@ -49,9 +60,13 @@ win:
       arch: [x64]
     - target: portable
       arch: [x64]
+  # Dat ten ngay o day thay vi doi tay luc tai len. Trang gioi thieu tro vao
+  # dung hai ten nay; doi tay thi som muon cung co lan quen.
+  artifactName: AURA-${version}-windows-portable.${ext}
 nsis:
+  artifactName: AURA-${version}-windows-setup.${ext}
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-  shortcutName: Lyra
+  shortcutName: AURA

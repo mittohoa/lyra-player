@@ -47,11 +47,11 @@ export function describe(err: unknown, fallback = 'Có lỗi xảy ra.'): string
   // ---- File va o dia --------------------------------------------------
   if (/enoent/.test(text)) return 'Không tìm thấy file hoặc thư mục. Có thể đã bị xoá hoặc đổi tên.'
   if (/eacces|eperm/.test(text))
-    return 'Không có quyền truy cập file. Thử chạy Lyra với quyền quản trị, hoặc chọn thư mục khác.'
+    return 'Không có quyền truy cập file. Thử chạy AURA với quyền quản trị, hoặc chọn thư mục khác.'
   if (/ebusy|elocked/.test(text))
     return 'File đang được chương trình khác dùng. Đóng chương trình đó rồi thử lại.'
   if (/enospc/.test(text)) return 'Ổ đĩa đã đầy. Dọn bớt chỗ trống rồi thử lại.'
-  if (/emfile|enfile/.test(text)) return 'Mở quá nhiều file cùng lúc. Khởi động lại Lyra.'
+  if (/emfile|enfile/.test(text)) return 'Mở quá nhiều file cùng lúc. Khởi động lại AURA.'
 
   // ---- Cong cu ngoai --------------------------------------------------
   if (/ytdlpmissing|chua tim thay yt-dlp/.test(text))

@@ -80,7 +80,7 @@ export default function App(): JSX.Element {
   }, [playerError, toast])
 
   /**
-   * Overlay lay lyric tu dau: Lyra dang phat thi Lyra thang; Lyra dang ranh
+   * Overlay lay lyric tu dau: AURA dang phat thi AURA thang; AURA dang ranh
    * ma app khac (Spotify, trinh duyet...) dang phat thi theo app do.
    */
   const followExternal =
@@ -258,7 +258,7 @@ export default function App(): JSX.Element {
 
   // Tieu de cua so theo bài dang phat
   useEffect(() => {
-    document.title = track ? `${track.artist} — ${track.title}` : 'Lyra'
+    document.title = track ? `${track.artist} — ${track.title}` : 'AURA'
   }, [track, isPlaying])
 
   if (!ready) {

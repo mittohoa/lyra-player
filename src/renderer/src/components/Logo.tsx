@@ -1,7 +1,7 @@
 import type { JSX } from 'react'
 
 /**
- * Dau hieu Lyra. Hinh hoc dong bo voi `resources/icon.svg` - sua ben do
+ * Dau hieu AURA. Hinh hoc dong bo voi `resources/icon.svg` - sua ben do
  * thi sua ca ben nay (file kia la ban goc de xuat ra icon cua app).
  *
  * Id cua gradient co dinh: moi ban ve deu giong het nhau nen trung id

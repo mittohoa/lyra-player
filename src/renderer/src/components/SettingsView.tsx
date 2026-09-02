@@ -395,7 +395,7 @@ function LogSection(): JSX.Element {
     <section className="card">
       <h3>Nhật ký</h3>
       <p className="card__hint">
-        Mọi lỗi Lyra gặp phải đều được ghi lại ở đây và vào file trong thư mục dữ liệu. Khi có gì
+        Mọi lỗi AURA gặp phải đều được ghi lại ở đây và vào file trong thư mục dữ liệu. Khi có gì
         đó không chạy, mở ra xem trước khi đoán.
       </p>
 
@@ -480,7 +480,7 @@ export function SettingsView(): JSX.Element {
   const overlay = settings.overlay
 
   // Do man hinh DANG CHUA cua so nay, khong phai man hinh chinh: nguoi cam hai
-  // man hinh thuong keo Lyra sang cai phu, va co chu hop voi cai phu moi la co
+  // man hinh thuong keo AURA sang cai phu, va co chu hop voi cai phu moi la co
   // ho muon.
   const suggestedFontSize = suggestOverlayFontSize(window.screen.availWidth)
 
@@ -764,7 +764,7 @@ export function SettingsView(): JSX.Element {
           <h3>Lyric cho nhạc ở app khác</h3>
           <p className="card__hint">
             Đọc bài đang phát từ Windows để hiện lyric nổi cho cả Spotify, YouTube trên trình
-            duyệt, hay bất cứ app nào — không cần phát trong Lyra. Khi Lyra đang phát thì Lyra
+            duyệt, hay bất cứ app nào — không cần phát trong AURA. Khi AURA đang phát thì AURA
             được ưu tiên.
           </p>
           <Field
@@ -927,7 +927,7 @@ export function SettingsView(): JSX.Element {
             />
           </Field>
 
-          <Field label="Bật/tắt lyric nổi" hint="Phím tắt toàn cục, dùng được cả khi Lyra ở khay">
+          <Field label="Bật/tắt lyric nổi" hint="Phím tắt toàn cục, dùng được cả khi AURA ở khay">
             <HotkeyInput
               value={settings.hotkeys.toggleOverlay}
               onChange={(v) =>

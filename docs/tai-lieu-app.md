@@ -1,4 +1,4 @@
-# Lyra — tài liệu toàn app
+# AURA — tài liệu toàn app
 
 > Trạng thái: đang chạy được, 133 phép kiểm tra tự động đều đạt.
 > Quy mô: 12.765 dòng mã nguồn + 2.947 dòng kịch bản kiểm tra.
@@ -6,16 +6,16 @@
 
 ---
 
-## 1. Lyra là gì
+## 1. AURA là gì
 
 **Lời bài hát hiện trên màn hình, cho bất cứ thứ gì đang phát trên máy.**
 
-Đó là câu duy nhất đáng nhớ về app này. Mọi thứ khác trong Lyra hoặc là để phục
+Đó là câu duy nhất đáng nhớ về app này. Mọi thứ khác trong AURA hoặc là để phục
 vụ câu đó, hoặc là một sản phẩm thứ hai đi kèm — phần 3 nói thẳng chỗ nào là chỗ
 nào.
 
 Điểm khác biệt so với Zing, NhacCuaTui hay Spotify: các app đó chỉ hiện lời cho
-nhạc **của chính chúng**. Lyra đọc được nhạc đang phát ở **app khác** — Spotify,
+nhạc **của chính chúng**. AURA đọc được nhạc đang phát ở **app khác** — Spotify,
 Chrome, Edge, Windows Media Player — rồi tự đi dò lời cho bài đó và hiện lên một
 khung nổi luôn nằm trên cùng màn hình.
 
@@ -51,7 +51,7 @@ Cửa sổ overlay (src/renderer/src/OverlayView.tsx)
 
 Vị trí phát là chỗ dễ sai nhất: Windows chỉ đưa một **ảnh chụp** vị trí kèm mốc
 `lastUpdated`, không phải vị trí lúc này. Không bù phần thời gian đã trôi thì lời
-luôn chạy chậm hơn nhạc vài giây. Lyra bù hai lần — một lần ở tiến trình chính
+luôn chạy chậm hơn nhạc vài giây. AURA bù hai lần — một lần ở tiến trình chính
 lúc gửi, một lần ở giao diện theo từng khung hình — nên đồng hồ chạy mượt.
 
 ---
@@ -60,9 +60,9 @@ lúc gửi, một lần ở giao diện theo từng khung hình — nên đồng
 
 Đây là phần trả lời trực tiếp cho câu "app đang phình to tính năng".
 
-Lyra hiện đang là **hai sản phẩm nằm chung một cửa sổ**:
+AURA hiện đang là **hai sản phẩm nằm chung một cửa sổ**:
 
-### Sản phẩm A — công cụ lời cho cả máy  ← *đây là Lyra*
+### Sản phẩm A — công cụ lời cho cả máy  ← *đây là AURA*
 
 | Phần | File chính | Vì sao nó thuộc lõi |
 |---|---|---|
@@ -95,11 +95,11 @@ Ba hướng, chưa chọn hướng nào:
    Zing hay NCT đổi API thì phải đi sửa.
 2. **Thu về lõi.** Bỏ thư viện + danh sách phát + tải nhạc, giữ phát online và
    toàn bộ sản phẩm A. Ước chừng bớt được ~2.500 dòng và ba mặt dễ hỏng.
-3. **Tách đôi.** Lyra = công cụ lời; phần nghe nhạc thành một chế độ tắt được
+3. **Tách đôi.** AURA = công cụ lời; phần nghe nhạc thành một chế độ tắt được
    trong Cài đặt. Không mất mã, nhưng mặc định gọn.
 
 **Về đề nghị thêm luồng TV (FPT và nguồn khác):** đó sẽ là sản phẩm thứ ba, và
-nó kéo theo cả một nhánh mới — Lyra hiện chỉ có thẻ `<audio>`, muốn xem TV thì
+nó kéo theo cả một nhánh mới — AURA hiện chỉ có thẻ `<audio>`, muốn xem TV thì
 phải có `<video>`, thư viện HLS (`hls.js`), và cửa sổ video nổi. Việc này khả
 thi, nhưng nên quyết sau khi đã chốt ba hướng ở trên. Tôi đã dừng lại chưa làm.
 
@@ -174,7 +174,7 @@ Bật "click xuyên qua" thì chuột đi thẳng xuống cửa sổ bên dướ
 
 ### 5.3 Căn mốc thời gian bằng AI (chạy trên máy)
 
-Lời không có mốc thời gian thì không chạy theo nhạc được. Lyra dùng
+Lời không có mốc thời gian thì không chạy theo nhạc được. AURA dùng
 **whisper.cpp** nghe lại bài hát rồi khớp bản nghe được với lời có sẵn (LCS +
 nội suy tuyến tính + khớp từ gần đúng).
 
@@ -196,7 +196,7 @@ thời điểm từng từ trong đoạn.
 
 ### 5.4 Phụ đề cho video
 
-Video dài hơn 8 phút thì Lyra hiểu đó không phải bài hát và đi tìm phụ đề trước.
+Video dài hơn 8 phút thì AURA hiểu đó không phải bài hát và đi tìm phụ đề trước.
 Đọc được `.srt`, `.vtt`, `.ass`.
 
 Ba cái bẫy của YouTube, đều đã kiểm chứng trên video thật:
@@ -205,18 +205,18 @@ Ba cái bẫy của YouTube, đều đã kiểm chứng trên video thật:
    đó ở ô `automatic_captions` — nghĩa là với video kiểu ấy **không có đường nào
    tới bản máy tự nghe**.
 2. Có kênh tải lên "phụ đề" chỉ gồm đúng một dòng quảng cáo. Cộng với (1) thì bí
-   thật — nên Lyra **từ chối hẳn**: dưới 3 dòng, hoặc dưới một dòng mỗi 3 phút,
+   thật — nên AURA **từ chối hẳn**: dưới 3 dòng, hoặc dưới một dòng mỗi 3 phút,
    thì coi như không có. Hiện một dòng "nhớ like và đăng ký" suốt 16 phút còn tệ
    hơn không hiện gì.
 3. URL `vtt` của bản máy tự nghe trả về một **playlist HLS**, không phải phụ đề.
 
-Vì thế Lyra **đọc metadata để quyết định** nhưng **giao cho yt-dlp tải** — gọi
+Vì thế AURA **đọc metadata để quyết định** nhưng **giao cho yt-dlp tải** — gọi
 thẳng URL bằng `fetch` thì Google trả 429 rất nhanh.
 
 ### 5.5 Tải nhạc
 
 Tải chất lượng cao nhất nguồn cho, ghi tag (tên bài, nghệ sĩ, album, ảnh bìa) và
-ghi kèm file `.lrc` cạnh file nhạc. Mặc định vào `Music/Lyra`.
+ghi kèm file `.lrc` cạnh file nhạc. Mặc định vào `Music/AURA`.
 
 > ⚠️ Tải nội dung từ Zing, NhacCuaTui hay YouTube vi phạm điều khoản dịch vụ của
 > họ, và sao chép cho mục đích cá nhân ở Việt Nam là vùng xám về pháp lý. Vì vậy
@@ -244,7 +244,7 @@ Ba lớp, không lớp nào để lọt:
 Nơi lỗi hiện ra: toast bốn mức (thông tin / xong việc / cảnh báo / lỗi) ở góc
 trên phải; và **Cài đặt → Nhật ký**, xem được ngay trong app, bấm vào từng dòng
 để mở chi tiết kỹ thuật, chép được cả nhật ký, mở được thư mục file. File nhật
-ký nằm ở `%APPDATA%/Lyra/logs/`, một file mỗi ngày, giữ 7 ngày, tối đa 5 MB.
+ký nằm ở `%APPDATA%/AURA/logs/`, một file mỗi ngày, giữ 7 ngày, tối đa 5 MB.
 
 Việc chạy nền có cơ chế riêng vì không có ai đang đứng đợi: cầu SMTC chết thì tự
 dựng lại 3 lần rồi mới chịu thua và báo; bị YouTube chặn 429 thì nói rõ là tạm
@@ -252,7 +252,7 @@ thời và sẽ tự hết.
 
 ### 5.7 Logo động
 
-Cùng một hình với logo Lyra, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ
+Cùng một hình với logo AURA, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ
 thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp
 nhau: **cặp nốt lắc quanh dấu xà** như đang bắt nhịp, **thanh lời chạy từ trái
 sang** như một dòng lyric đang hiện dần. Bản `block` (dùng ở màn hình khởi động)
@@ -280,19 +280,19 @@ chỉ giữ một nhịp thở rất chậm — im hoàn toàn thì người dù
 | `test-error-ui` | 14 | Toàn hệ thống báo lỗi và logo động — chạy app thật |
 | `test-translate` | 17 | Đường dịch lời |
 
-Các bộ "chạy app thật" mở Lyra lên và điều khiển qua Chrome DevTools Protocol,
+Các bộ "chạy app thật" mở AURA lên và điều khiển qua Chrome DevTools Protocol,
 không giả lập gì cả.
 
 Ngoài ra còn vài kịch bản cần mạng nên không nằm trong `npm test`:
 `test:subs` (phụ đề thật từ YouTube), `test:download`, `test:external`,
 `test:whisper`, và `test-subs-live.mjs` — bộ này mở Edge phát một video YouTube
-thật rồi xem Lyra có nhận ra và dò được lời không.
+thật rồi xem AURA có nhận ra và dò được lời không.
 
 ---
 
 ## 7. Giới hạn đã biết
 
-- **Lyra không hiện trong khay media của Windows.** Nhạc do chính Lyra phát
+- **AURA không hiện trong khay media của Windows.** Nhạc do chính AURA phát
   không xuất hiện ở ô điều khiển media của hệ điều hành. Đây là giới hạn của
   Electron; đã thử ba cờ Chromium khác nhau, không cờ nào ăn, đã gỡ hết.
 - **Zing và NhacCuaTui là API nội bộ.** Không có cam kết. Họ đổi là hỏng.
@@ -310,7 +310,7 @@ thật rồi xem Lyra có nhận ra và dò được lời không.
 
 ## 8. Cập nhật
 
-Lyra không nằm trong cửa hàng nào, nên phải tự lo việc báo có bản mới. Không lo
+AURA không nằm trong cửa hàng nào, nên phải tự lo việc báo có bản mới. Không lo
 thì một người cài tay bản 0.1.0 sẽ dùng nó mãi mãi, kể cả sau khi lỗi họ gặp đã
 được sửa từ lâu — và họ không có cách nào biết.
 
@@ -372,5 +372,5 @@ npm run typecheck
 npm run dist       # đóng gói bản cài Windows
 ```
 
-Đường dẫn dữ liệu: `%APPDATA%/Lyra/` — cài đặt, danh sách phát, bộ nhớ đệm lời,
+Đường dẫn dữ liệu: `%APPDATA%/AURA/` — cài đặt, danh sách phát, bộ nhớ đệm lời,
 nhật ký, và `bin/` chứa yt-dlp cùng model Whisper tải về.

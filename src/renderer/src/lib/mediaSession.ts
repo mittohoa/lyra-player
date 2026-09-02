@@ -5,7 +5,7 @@ import { logToMain } from './log'
  * Cong bo bai dang phat len Windows qua Media Session API.
  *
  * Chromium chuyen thong tin nay sang SMTC (System Media Transport Controls) cua
- * Windows, nen Lyra hien ra trong bang dieu khien media (bam nut am luong),
+ * Windows, nen AURA hien ra trong bang dieu khien media (bam nut am luong),
  * kem anh bia va nut dieu khien - va phim media tren ban phim cung nhan dung app.
  *
  * Khong co metadata thi Windows KHONG tao phien media nao cho app ca.
