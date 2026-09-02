@@ -12,7 +12,8 @@ publish:
 # Electron lay `app.getPath('userData')` tu `productName` cua package.json.
 # Doi cho do thanh AURA la thu muc du lieu nhay tu %APPDATA%/Lyra sang
 # %APPDATA%/AURA, va moi thu nguoi dung da co - cai dat, thu vien, danh sach
-# phat, loi tu nhap, do lech gio, bo nho dem loi, mo hinh dich hang tram MB -
+# phat, loi tu nhap, do lech gio, bo nho dem loi, va mo hinh AI can gio da tai
+# (thu muc `ai`, do duoc 675 MB tren mot may dang dung) -
 # nam lai o thu muc cu ma app khong con nhin thay.
 #
 # Da thu cach khac: goi `app.setPath` luc khoi dong. Cach do vua thua vua hong

@@ -317,9 +317,9 @@ tế có hai chỗ làm hỏng dữ liệu hoặc làm chết app.
 Electron lấy `app.getPath('userData')` từ đúng trường đó. Đổi nó thành `AURA` là
 thư mục dữ liệu nhảy từ `%APPDATA%/Lyra` sang `%APPDATA%/AURA`, và mọi thứ người
 dùng đã có — cài đặt, thư viện, danh sách phát, lời tự nhập, độ lệch giờ từng
-bài, bộ nhớ đệm lời, mô hình dịch đã tải hàng trăm MB — nằm lại chỗ cũ mà app
-không còn nhìn thấy. Đã thử thật một lần và thấy `settings.json` rơi sang thư
-mục mới.
+bài, bộ nhớ đệm lời, và mô hình AI căn giờ đã tải (thư mục `ai`, đo được 675 MB
+trên một máy đang dùng) — nằm lại chỗ cũ mà app không còn nhìn thấy. Đã thử
+thật một lần và thấy `settings.json` rơi sang thư mục mới.
 
 Tên hiển thị đặt ở `electron-builder.yml`: `productName: AURA` lo tên exe, thư
 mục cài, lối tắt; `artifactName` ghi cứng tiền tố `AURA-`. Không cần dòng mã nào.
