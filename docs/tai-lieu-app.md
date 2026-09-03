@@ -105,6 +105,62 @@ thi, nhưng nên quyết sau khi đã chốt ba hướng ở trên. Tôi đã d�
 
 ---
 
+## 3b. Android và Windows — bên nào có gì
+
+Hai bản **đã đi lệch nhau**, không phải bản này là tập con của bản kia. Android
+chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
+thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
+
+Đối chiếu: Android 0.3.11, Windows 0.1.7.
+
+### Cả hai đều có
+
+| | Android | Windows |
+|---|---|---|
+| Hiện lời cho nhạc phát ở app khác | `NotificationListenerService` | SMTC, qua PowerShell |
+| Khung lời nổi đè lên app khác | ✓ | ✓ |
+| Tự phát nhạc; hàng đợi, trộn, lặp | ✓ | ✓ |
+| Thư viện trong máy, danh sách phát | ✓ | ✓ |
+| Sửa lời tay, chỉnh lệch giờ | ✓ | ✓ |
+| Đọc `.lrc` nằm cạnh tệp nhạc | ✓ | ✓ |
+| Ghi lời ra `.lrc` cạnh tệp | ✓ | ✓ |
+| Đọc lời nhúng trong thẻ tệp nhạc | ID3 `USLT` **và `SYLT` có mốc giờ**, Vorbis | `music-metadata`, chữ trơn |
+| Dịch lời tại chỗ | ML Kit | ONNX, hai mô hình chọn được |
+| Tải nhạc về máy | chỉ bản `sideload` | ✓ |
+| Tự cập nhật | ✓ | ✓ (hỏng tới 0.1.6, xem mục 8) |
+
+### Chỉ Android có
+
+| Tính năng | Vì sao Windows chưa có |
+|---|---|
+| **Phát video** trong máy, toàn màn hình, tự xoay theo chiều video | Windows chỉ có thẻ `<audio>`; thêm video là mở một nhánh mới |
+| **Phụ đề `.srt`** nằm cạnh tệp video | đi kèm phần video ở trên |
+| **Thẻ lời chia sẻ** — sáu mẫu bố cục, xuất ra ảnh | làm ở Android 0.3.4, Windows đứng yên từ 31/8 |
+| **Nhập lời từ ảnh chụp** (OCR) | như trên |
+| **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | như trên |
+| **Góp lời ngược lại cho LRCLIB** | như trên |
+| **Sao lưu lời tự nhập ra tệp** | như trên |
+| Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
+
+### Chỉ Windows có
+
+| Tính năng | Vì sao Android chưa có |
+|---|---|
+| **Căn mốc giờ bằng AI** — Whisper chạy tại chỗ | mô hình nặng hàng trăm MB, chưa hợp với điện thoại |
+| **YouTube** tìm và phát; **Spotify** tra cứu; dán thẳng URL | Android chỉ có Zing MP3 và NhacCuaTui |
+| **Lấy phụ đề YouTube** cho video đang xem trong trình duyệt | cần `yt-dlp`, một tệp nhị phân bên ngoài |
+| Thanh nút điều khiển ở ô xem trước dưới taskbar | riêng của Windows |
+
+### Ba chỗ Windows thua rõ nhất
+
+1. **Không phát được video.** Khoảng cách lớn nhất. Android mở video, xoay
+   ngang, đọc phụ đề `.srt` nằm cạnh; Windows không có thẻ `<video>` nào.
+2. **Không có thẻ lời chia sẻ và OCR.** Hai thứ Android có từ 0.3.4.
+3. **Nhạc do chính AURA phát không hiện trong khay media của Windows** — giới
+   hạn của Electron, đã thử ba cờ Chromium, không cờ nào ăn (xem mục 7).
+
+---
+
 ## 4. Kiến trúc
 
 Ba tiến trình, ranh giới rõ ràng:
