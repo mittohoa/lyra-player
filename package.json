@@ -1,6 +1,6 @@
 {
   "name": "lyra",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Trinh nghe nhac offline + online cho Windows, kem lyric noi trong suot",
   "main": "./out/main/index.js",
   "author": "mittohoa",
@@ -10,7 +10,7 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
-    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && node scripts/test-overlay-size.ts && node scripts/test-language.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:thumbar && node scripts/test-video.mjs",
+    "test": "node scripts/test-lrc.ts && node scripts/test-align.ts && node scripts/test-identify.ts && node scripts/test-subtitles.ts && node scripts/test-errors.ts && node scripts/test-overlay-size.ts && node scripts/test-language.ts && electron scripts/test-protocol.mjs && node scripts/test-playback.mjs && node scripts/test-smtc.mjs && node scripts/test-error-ui.mjs && node scripts/test-overlay-tune.mjs && node scripts/test-quit.mjs && npm run test:thumbar && node scripts/test-the-loi.mjs && node scripts/test-video.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "icon": "electron scripts/make-icon.mjs",
     "icon:thumbar": "electron scripts/make-thumbar-icons.mjs",
@@ -26,7 +26,8 @@
     "test:thumbar": "esbuild scripts/test-thumbar.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/main/test-thumbar.cjs --log-level=error && electron out/main/test-thumbar.cjs",
     "test:subs": "esbuild scripts/test-subtitle-source.mjs --bundle --platform=node --format=cjs --external:electron --alias:@shared=./src/shared --outfile=out/test-subs.cjs --log-level=error && electron out/test-subs.cjs",
     "test:dich": "esbuild scripts/test-local-translate.mjs --bundle --platform=node --format=cjs --external:electron --external:@huggingface/transformers --alias:@shared=./src/shared --outfile=out/test-dich.cjs --log-level=error && electron out/test-dich.cjs",
-    "test:video": "node scripts/test-video.mjs"
+    "test:video": "node scripts/test-video.mjs",
+    "test:the": "node scripts/test-the-loi.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",

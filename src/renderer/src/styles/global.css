@@ -1626,3 +1626,139 @@ input[type='color'] {
   width: 100vw;
   height: 100vh;
 }
+
+/* ---- Thẻ lời chia sẻ ------------------------------------------------------ */
+
+/* Nút nằm trong dòng lời, chỉ hiện khi rê chuột vào dòng đó. Luôn hiện khi bàn
+   phím đang ở nút — người dùng bàn phím không có "rê chuột vào" để mà hiện. */
+.lyric-line {
+  position: relative;
+}
+.lyric-line__the {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-faint);
+  background: rgb(var(--art-rgb) / 0.12);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.16s var(--ease), color 0.16s var(--ease);
+}
+.lyric-line:hover .lyric-line__the,
+.lyric-line__the:focus-visible {
+  opacity: 1;
+}
+.lyric-line__the:hover {
+  color: var(--art);
+  background: rgb(var(--art-rgb) / 0.24);
+}
+
+.the-loi__nen {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 0.62);
+  backdrop-filter: blur(3px);
+  animation: art-in 0.2s var(--ease);
+}
+
+.the-loi {
+  width: min(920px, 92vw);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px 22px 24px;
+  border-radius: var(--r-lg);
+  background: var(--g1);
+  box-shadow: 0 40px 90px rgb(0 0 0 / 0.6);
+}
+
+.the-loi__dau {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.the-loi__dau h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.the-loi__than {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* Canvas thật là 1080x1350; ở đây chỉ thu nhỏ bằng CSS. Thứ nhìn thấy đúng là
+   thứ được lưu ra. */
+.the-loi__xem {
+  width: 320px;
+  height: 400px;
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgb(0 0 0 / 0.45);
+}
+
+.the-loi__mau {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.the-loi__chip {
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--text);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.16s var(--ease);
+}
+.the-loi__chip:hover:not(:disabled) {
+  border-color: var(--art);
+}
+.the-loi__chip--chon {
+  color: #fff;
+  background: var(--art);
+  border-color: var(--art);
+}
+/* Mẫu cần bìa mà bài không có bìa: làm mờ chứ KHÔNG giấu đi — giấu thì người
+   dùng tưởng app không có mẫu đó. */
+.the-loi__chip--mo {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.the-loi__mota {
+  margin: 14px 0 18px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-faint);
+}
+
+.the-loi__nut {
+  display: flex;
+  gap: 10px;
+}
+
+.the-loi__bao {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  color: var(--art);
+}
+
+@media (max-width: 780px) {
+  .the-loi__than {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}

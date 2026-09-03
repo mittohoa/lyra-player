@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, type JSX } from 'react'
+import { useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import { usePlayer } from '@/store/player'
 import { useLyrics } from '@/store/lyrics'
 import { activeLineIndex } from '@/lib/lyrics'
 import { formatOffset } from '@/lib/format'
 import { useApp } from '@/store/app'
-import { IconEdit, IconRefresh, IconSparkle, IconTranslate } from '@/lib/icons'
+import { IconEdit, IconRefresh, IconShare, IconSparkle, IconTranslate } from '@/lib/icons'
 import { LyraLoader } from './LyraLoader'
+import { TheLoiModal } from './TheLoiModal'
 
 const ORIGIN_LABEL: Record<string, string> = {
   embedded: 'từ tag trong file',
@@ -17,6 +18,8 @@ const ORIGIN_LABEL: Record<string, string> = {
 }
 
 export function LyricsPanel(): JSX.Element {
+  // Câu đang chọn để làm thẻ. null = chưa mở thẻ nào.
+  const [cauLamThe, datCauLamThe] = useState<string | null>(null)
   const track = usePlayer((s) => s.current())
   const position = usePlayer((s) => s.position)
   const seek = usePlayer((s) => s.seek)
@@ -70,6 +73,7 @@ export function LyricsPanel(): JSX.Element {
   }
 
   return (
+    <>
     <div className="lyrics">
       <div className="lyrics__head">
         <strong style={{ fontSize: 14 }}>Lời bài hát</strong>
@@ -209,10 +213,42 @@ export function LyricsPanel(): JSX.Element {
               {translation?.[i] && translation[i] !== line.text && (
                 <div className="lyric-line__translation">{translation[i]}</div>
               )}
+              {/*
+                Nút làm thẻ nằm TRONG dòng, hiện khi rê chuột vào. Để nó ngoài
+                lề thì phải có cách khác chỉ ra đang nói về câu nào — mà câu
+                hát dài ngắn khác nhau, không xếp cột được.
+
+                stopPropagation: bấm vào dòng là tua nhạc tới đó. Bấm nút này
+                thì KHÔNG được tua — người ta đang muốn giữ nguyên chỗ đang
+                nghe để ngắm câu vừa hát.
+              */}
+              {line.text.trim() !== '' && (
+                <button
+                  className="lyric-line__the"
+                  title="Làm thẻ lời để chia sẻ"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    datCauLamThe(line.text)
+                  }}
+                >
+                  <IconShare size={15} />
+                </button>
+              )}
             </div>
           )
         })}
       </div>
     </div>
+
+    {cauLamThe !== null && (
+      <TheLoiModal
+        cauHat={cauLamThe}
+        tenBai={track.title}
+        caSi={track.artist}
+        artwork={track.artwork}
+        onClose={() => datCauLamThe(null)}
+      />
+    )}
+    </>
   )
 }

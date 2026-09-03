@@ -144,6 +144,33 @@ export function registerIpc(): void {
     )
   )
 
+  /**
+   * Luu tam the loi ra file PNG.
+   *
+   * Nhan mang byte chu khong nhan chuoi data: URL — mot tam 1080x1350 ra chung
+   * 300-600 KB, ma data: URL con phinh them mot phan ba vi base64. Gui mang
+   * byte qua thi khong ton them gi.
+   *
+   * Tra ve duong dan da luu, hoac null khi nguoi dung bam Huy.
+   */
+  ipc.handle(
+    IPC.shareSaveCard,
+    async (_e, png: Uint8Array, tenGoiY: string): Promise<string | null> => {
+      const win = getMainWindow()
+      const opts: Electron.SaveDialogOptions = {
+        defaultPath: join(app.getPath('pictures'), tenGoiY),
+        filters: [{ name: 'Ảnh PNG', extensions: ['png'] }]
+      }
+      const ket = win
+        ? await dialog.showSaveDialog(win, opts)
+        : await dialog.showSaveDialog(opts)
+      if (ket.canceled || !ket.filePath) return null
+      await fs.writeFile(ket.filePath, Buffer.from(png))
+      log.info('thẻ lời', 'Đã lưu thẻ ra ' + ket.filePath)
+      return ket.filePath
+    }
+  )
+
   ipc.handle(IPC.libraryAddFolder, async (): Promise<string[]> => {
     const result = await openDialog({ properties: ['openDirectory', 'multiSelections'] })
     if (result.canceled) return getSettings().libraryFolders

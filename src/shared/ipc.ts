@@ -3,6 +3,8 @@ export const IPC = {
   settingsGet: 'settings:get',
   settingsPatch: 'settings:patch',
 
+  shareSaveCard: 'share:save-card',
+
   libraryGet: 'library:get',
   libraryScan: 'library:scan',
   libraryAddFolder: 'library:add-folder',

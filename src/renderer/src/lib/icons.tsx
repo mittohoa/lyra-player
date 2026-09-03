@@ -282,3 +282,17 @@ export const IconVideo = (p: IconProps): JSX.Element => (
     <path d="M15.5 10.5 21.5 7.5v9l-6-3z" />
   </Icon>
 )
+
+export const IconCopy = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <rect x="9" y="9" width="11" height="11" rx="2" />
+    <path d="M15 6.5V5.5A1.5 1.5 0 0 0 13.5 4h-8A1.5 1.5 0 0 0 4 5.5v8A1.5 1.5 0 0 0 5.5 15h1" />
+  </Icon>
+)
+
+export const IconShare = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <rect x="4" y="3" width="16" height="18" rx="2.5" />
+    <path d="M8 9h8M8 13h6" />
+  </Icon>
+)

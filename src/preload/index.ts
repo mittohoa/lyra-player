@@ -67,6 +67,12 @@ const api = {
       invoke(IPC.settingsPatch, patch)
   },
 
+  share: {
+    /** Luu tam the loi ra PNG. Tra ve duong dan, hoac null khi bam Huy. */
+    saveCard: (png: Uint8Array, tenGoiY: string): Promise<string | null> =>
+      invoke(IPC.shareSaveCard, png, tenGoiY)
+  },
+
   library: {
     get: (): Promise<Track[]> => invoke(IPC.libraryGet),
     scan: (): Promise<Track[]> => invoke(IPC.libraryScan),

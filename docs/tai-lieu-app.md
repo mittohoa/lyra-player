@@ -129,6 +129,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | Tải nhạc về máy | chỉ bản `sideload` | ✓ |
 | Phát video trong máy, toàn màn hình | ✓ | ✓ |
 | Phụ đề `.srt` / `.vtt` / `.ass` nằm cạnh tệp | `.srt` | ✓ |
+| Thẻ lời chia sẻ — sáu mẫu bố cục, xuất ảnh | ✓ | ✓ |
 | Tự cập nhật | ✓ | ✓ (hỏng tới 0.1.6, xem mục 8) |
 
 ### Chỉ Android có
@@ -136,8 +137,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | Tính năng | Vì sao Windows chưa có |
 |---|---|
 | **Tự xoay theo chiều video** khi vào toàn màn hình | trên máy tính người dùng tự xoay cửa sổ được, không cần |
-| **Thẻ lời chia sẻ** — sáu mẫu bố cục, xuất ra ảnh | làm ở Android 0.3.4, Windows đứng yên từ 31/8 |
-| **Nhập lời từ ảnh chụp** (OCR) | như trên |
+| **Nhập lời từ ảnh chụp** (OCR) | làm ở Android 0.3.4, Windows chưa theo |
 | **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | như trên |
 | **Góp lời ngược lại cho LRCLIB** | như trên |
 | **Sao lưu lời tự nhập ra tệp** | như trên |
@@ -154,11 +154,12 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 
 ### Hai chỗ Windows còn thua
 
-1. **Không có thẻ lời chia sẻ và OCR.** Hai thứ Android có từ 0.3.4.
+1. **Không có OCR nhập lời từ ảnh, và không có chạm để căn giờ.** Bù lại
+   Windows có căn giờ bằng AI, thứ Android không có.
 2. **Nhạc do chính AURA phát không hiện trong khay media của Windows** — giới
    hạn của Electron, đã thử ba cờ Chromium, không cờ nào ăn (xem mục 7).
 
-*Khoảng cách lớn nhất — không phát được video — đã lấp ở 0.1.8.*
+*Hai khoảng cách lớn nhất đã lấp: phát video ở 0.1.8, thẻ lời chia sẻ ở 0.1.9.*
 
 ---
 
@@ -336,7 +337,42 @@ Phụ đề `.srt` / `.vtt` / `.ass` nằm cạnh tệp được đọc lên nh�
 bộ đọc phụ đề có sẵn từ phần YouTube. Nhãn nguồn ghi **"từ file phụ đề đi kèm"**
 chứ không ghi ".lrc" — nói sai thì người dùng đi tìm một tệp không tồn tại.
 
-### 5.8 Logo động
+### 5.8 Thẻ lời chia sẻ
+
+Thêm ở 0.1.9, làm theo bản Android (`share/TheLoi.kt`) và **dùng đúng số đo của
+nó** — 1080×1350, cùng sáu mẫu, cùng dòng thương hiệu ở góc dưới — để hai bên ra
+cùng một tấm thẻ. Người ta chia sẻ từ điện thoại hay từ máy tính đều phải nhận
+ra là AURA.
+
+Sáu mẫu khác nhau về **bố cục**, không phải bộ màu: một câu hát dữ dội và một
+câu hát buồn không nên trông như nhau.
+
+**Vẽ bằng `<canvas>`, không chụp lại giao diện.** Một hàm duy nhất
+(`lib/theLoi.ts`) dựng cả tấm xem trước lẫn file xuất ra, nên thứ người dùng
+nhìn thấy đúng là thứ được gửi đi. Tấm xem trước chính là canvas 1080×1350 đó,
+chỉ thu nhỏ bằng CSS. Chụp màn hình thì tấm ảnh phụ thuộc cỡ cửa sổ, mật độ điểm
+ảnh và cả nền phía sau — mỗi máy một kiểu.
+
+**Mẫu cần ảnh bìa mà bài không có bìa thì bị làm mờ, không bị giấu đi.** Giấu
+thì người dùng tưởng app không có mẫu đó. Và nếu vẫn gọi vẽ thì nó lùi về mẫu
+mặc định chứ không vẽ ra một tấm trống hoác.
+
+**Nút mở thẻ nằm trong dòng lời**, hiện khi rê chuột. Bấm vào dòng là tua nhạc
+tới đó, nên nút phải chặn sự kiện lan lên — người ta đang muốn giữ nguyên chỗ
+đang nghe để ngắm câu vừa hát.
+
+Lưu ra PNG qua hộp thoại của hệ thống, hoặc chép thẳng vào bảng nháp. Gửi sang
+tiến trình chính bằng **mảng byte chứ không phải chuỗi `data:`** — một tấm
+1080×1350 chừng 300–600 KB, mà `data:` còn phình thêm một phần ba vì base64.
+
+Bài kiểm `test-the-loi.mjs` đo **qua đúng giao diện người dùng bấm**, rồi đọc
+điểm ảnh ra mà so. Phép đo quan trọng nhất là **sáu mẫu có khác nhau thật
+không** — sáu mẫu mà ba mẫu vẽ ra giống hệt nhau thì bài kiểm vẫn xanh nếu chỉ
+hỏi "có vẽ được không". Tệp nhạc thử được dựng ra kèm **ảnh bìa nhúng trong thẻ
+ID3**, vì thiếu bìa thì hai mẫu cần bìa bị tắt và sẽ không bao giờ được vẽ lần
+nào.
+
+### 5.9 Logo động
 
 Cùng một hình với logo AURA, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ
 thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp
