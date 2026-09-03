@@ -397,10 +397,17 @@ năng phần lớn không đụng tới — cùng lối nghĩ với mô hình d�
 bản Android.
 
 **Phần WASM thì có nhúng, nhưng lọc bớt.** `tesseract.js-core` mang tám biến thể
-WASM, tổng 44 MB, mà một lượt chạy chỉ nạp đúng một cái. Đọc
-`worker-script/node/getCore.js` thì thấy: với OEM mặc định (LSTM) nó chỉ đụng ba
-biến thể `-lstm`, chọn theo mức hỗ trợ SIMD của máy. Lọc bốn biến thể còn lại và
-mọi bản gộp-một-file `.wasm.js` thì còn **8,5 MB**.
+WASM, tổng 44 MB, mà một lượt chạy chỉ nạp đúng một cái. Lọc còn ba bản cần dùng
+và bỏ mọi bản gộp-một-file `.wasm.js` thì còn **10 MB** — bộ cài chỉ to thêm
+3,4 MB.
+
+**Chỗ này đọc mã suýt dẫn đi sai, phải đo mới ra.** `getCore.js` đặt tên tham số
+đầu là `oem` rồi hỏi `[OEM.DEFAULT, OEM.LSTM_ONLY].includes(oem)`, nhìn thì
+tưởng bản `-lstm` được chọn — và tôi đã lọc theo hướng đó. Nhưng chỗ gọi nó
+(`worker-script/index.js` dòng 42) truyền vào `lstmOnly`, một giá trị ĐÚNG/SAI,
+mà `true` thì không bao giờ nằm trong `[3, 1]`. Nên trong Node, Tesseract **luôn
+nạp biến thể không phải `-lstm`**. Bản chạy từ mã nguồn không lộ ra vì
+`node_modules` còn đủ tám biến thể; chỉ bản đã đóng gói mới chết.
 
 **Chọn ảnh và đọc ảnh là hai lệnh riêng**, không gộp một. Gộp lại thì không bài
 kiểm tự động nào chạm vào được: hộp thoại của hệ điều hành đòi một cú bấm thật.

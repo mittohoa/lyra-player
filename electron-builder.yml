@@ -45,15 +45,18 @@ files:
   - '!node_modules/onnxruntime-web/**'
 
   # Bộ đọc chữ Tesseract mang TÁM biến thể WASM — 44 MB, mà một lượt chạy chỉ
-  # nạp đúng một cái. Xem `tesseract.js/src/worker-script/node/getCore.js`: với
-  # OEM mặc định (LSTM) nó chỉ đụng tới ba biến thể `-lstm`, chọn theo mức hỗ
-  # trợ SIMD của máy. Bốn biến thể còn lại không đường nào chạy tới.
-  - '!node_modules/tesseract.js-core/tesseract-core.wasm'
-  - '!node_modules/tesseract.js-core/tesseract-core.js'
-  - '!node_modules/tesseract.js-core/tesseract-core-simd.wasm'
-  - '!node_modules/tesseract.js-core/tesseract-core-simd.js'
-  - '!node_modules/tesseract.js-core/tesseract-core-relaxedsimd.wasm'
-  - '!node_modules/tesseract.js-core/tesseract-core-relaxedsimd.js'
+  # nạp đúng một cái.
+  #
+  # ĐO CHỨ KHÔNG ĐOÁN, vì đọc mã suýt dẫn tôi đi sai: `getCore.js` đặt tên tham
+  # số đầu là `oem` rồi hỏi `[OEM.DEFAULT, OEM.LSTM_ONLY].includes(oem)` —
+  # nhìn thì tưởng bản `-lstm` được chọn. Nhưng chỗ gọi nó
+  # (`worker-script/index.js` dòng 42) truyền vào `lstmOnly`, một giá trị
+  # ĐÚNG/SAI. Mà `true` thì không bao giờ nằm trong `[3, 1]`. Nên khi chạy
+  # trong Node, Tesseract LUÔN nạp biến thể KHÔNG phải `-lstm`.
+  #
+  # Giữ cả ba bản không-lstm vì máy nào hỗ trợ tới đâu thì nó chọn tới đó.
+  - '!node_modules/tesseract.js-core/*-lstm.js'
+  - '!node_modules/tesseract.js-core/*-lstm.wasm'
 
   # Và bỏ hết bản GỘP-MỘT-FILE (`.wasm.js`, mỗi cái 3-4 MB): đó là bản nhúng
   # WASM vào JS dưới dạng base64, dành cho chỗ không nạp được file .wasm rời.
