@@ -357,13 +357,23 @@ thì một người cài tay bản 0.1.0 sẽ dùng nó mãi mãi, kể cả sau
 
 Một **bản phát hành GitHub mang cả hai nền tảng**: APK Android và exe Windows
 nằm chung một thẻ, kèm `SHA256SUMS.txt` và `latest.yml`. Số hiệu hai bên đi
-riêng — `v0.3.11` mang Android 0.3.11 và Windows 0.1.6 — nên bộ dò bản mới phải
+riêng — `v0.3.11` mang Android 0.3.11 và Windows 0.1.7 — nên bộ dò bản mới phải
 đọc **tên tệp**, không đọc tên thẻ.
 
 **Windows** dùng `electron-updater` đọc trang phát hành GitHub: tải ngầm, cài
 lúc thoát app. Nhờ `.blockmap`, lần cập nhật sau thường chỉ tải vài MB chứ
 không tải lại cả bộ cài 104 MB. Bản **portable** thì tắt — nó là một file người
 dùng tự để đâu tuỳ ý, ghi đè lên nó là việc không nên tự tiện làm.
+
+> **Chỗ này từng hỏng suốt mà không ai biết.** `electron-updater` là module
+> CommonJS và bày `autoUpdater` ra bằng một *getter* trên `module.exports`; Node
+> dò tên export của CJS bằng cách đọc tĩnh mã nguồn nên không thấy getter đó, và
+> `const { autoUpdater } = await import(...)` trả về `undefined`. Phải lấy qua
+> `.default`. Lỗi sống được tới bản 0.1.6 vì hai lẽ: nó **chỉ xuất hiện trong bản
+> đã cài** (bản portable và bản dev đều thoát sớm trước đó), và phần này **chỉ ghi
+> nhật ký khi có bản mới hoặc khi lỗi** — lúc hỏng hoàn toàn thì nhật ký trống
+> trơn, không khác gì lúc chạy tốt. Sửa ở 0.1.7, kèm một dòng nhật ký lúc khởi
+> động để lần sau nhìn thấy được.
 
 **Android** hỏi GitHub một lần mỗi lần mở app, rồi hiện một dải báo ở đầu màn
 hình. Bản `sideload` tự tải APK và mở thẳng hộp cài đặt của hệ thống; bản `play`

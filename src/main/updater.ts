@@ -39,7 +39,31 @@ export async function batTuCapNhat(): Promise<void> {
     return
   }
 
-  const { autoUpdater } = await import('electron-updater')
+  // `electron-updater` là module CommonJS và bày `autoUpdater` ra bằng một
+  // GETTER trên `module.exports`. Node dò tên export của module CJS bằng cách
+  // đọc tĩnh mã nguồn, và nó KHÔNG thấy getter — nên
+  // `const { autoUpdater } = await import('electron-updater')` trả về
+  // `undefined`, rồi dòng kế tiếp ném `TypeError: Cannot set properties of
+  // undefined`. Lỗi này chỉ lộ ra trong BẢN ĐÓNG GÓI ĐÃ CÀI: bản portable và
+  // bản chạy dev đều thoát sớm ở `tuCapNhatDuoc()` nên không bao giờ chạy tới
+  // đây. Nghĩa là tự cập nhật hỏng từ đầu mà không ai thấy.
+  //
+  // Đo được: Node thấy AppUpdater, NsisUpdater, MacUpdater… nhưng không thấy
+  // autoUpdater. Lấy qua `.default` thì được — đó chính là `module.exports`.
+  const nap = await import('electron-updater')
+  const autoUpdater =
+    nap.autoUpdater ?? (nap as unknown as { default: typeof nap }).default?.autoUpdater
+
+  if (!autoUpdater) {
+    // Nói thẳng ra thay vì để một TypeError trần trụi rơi vào lưới bắt lỗi
+    // chung — ở đó nó hiện thành "Một tác vụ nền thất bại", câu chẳng giúp ai
+    // lần ra nguyên nhân.
+    log.warn(
+      'cập nhật',
+      'Không lấy được autoUpdater từ electron-updater — bỏ qua phần tự cập nhật'
+    )
+    return
+  }
 
   // Tải ngầm thì được, nhưng cài thì phải đợi lúc thoát
   autoUpdater.autoDownload = true
@@ -76,4 +100,10 @@ export async function batTuCapNhat(): Promise<void> {
 
   setTimeout(kiem, CHO_LUC_MO)
   setInterval(kiem, NHIP_KIEM)
+
+  // Mot dong noi ro la da bat duoc. Truoc day phan nay chi ghi nhat ky khi CO
+  // ban moi hoac khi LOI, nen luc no hong hoan toan thi nhat ky trong tron -
+  // giong het luc chay tot. Loi `autoUpdater undefined` song duoc nhieu thang
+  // la nho cho im lang do.
+  log.info('cập nhật', `Đã bật tự cập nhật — kiểm sau ${CHO_LUC_MO / 1000}s rồi mỗi ${NHIP_KIEM / 3600000} tiếng`)
 }
