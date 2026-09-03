@@ -5,6 +5,7 @@ import type { Lyrics, LyricsQuery } from '@shared/types'
 import { getSettings, lyricsOffsetStore, manualLyricsStore } from '../store'
 import { emptyLyrics, toLyrics } from './lrc'
 import { fetchBest } from './lrclib'
+import { parseSubtitles } from '../subtitles/parse'
 import { log } from '../logger'
 
 export * from './lrc'
@@ -34,13 +35,26 @@ async function writeCache(query: LyricsQuery, content: string): Promise<void> {
   }
 }
 
-/** Tim file .lrc / .txt nam canh file nhac. */
-async function readSidecar(filePath: string): Promise<string | null> {
+/**
+ * Tim file loi hoac phu de nam canh file.
+ *
+ * `.lrc` di truoc `.srt`: mot phim co ca hai thi ban `.lrc` gan nhu chac chan
+ * la loi bai hat co nguoi cham vao, con `.srt` thuong la phu de tai kem.
+ *
+ * Tra ve ca DINH DANG chu khong chi noi dung. Doc `.srt` bang bo doc `.lrc`
+ * thi ra rong — hai dinh dang ghi moc gio khac han nhau — va man hinh se bao
+ * "khong co loi" trong khi tep nam ngay canh do.
+ */
+async function readSidecar(
+  filePath: string
+): Promise<{ content: string; laPhuDe: boolean } | null> {
   const stem = filePath.slice(0, filePath.length - extname(filePath).length)
-  for (const ext of ['.lrc', '.LRC', '.txt']) {
+  for (const ext of ['.lrc', '.LRC', '.txt', '.srt', '.SRT', '.vtt', '.VTT', '.ass', '.ASS']) {
     try {
       const content = await fs.readFile(stem + ext, 'utf8')
-      if (content.trim()) return content
+      if (content.trim()) {
+        return { content, laPhuDe: /\.(srt|vtt|ass)$/i.test(ext) }
+      }
     } catch {
       // khong co file nay, thu duoi tiep theo
     }
@@ -50,7 +64,7 @@ async function readSidecar(filePath: string): Promise<string | null> {
     const base = filePath.slice(dirname(filePath).length + 1)
     const stemName = base.slice(0, base.length - extname(base).length)
     const content = await fs.readFile(join(dirname(filePath), 'lyrics', `${stemName}.lrc`), 'utf8')
-    if (content.trim()) return content
+    if (content.trim()) return { content, laPhuDe: false }
   } catch {
     // khong co
   }
@@ -115,7 +129,13 @@ export async function resolveLyrics(
 
     if (query.filePath) {
       const sidecar = await readSidecar(query.filePath)
-      if (sidecar) return toLyrics(sidecar, 'sidecar', offset)
+      if (sidecar) {
+        if (!sidecar.laPhuDe) return toLyrics(sidecar.content, 'sidecar', offset)
+        const lines = parseSubtitles(sidecar.content)
+        if (lines.length) return { kind: 'synced', lines, origin: 'subtitle', offset }
+        // Doc ra khong duoc dong nao: coi nhu khong co, di tim nguon khac. Nhan
+        // mot ban loi rong roi dung lai thi moi nguon con lai deu bi bo qua.
+      }
     }
 
     if (embedded?.trim()) return toLyrics(embedded, 'embedded', offset)

@@ -8,11 +8,29 @@ import {
 } from '@/lib/mediaSession'
 import { logToMain, report } from '@/lib/report'
 
-/** Mot the <audio> duy nhat cho ca app - tao san de khong bi mat khi React re-render. */
-const audio = new Audio()
+/**
+ * Mot the phat duy nhat cho ca app - tao san de khong bi mat khi React re-render.
+ *
+ * La <video> chu KHONG phai <audio>, du phan lon thoi gian no phat nhac.
+ *
+ * Mot the <video> chua gan vao trang chay y het <audio>: van tai, van phat,
+ * van ban su kien nhu thuong. Nhung khi bai dang phat la phim thi chi viec gan
+ * no vao o bia — hinh hien ra ngay, con hang doi, vi tri phat, media session
+ * va toan bo phan con lai cua tep nay khong phai doi mot dong.
+ *
+ * Cach kia — hai the rieng, mot cho tieng mot cho hinh — bat ta nhan doi moi
+ * cho dang goi `audio.` o duoi (39 cho), roi giu chung dong bo voi nhau.
+ *
+ * Chuyen the <video> tu cho nay sang cho khac trong trang KHONG lam dut nhac:
+ * Chromium giu nguyen mach phat khi phan tu doi cha.
+ */
+const audio = document.createElement('video')
 audio.preload = 'auto'
+// Khong co hinh thi the <video> van chiem cho theo ti le mac dinh; de app tu
+// quyet cho hien bang CSS.
+audio.playsInline = true
 // Khong dat crossOrigin: nhieu CDN nhac (Zing/NCT) khong tra header CORS,
-// dat vao se lam the <audio> tu choi phat.
+// dat vao se lam the phat tu choi phat.
 
 interface PlayerState {
   queue: Track[]

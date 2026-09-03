@@ -127,14 +127,15 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | Đọc lời nhúng trong thẻ tệp nhạc | ID3 `USLT` **và `SYLT` có mốc giờ**, Vorbis | `music-metadata`, chữ trơn |
 | Dịch lời tại chỗ | ML Kit | ONNX, hai mô hình chọn được |
 | Tải nhạc về máy | chỉ bản `sideload` | ✓ |
+| Phát video trong máy, toàn màn hình | ✓ | ✓ |
+| Phụ đề `.srt` / `.vtt` / `.ass` nằm cạnh tệp | `.srt` | ✓ |
 | Tự cập nhật | ✓ | ✓ (hỏng tới 0.1.6, xem mục 8) |
 
 ### Chỉ Android có
 
 | Tính năng | Vì sao Windows chưa có |
 |---|---|
-| **Phát video** trong máy, toàn màn hình, tự xoay theo chiều video | Windows chỉ có thẻ `<audio>`; thêm video là mở một nhánh mới |
-| **Phụ đề `.srt`** nằm cạnh tệp video | đi kèm phần video ở trên |
+| **Tự xoay theo chiều video** khi vào toàn màn hình | trên máy tính người dùng tự xoay cửa sổ được, không cần |
 | **Thẻ lời chia sẻ** — sáu mẫu bố cục, xuất ra ảnh | làm ở Android 0.3.4, Windows đứng yên từ 31/8 |
 | **Nhập lời từ ảnh chụp** (OCR) | như trên |
 | **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | như trên |
@@ -151,13 +152,13 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Lấy phụ đề YouTube** cho video đang xem trong trình duyệt | cần `yt-dlp`, một tệp nhị phân bên ngoài |
 | Thanh nút điều khiển ở ô xem trước dưới taskbar | riêng của Windows |
 
-### Ba chỗ Windows thua rõ nhất
+### Hai chỗ Windows còn thua
 
-1. **Không phát được video.** Khoảng cách lớn nhất. Android mở video, xoay
-   ngang, đọc phụ đề `.srt` nằm cạnh; Windows không có thẻ `<video>` nào.
-2. **Không có thẻ lời chia sẻ và OCR.** Hai thứ Android có từ 0.3.4.
-3. **Nhạc do chính AURA phát không hiện trong khay media của Windows** — giới
+1. **Không có thẻ lời chia sẻ và OCR.** Hai thứ Android có từ 0.3.4.
+2. **Nhạc do chính AURA phát không hiện trong khay media của Windows** — giới
    hạn của Electron, đã thử ba cờ Chromium, không cờ nào ăn (xem mục 7).
+
+*Khoảng cách lớn nhất — không phát được video — đã lấp ở 0.1.8.*
 
 ---
 
@@ -306,7 +307,36 @@ Việc chạy nền có cơ chế riêng vì không có ai đang đứng đợi:
 dựng lại 3 lần rồi mới chịu thua và báo; bị YouTube chặn 429 thì nói rõ là tạm
 thời và sẽ tự hết.
 
-### 5.7 Logo động
+### 5.7 Phát video
+
+Thêm ở 0.1.8. Cách làm gọn hơn vẻ ngoài của nó: **cả app chỉ có MỘT thẻ phát,
+và thẻ đó là `<video>` chứ không phải `<audio>`** (`store/player.ts`).
+
+Một thẻ `<video>` chưa gắn vào trang chạy y hệt `<audio>`: vẫn tải, vẫn phát,
+vẫn bắn sự kiện. Nên khi bài đang phát là phim thì chỉ việc **gắn nó vào ô bìa**
+(`VideoStage.tsx`) — hàng đợi, vị trí phát, media session và toàn bộ phần còn
+lại không phải đổi một dòng. Chuyển thẻ từ chỗ này sang chỗ khác trong trang
+không làm đứt tiếng: Chromium giữ nguyên mạch phát khi phần tử đổi cha.
+
+Cách kia — hai thẻ riêng, một cho tiếng một cho hình — bắt phải nhân đôi cả 39
+chỗ đang gọi `audio.` trong store, rồi giữ chúng đồng bộ với nhau.
+
+**Nhận ra đâu là phim thì phải nhìn vào tệp, không nhìn đuôi.** Một `.mp4` chỉ
+có tiếng là chuyện thường, và bảo nó là phim thì người dùng mở ra chỉ thấy một ô
+đen. Đo trên tệp thật: `music-metadata` trả về hai track cho một `.mp4`
+h264+aac, và track hình có `type` là `undefined`, `video` cũng `undefined` —
+chỉ có `codecName` là `<avc1>`. Nên bộ nhận dạng phải nhìn cả mã bộ giải, không
+thể hỏi `t.video` rồi tin.
+
+Chỉ quét những đuôi Chromium phát được thật: `.mp4` `.m4v` `.webm` `.mov`
+`.ogv`. **`.mkv` cố ý không có** dù nó phổ biến — Chromium không giải được
+Matroska, quét vào chỉ để người dùng bấm vào rồi thấy báo lỗi.
+
+Phụ đề `.srt` / `.vtt` / `.ass` nằm cạnh tệp được đọc lên như lời bài hát, qua
+bộ đọc phụ đề có sẵn từ phần YouTube. Nhãn nguồn ghi **"từ file phụ đề đi kèm"**
+chứ không ghi ".lrc" — nói sai thì người dùng đi tìm một tệp không tồn tại.
+
+### 5.8 Logo động
 
 Cùng một hình với logo AURA, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ
 thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp

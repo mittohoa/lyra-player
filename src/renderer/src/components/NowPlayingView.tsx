@@ -2,6 +2,7 @@ import type { JSX } from 'react'
 import { usePlayer } from '@/store/player'
 import { useApp } from '@/store/app'
 import { LyricsPanel } from './LyricsPanel'
+import { VideoStage } from './VideoStage'
 import { formatTime, sourceLabel } from '@/lib/format'
 import { IconMusic, IconOverlay } from '@/lib/icons'
 
@@ -22,6 +23,7 @@ export function NowPlayingView(): JSX.Element {
     )
   }
 
+  const laPhim = track.kind === 'video'
   const overlayOn = settings?.overlay.enabled ?? false
 
   const toggleOverlay = async (): Promise<void> => {
@@ -33,8 +35,18 @@ export function NowPlayingView(): JSX.Element {
   return (
     <div className="now-playing">
       <div>
-        <div className="np-art-large">
-          {track.artwork ? (
+        {/*
+          Phim thi cho hinh chiem dung o bia, khong mo them trang rieng.
+          Nguoi ta dang o day de xem loi chay theo tieng; day sang mot man hinh
+          khac la cat mat dung thu ho toi de xem.
+
+          Bo o vuong khi la phim: hinh nao cung ngang, ep vao khung 1:1 thi hoac
+          cat mat hai ben hoac chua hai dai den.
+        */}
+        <div className={'np-art-large' + (laPhim ? ' np-art-large--phim' : '')}>
+          {laPhim ? (
+            <VideoStage />
+          ) : track.artwork ? (
             <img
               src={track.artwork}
               alt=""

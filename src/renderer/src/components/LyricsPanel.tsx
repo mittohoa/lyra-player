@@ -10,6 +10,7 @@ import { LyraLoader } from './LyraLoader'
 const ORIGIN_LABEL: Record<string, string> = {
   embedded: 'từ tag trong file',
   sidecar: 'từ file .lrc đi kèm',
+  subtitle: 'từ file phụ đề đi kèm',
   lrclib: 'từ LRCLIB',
   manual: 'bạn tự nhập',
   none: 'không có'

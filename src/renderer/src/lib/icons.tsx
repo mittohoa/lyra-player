@@ -263,3 +263,22 @@ export const IconSliders = (p: IconProps): JSX.Element => (
     <circle cx="9.5" cy="16.5" r="2.5" />
   </Icon>
 )
+
+export const IconFullscreen = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <path d="M4 9V5.5A1.5 1.5 0 0 1 5.5 4H9M15 4h3.5A1.5 1.5 0 0 1 20 5.5V9M20 15v3.5a1.5 1.5 0 0 1-1.5 1.5H15M9 20H5.5A1.5 1.5 0 0 1 4 18.5V15" />
+  </Icon>
+)
+
+export const IconFullscreenExit = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <path d="M9 4v3.5A1.5 1.5 0 0 1 7.5 9H4M20 9h-3.5A1.5 1.5 0 0 1 15 7.5V4M15 20v-3.5a1.5 1.5 0 0 1 1.5-1.5H20M4 15h3.5A1.5 1.5 0 0 1 9 16.5V20" />
+  </Icon>
+)
+
+export const IconVideo = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <rect x="2.5" y="6" width="13" height="12" rx="2" />
+    <path d="M15.5 10.5 21.5 7.5v9l-6-3z" />
+  </Icon>
+)

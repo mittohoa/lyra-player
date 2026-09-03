@@ -3,6 +3,9 @@
 export type SourceId = 'local' | 'direct' | 'youtube' | 'zing' | 'nct' | 'spotify'
 
 /** Mot bai hat, du la file local hay ket qua tu nguon online. */
+/** Bai nhac hay doan phim. Thieu truong nay thi coi nhu nhac. */
+export type MediaKind = 'audio' | 'video'
+
 export interface Track {
   /** Khoa duy nhat: `${source}:${sourceId}` */
   id: string
@@ -27,6 +30,13 @@ export interface Track {
   isLive?: boolean
   /** Epoch ms, dung de sap xep "moi them". */
   addedAt?: number
+  /**
+   * Nhac hay phim. Vang mat = nhac.
+   *
+   * De vang mat thay vi mac dinh 'audio' co ly do: thu vien nguoi dung da luu
+   * tu ban truoc khong co truong nay, va doc lai phai ra dung ket qua cu.
+   */
+  kind?: MediaKind
 }
 
 /** URL phat duoc + header can thiet, do main process phan giai. */
@@ -53,8 +63,14 @@ export interface Lyrics {
   lines: LyricLine[]
   /** Toan van, dung khi kind === 'plain'. */
   plainText?: string
-  /** Nguon lay duoc lyric, hien thi trong UI. */
-  origin: 'embedded' | 'sidecar' | 'lrclib' | 'manual' | 'none'
+  /**
+   * Nguon lay duoc lyric, hien thi trong UI.
+   *
+   * `subtitle` tach rieng khoi `sidecar`: ca hai deu nam canh file, nhung noi
+   * "tu file .lrc di kem" khi that ra doc mot file .srt la noi sai voi nguoi
+   * dung — ho se di tim mot file .lrc khong ton tai.
+   */
+  origin: 'embedded' | 'sidecar' | 'subtitle' | 'lrclib' | 'manual' | 'none'
   /** Lech thoi gian nguoi dung chinh tay (giay, co the am). */
   offset: number
 }

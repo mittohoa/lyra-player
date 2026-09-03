@@ -3,7 +3,15 @@ import type { Track } from '@shared/types'
 import { AddToPlaylist } from './AddToPlaylist'
 import { formatTime, sourceLabel } from '@/lib/format'
 import { useDownloads } from '@/store/downloads'
-import { IconDownload, IconFolder, IconMusic, IconPlay, IconQueue, IconTrash } from '@/lib/icons'
+import {
+  IconDownload,
+  IconFolder,
+  IconMusic,
+  IconPlay,
+  IconQueue,
+  IconTrash,
+  IconVideo
+} from '@/lib/icons'
 import { LyraLoader } from './LyraLoader'
 
 interface Props {
@@ -70,9 +78,16 @@ export function TrackRow({
     >
       <div className="track-row__index">{index !== undefined ? index + 1 : ''}</div>
 
+      {/*
+        Phim thi de icon phim thay cho not nhac. Nhieu tep phim khong co anh
+        bia, va mot danh sach toan not nhac khong cho biet bam vao se ra tieng
+        hay ra hinh.
+      */}
       <div className="track-row__art">
         {track.artwork ? (
           <img src={track.artwork} alt="" width={40} height={40} loading="lazy" />
+        ) : track.kind === 'video' ? (
+          <IconVideo size={16} />
         ) : (
           <IconMusic size={16} />
         )}

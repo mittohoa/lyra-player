@@ -1563,3 +1563,66 @@ input[type='color'] {
   gap: 8px;
   margin-top: 12px;
 }
+
+/* ---- Chỗ hiện hình khi bài đang phát là phim ------------------------------ */
+
+/* Phim thì bỏ khung vuông: hình nào cũng ngang, ép vào 1:1 thì hoặc cắt mất
+   hai bên hoặc chừa hai dải đen. */
+.np-art-large--phim {
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+/* Thẻ <video> do store giữ, chỉ được gắn vào đây - nên nhắm bằng tên thẻ. */
+.video-stage video {
+  width: 100%;
+  height: 100%;
+  /* `contain` chứ không `cover`: cắt mất mép của một đoạn phim là cắt mất nội
+     dung, khác hẳn ảnh bìa vốn chỉ là nền. */
+  object-fit: contain;
+  display: block;
+}
+
+.video-stage__nut {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.18s var(--ease);
+}
+/* Hiện khi rê chuột vào, và luôn hiện khi bàn phím đang ở nút - người dùng bàn
+   phím không có "rê chuột vào" để mà hiện ra. */
+.video-stage:hover .video-stage__nut,
+.video-stage__nut:focus-visible {
+  opacity: 1;
+}
+.video-stage__nut:hover {
+  background: rgb(0 0 0 / 0.72);
+}
+
+/* Toàn màn hình: thẻ bọc phủ kín, nút vẫn nằm trong tầm với */
+.video-stage:fullscreen {
+  display: grid;
+  place-items: center;
+}
+.video-stage:fullscreen video {
+  width: 100vw;
+  height: 100vh;
+}

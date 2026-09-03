@@ -1,14 +1,36 @@
 import { promises as fs, type Dirent } from 'node:fs'
 import { basename, extname, join, sep } from 'node:path'
 import { parseFile, type IAudioMetadata } from 'music-metadata'
-import type { ScanProgress, Track } from '@shared/types'
+import type { MediaKind, ScanProgress, Track } from '@shared/types'
 import { libraryStore } from './store'
 import { log } from './logger'
 
-const AUDIO_EXT = new Set([
+/** Duoi chi co the la nhac, khong bao gio mang hinh. */
+const DUOI_NHAC = new Set([
   '.mp3', '.flac', '.m4a', '.aac', '.ogg', '.oga', '.opus',
-  '.wav', '.wma', '.aiff', '.aif', '.mp4', '.webm'
+  '.wav', '.wma', '.aiff', '.aif'
 ])
+
+/**
+ * Duoi CO THE mang hinh — nhung cung co the chi co tieng.
+ *
+ * Chi liet ke thu Chromium phat duoc that. `.mkv` khong co trong day du no
+ * pho bien: Chromium khong giai duoc Matroska, quet vao chi de nguoi dung bam
+ * vao roi thay bao loi.
+ */
+const DUOI_CO_THE_CO_HINH = new Set(['.mp4', '.m4v', '.webm', '.mov', '.ogv'])
+
+const AUDIO_EXT = new Set([...DUOI_NHAC, ...DUOI_CO_THE_CO_HINH])
+
+/**
+ * Ma cua cac bo giai HINH, doc tu `trackInfo`.
+ *
+ * ĐO TRÊN TEP THAT, khong doan: voi mot .mp4 h264+aac, `music-metadata` tra ve
+ * hai track, va track hinh co `type` la undefined, `video` cung undefined —
+ * chi co `codecName` la `<avc1>`. Nen khong the hoi `t.video` roi tin; phai
+ * nhin ca ma bo giai.
+ */
+const MA_HINH = /^(avc[13]|hev1|hvc[13]|vp0?[89]|av01|mp4v|theora|h26[345])/i
 
 /** Thu muc bo qua khi quet - toan rac hoac file he thong. */
 const SKIP_DIRS = new Set(['node_modules', '$RECYCLE.BIN', 'System Volume Information', '.git'])
@@ -88,11 +110,33 @@ function extractEmbeddedLyrics(meta: IAudioMetadata): string | undefined {
   return joined || undefined
 }
 
+/** Tep nay co luong hinh khong. Dung cho mot vai duoi vua la nhac vua la phim. */
+function coHinh(meta: IAudioMetadata): boolean {
+  return (meta.format.trackInfo ?? []).some((t) => {
+    if (t.video != null) return true
+    const ma = t.codecName?.replace(/[<>]/g, '').trim()
+    return ma != null && MA_HINH.test(ma)
+  })
+}
+
+/**
+ * Nhac hay phim.
+ *
+ * Duoi thuan nhac thi khoi doc. Duoi hai nghia thi phai NHIN VAO TEP: mot
+ * `.mp4` chi co tieng la chuyen thuong, va bao no la phim thi nguoi dung mo
+ * ra chi thay mot o den.
+ */
+function loaiCuaTep(filePath: string, meta: IAudioMetadata): MediaKind {
+  if (!DUOI_CO_THE_CO_HINH.has(extname(filePath).toLowerCase())) return 'audio'
+  return coHinh(meta) ? 'video' : 'audio'
+}
+
 export async function readTrackFromFile(filePath: string): Promise<Track | null> {
   try {
     const stat = await fs.stat(filePath)
     const meta = await parseFile(filePath, { duration: true, skipCovers: false })
     const guess = guessFromFilename(filePath)
+    const kind = loaiCuaTep(filePath, meta)
     return {
       id: trackIdForFile(filePath),
       source: 'local',
@@ -110,6 +154,7 @@ export async function readTrackFromFile(filePath: string): Promise<Track | null>
       artwork: pictureToDataUri(meta),
       filePath,
       embeddedLyrics: extractEmbeddedLyrics(meta),
+      kind,
       addedAt: stat.mtimeMs
     }
   } catch (err) {
