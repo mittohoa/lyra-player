@@ -98,10 +98,14 @@ writeFileSync(
   'utf8'
 )
 
+// Mac dinh chay ma nguon. Dat AURA_EXE tro toi mot ban DA CAI thi do chinh
+// ban do — kiem ma nguon khong thay duoc cho kiem thu that su giao di.
+const EXE = process.env.AURA_EXE
 const { default: electron } = await import('electron')
+console.log('  do tren: ' + (EXE ? 'ban da cai' : 'ma nguon'))
 const child = spawn(
-  electron,
-  ['.', `--user-data-dir=${userData}`, `--remote-debugging-port=${PORT}`],
+  EXE ?? electron,
+  [...(EXE ? [] : ['.']), `--user-data-dir=${userData}`, `--remote-debugging-port=${PORT}`],
   { stdio: ['ignore', 'pipe', 'pipe'] }
 )
 const appLog = []
