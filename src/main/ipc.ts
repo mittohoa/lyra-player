@@ -171,6 +171,32 @@ export function registerIpc(): void {
     }
   )
 
+  /**
+   * CHON anh va DOC anh tach lam hai lenh, khong gop mot.
+   *
+   * Gop lai thi khong bai kiem tu dong nao cham vao duoc: hop thoai cua he dieu
+   * hanh doi mot cu bam that, khong lai duoc bang ma. Ma phan dang can do lai
+   * chinh la phan doc chu.
+   *
+   * Tach ra con mo duong cho keo tha anh vao sau nay - luc do da co san duong
+   * dan, khong can hop thoai nua.
+   */
+  ipc.handle(IPC.ocrPick, async (): Promise<string | null> => {
+    const chon = await openDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'Ảnh', extensions: ['png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif'] }]
+    })
+    return chon.canceled || chon.filePaths.length === 0 ? null : chon.filePaths[0]
+  })
+
+  ipc.handle(
+    IPC.ocrRead,
+    async (_e, duongAnh: string): Promise<{ chu: string; doTin: number }> => {
+      const { docChuTuAnh } = await import('./ai/ocr')
+      return docChuTuAnh(duongAnh)
+    }
+  )
+
   ipc.handle(IPC.libraryAddFolder, async (): Promise<string[]> => {
     const result = await openDialog({ properties: ['openDirectory', 'multiSelections'] })
     if (result.canceled) return getSettings().libraryFolders

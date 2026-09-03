@@ -44,9 +44,27 @@ files:
   # Bản chạy trong trình duyệt (WASM) — 130 MB, và tiến trình chính không dùng
   - '!node_modules/onnxruntime-web/**'
 
+  # Bộ đọc chữ Tesseract mang TÁM biến thể WASM — 44 MB, mà một lượt chạy chỉ
+  # nạp đúng một cái. Xem `tesseract.js/src/worker-script/node/getCore.js`: với
+  # OEM mặc định (LSTM) nó chỉ đụng tới ba biến thể `-lstm`, chọn theo mức hỗ
+  # trợ SIMD của máy. Bốn biến thể còn lại không đường nào chạy tới.
+  - '!node_modules/tesseract.js-core/tesseract-core.wasm'
+  - '!node_modules/tesseract.js-core/tesseract-core.js'
+  - '!node_modules/tesseract.js-core/tesseract-core-simd.wasm'
+  - '!node_modules/tesseract.js-core/tesseract-core-simd.js'
+  - '!node_modules/tesseract.js-core/tesseract-core-relaxedsimd.wasm'
+  - '!node_modules/tesseract.js-core/tesseract-core-relaxedsimd.js'
+
+  # Và bỏ hết bản GỘP-MỘT-FILE (`.wasm.js`, mỗi cái 3-4 MB): đó là bản nhúng
+  # WASM vào JS dưới dạng base64, dành cho chỗ không nạp được file .wasm rời.
+  # Electron nạp được, nên chúng chỉ nằm chiếm chỗ.
+  - '!node_modules/tesseract.js-core/*.wasm.js'
+
 # Bản nhị phân gốc không nạp được từ trong file nén asar, phải để ngoài
 asarUnpack:
   - node_modules/onnxruntime-node/**
+  # WASM cũng không nạp được từ trong file nén asar
+  - node_modules/tesseract.js-core/**
 extraResources:
   - from: resources/icon.png
     to: icon.png

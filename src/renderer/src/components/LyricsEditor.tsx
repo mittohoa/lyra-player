@@ -3,6 +3,7 @@ import { usePlayer } from '@/store/player'
 import { useLyrics } from '@/store/lyrics'
 import { formatTime } from '@/lib/format'
 import { LyraLoader } from './LyraLoader'
+import { IconImage } from '@/lib/icons'
 
 /**
  * Hop thoai tu nhap lyric. Chap nhan ca van ban thuan lan dinh dang .lrc.
@@ -16,6 +17,40 @@ export function LyricsEditor(): JSX.Element | null {
   const { editorOpen, setEditorOpen, saveManual, lyrics } = useLyrics()
   const [text, setText] = useState('')
   const [saving, setSaving] = useState(false)
+  // Đang đọc ảnh. Một lượt đọc mất vài giây tới vài chục giây tuỳ ảnh, nên
+  // phải cho thấy là app đang làm việc chứ không phải đứng hình.
+  const [dangDoc, datDangDoc] = useState(false)
+  const [baoOcr, datBaoOcr] = useState<string | null>(null)
+
+  /**
+   * Chọn một tấm ảnh rồi chèn chữ đọc được vào CUỐI ô soạn.
+   *
+   * Chèn thêm chứ không thay thế: người ta có thể chụp lời làm nhiều tấm, và
+   * đọc tấm thứ hai mà xoá mất tấm thứ nhất thì phải làm lại từ đầu.
+   */
+  const nhapTuAnh = async (): Promise<void> => {
+    datBaoOcr(null)
+    datDangDoc(true)
+    try {
+      const duong = await window.api.ocr.pick()
+      if (!duong) return
+      const ra = await window.api.ocr.read(duong)
+      if (!ra.chu.trim()) {
+        datBaoOcr('Không đọc ra chữ nào trong ảnh này.')
+        return
+      }
+      setText((cu) => (cu.trim() ? cu.replace(/\s*$/, '') + '\n' + ra.chu : ra.chu))
+      datBaoOcr(
+        ra.doTin < 60
+          ? `Đã chèn, nhưng ảnh hơi khó đọc (độ tin ${ra.doTin}%) — xem lại giúp.`
+          : `Đã chèn chữ đọc được (độ tin ${ra.doTin}%).`
+      )
+    } catch (e) {
+      datBaoOcr('Không đọc được ảnh: ' + (e instanceof Error ? e.message : 'lỗi không rõ'))
+    } finally {
+      datDangDoc(false)
+    }
+  }
 
   useEffect(() => {
     if (!editorOpen || !track) return
@@ -82,11 +117,26 @@ export function LyricsEditor(): JSX.Element | null {
             spellCheck={false}
             placeholder={'[00:12.50]Dòng đầu tiên\n[00:18.20]Dòng thứ hai'}
           />
+          {/*
+            Báo kết quả đọc ảnh ngay dưới ô soạn, không dùng hộp thoại: chữ vừa
+            được chèn vào ngay trên đó, người dùng cần nhìn cả hai cùng lúc để
+            biết có phải sửa gì không.
+          */}
+          {baoOcr && <p className="ocr-bao">{baoOcr}</p>}
         </div>
 
         <div className="modal__foot">
           <button className="btn btn--ghost btn--sm" onClick={stampCurrent}>
             Chèn mốc {formatTime(position)}
+          </button>
+          <button
+            className="btn btn--ghost btn--sm"
+            onClick={() => void nhapTuAnh()}
+            disabled={dangDoc}
+            title="Chọn ảnh chụp lời, đọc chữ ra rồi chèn vào đây"
+          >
+            {dangDoc ? <LyraLoader /> : <IconImage size={15} />}
+            {dangDoc ? 'Đang đọc ảnh…' : 'Nhập từ ảnh'}
           </button>
           <div style={{ flex: 1 }} />
           <button className="btn btn--ghost btn--danger" onClick={() => void clear()} disabled={saving}>

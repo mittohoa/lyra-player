@@ -130,6 +130,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | Phát video trong máy, toàn màn hình | ✓ | ✓ |
 | Phụ đề `.srt` / `.vtt` / `.ass` nằm cạnh tệp | `.srt` | ✓ |
 | Thẻ lời chia sẻ — sáu mẫu bố cục, xuất ảnh | ✓ | ✓ |
+| Nhập lời từ ảnh chụp (OCR) | ML Kit | Tesseract |
 | Tự cập nhật | ✓ | ✓ (hỏng tới 0.1.6, xem mục 8) |
 
 ### Chỉ Android có
@@ -137,8 +138,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | Tính năng | Vì sao Windows chưa có |
 |---|---|
 | **Tự xoay theo chiều video** khi vào toàn màn hình | trên máy tính người dùng tự xoay cửa sổ được, không cần |
-| **Nhập lời từ ảnh chụp** (OCR) | làm ở Android 0.3.4, Windows chưa theo |
-| **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | như trên |
+| **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | làm ở Android 0.3.3, Windows chưa theo |
 | **Góp lời ngược lại cho LRCLIB** | như trên |
 | **Sao lưu lời tự nhập ra tệp** | như trên |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
@@ -154,12 +154,13 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 
 ### Hai chỗ Windows còn thua
 
-1. **Không có OCR nhập lời từ ảnh, và không có chạm để căn giờ.** Bù lại
-   Windows có căn giờ bằng AI, thứ Android không có.
+1. **Không có chạm để căn giờ.** Bù lại Windows có căn giờ bằng AI, thứ Android
+   không có — nên chỗ này không hẳn là thiếu, mà là làm theo cách khác.
 2. **Nhạc do chính AURA phát không hiện trong khay media của Windows** — giới
    hạn của Electron, đã thử ba cờ Chromium, không cờ nào ăn (xem mục 7).
 
-*Hai khoảng cách lớn nhất đã lấp: phát video ở 0.1.8, thẻ lời chia sẻ ở 0.1.9.*
+*Ba khoảng cách đã lấp trong một ngày: phát video ở 0.1.8, thẻ lời chia sẻ ở
+0.1.9, nhập lời từ ảnh ở 0.1.10.*
 
 ---
 
@@ -372,7 +373,44 @@ hỏi "có vẽ được không". Tệp nhạc thử được dựng ra kèm **�
 ID3**, vì thiếu bìa thì hai mẫu cần bìa bị tắt và sẽ không bao giờ được vẽ lần
 nào.
 
-### 5.9 Logo động
+### 5.9 Nhập lời từ ảnh chụp
+
+Thêm ở 0.1.10. Mở *Sửa lời* → **Nhập từ ảnh** → chọn một tấm ảnh chụp lời, chữ
+đọc được sẽ chèn vào cuối ô soạn.
+
+**Chèn thêm chứ không thay thế:** người ta có thể chụp lời làm nhiều tấm, và đọc
+tấm thứ hai mà xoá mất tấm thứ nhất thì phải làm lại từ đầu.
+
+**Vì sao KHÔNG dùng bộ đọc sẵn của Windows.** `Windows.Media.Ocr` có sẵn trong
+hệ điều hành, chạy tại chỗ, không phải tải gì — nghe thì hợp lý. Đã đo trên máy
+thật: nó **chỉ có `en-US`**, không có tiếng Việt. Mà lời cần đọc ở đây gần như
+luôn là tiếng Việt, và tiếng Việt sai dấu thì đọc ra vô nghĩa. Bộ đọc tiếng Việt
+chỉ xuất hiện nếu người dùng tự cài gói ngôn ngữ, không thể trông vào được.
+
+Nên dùng **Tesseract chạy tại chỗ** (`tesseract.js`), ngôn ngữ `vie+eng`. Thứ tự
+có ý nghĩa: bộ đứng trước được ưu tiên khi hai bộ đọc ra hai kết quả khác nhau —
+đảo lại thì "đã" hay thành "da", "cười" thành "cuoi". Ảnh **không rời khỏi máy**.
+
+**Dữ liệu ngôn ngữ tải khi dùng lần đầu, không nhúng sẵn** (`vie` chừng 5 MB,
+`eng` chừng 4 MB). Nhúng vào bộ cài là bắt mọi người tải thêm 9 MB cho một tính
+năng phần lớn không đụng tới — cùng lối nghĩ với mô hình dịch, và với ML Kit bên
+bản Android.
+
+**Phần WASM thì có nhúng, nhưng lọc bớt.** `tesseract.js-core` mang tám biến thể
+WASM, tổng 44 MB, mà một lượt chạy chỉ nạp đúng một cái. Đọc
+`worker-script/node/getCore.js` thì thấy: với OEM mặc định (LSTM) nó chỉ đụng ba
+biến thể `-lstm`, chọn theo mức hỗ trợ SIMD của máy. Lọc bốn biến thể còn lại và
+mọi bản gộp-một-file `.wasm.js` thì còn **8,5 MB**.
+
+**Chọn ảnh và đọc ảnh là hai lệnh riêng**, không gộp một. Gộp lại thì không bài
+kiểm tự động nào chạm vào được: hộp thoại của hệ điều hành đòi một cú bấm thật.
+Mà phần đáng đo lại chính là phần đọc chữ. Tách ra còn mở đường cho kéo thả ảnh
+sau này.
+
+**Đo được** trên ảnh chữ tiếng Việt dựng bằng canvas: đọc đúng **16/16 từ**, giữ
+nguyên dấu, độ tin 96%, và giữ đúng số dòng của ảnh.
+
+### 5.10 Logo động
 
 Cùng một hình với logo AURA, chỉ khác là nó cử động — dùng ở mọi trạng thái chờ
 thay cho vòng xoay chung chung. Hai chuyển động cùng chu kỳ 1,5 giây nên ăn nhịp

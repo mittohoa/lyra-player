@@ -67,6 +67,14 @@ const api = {
       invoke(IPC.settingsPatch, patch)
   },
 
+  ocr: {
+    /** Mo hop thoai chon anh. null = nguoi dung bam Huy. */
+    pick: (): Promise<string | null> => invoke(IPC.ocrPick),
+    /** Doc chu trong mot tam anh da biet duong dan. Nem loi khi doc hong. */
+    read: (duongAnh: string): Promise<{ chu: string; doTin: number }> =>
+      invoke(IPC.ocrRead, duongAnh)
+  },
+
   share: {
     /** Luu tam the loi ra PNG. Tra ve duong dan, hoac null khi bam Huy. */
     saveCard: (png: Uint8Array, tenGoiY: string): Promise<string | null> =>

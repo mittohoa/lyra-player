@@ -1762,3 +1762,11 @@ input[type='color'] {
     justify-items: center;
   }
 }
+
+/* Báo kết quả đọc chữ từ ảnh, nằm ngay dưới ô soạn lời */
+.ocr-bao {
+  margin: 10px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--art);
+}

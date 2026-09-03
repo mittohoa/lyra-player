@@ -296,3 +296,11 @@ export const IconShare = (p: IconProps): JSX.Element => (
     <path d="M8 9h8M8 13h6" />
   </Icon>
 )
+
+export const IconImage = (p: IconProps): JSX.Element => (
+  <Icon {...p}>
+    <rect x="3" y="4.5" width="18" height="15" rx="2.5" />
+    <circle cx="8.5" cy="9.5" r="1.6" />
+    <path d="M4 17l4.5-4.5 3 3 3.5-3.5L20 16" />
+  </Icon>
+)

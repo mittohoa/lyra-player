@@ -4,6 +4,8 @@ export const IPC = {
   settingsPatch: 'settings:patch',
 
   shareSaveCard: 'share:save-card',
+  ocrPick: 'ocr:pick',
+  ocrRead: 'ocr:read',
 
   libraryGet: 'library:get',
   libraryScan: 'library:scan',
