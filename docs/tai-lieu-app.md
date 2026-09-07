@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.23, Windows 0.1.10.
+Đối chiếu: Android 0.3.24, Windows 0.1.10.
 
 ### Cả hai đều có
 
@@ -524,7 +524,7 @@ thì một người cài tay bản 0.1.0 sẽ dùng nó mãi mãi, kể cả sau
 
 Một **bản phát hành GitHub mang cả hai nền tảng**: APK Android và exe Windows
 nằm chung một thẻ, kèm `SHA256SUMS.txt` và `latest.yml`. Số hiệu hai bên đi
-riêng — `v0.3.23` mang Android 0.3.23 và Windows 0.1.10 — nên bộ dò bản mới phải
+riêng — `v0.3.24` mang Android 0.3.24 và Windows 0.1.10 — nên bộ dò bản mới phải
 đọc **tên tệp**, không đọc tên thẻ.
 
 **Windows** dùng `electron-updater` đọc trang phát hành GitHub: tải ngầm, cài
