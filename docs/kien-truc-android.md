@@ -632,7 +632,7 @@ vào lịch sử commit rồi phải sửa lại sau.
 | Tải nhạc | file 4,08 MB, `USLT` 42 dòng lời có mốc, `fffb` ngay sau thẻ |
 | Hai biến thể | bản Play không có `Id3`/`Downloader` trong mã dex |
 
-Đợt sau, `0.3.20`–`0.3.24`, trên **Samsung SM-A507FN** (Android 13):
+Đợt sau, `0.3.20`–`0.3.25`, trên **Samsung SM-A507FN** (Android 13):
 
 | | |
 |---|---|
@@ -644,6 +644,13 @@ vào lịch sử commit rồi phải sửa lại sau.
 | Đệm thẻ nhạc trên đĩa | mở lần đầu ghi ra `the-nhac.json`; mở lại `Nap 1 the tu dia` và **không đọc lại thẻ nào** |
 | Ghi `.lrc` vào thư mục SAF | tạo mới → hỏi trước khi đè → đè vào chính tệp cũ (không đẻ ra `(1)`) → bản ngắn hơn co 102 → 72 byte |
 | Chỗ ghi của trình tải | hai bài kiểm chạy trên máy: gọi hai lần vẫn ra đúng một thư mục `Lyra`; tệp tạo ra ghi/đọc lại đủ 1024 byte |
+| Video trong máy | quét ra và đếm riêng; phát trong ô bìa đúng tỉ lệ; toàn màn hình có điều khiển riêng |
+| Phụ đề `.srt` cạnh video | đọc lên như lời — "Lời từ phụ đề cạnh video" |
+| Thẻ lời và video ngắn | sáu mẫu, chọn 1–3 dòng, khung hình video làm bìa; video 313 KB dựng trong ~1 giây |
+| Nghe app khác | YouTube → nhận nguồn, tách được ca sĩ khỏi tên video, lấy lời lrclib, khung nổi vẽ đè lên YouTube với hiệu ứng quét |
+| Đổi nguồn thì lời đổi theo | phát video trong máy có `.srt` → mở YouTube → tìm và khớp `'Enrique Iglesias' tu lrclib`, không còn giữ phụ đề cũ |
+| Cảnh báo khớp theo tên bài | phát `Hours` → "Lời này khớp theo tên bài chứ không khớp tên ca sĩ" |
+| Thôi lặp tên ca sĩ | khung nổi hiện "Luis Fonsi — Despacito ft. Daddy Yank…" thay vì lặp hai lần |
 
 **Chưa nghiệm thu:** đường tải gói ngôn ngữ rồi dịch thật — cần một bài tiếng
 nước ngoài đang phát. Và widget bám nhạc phát ở **app khác** (Zing, NCT): nó
