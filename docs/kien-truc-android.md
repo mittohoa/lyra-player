@@ -204,7 +204,7 @@ app nhạc, mở AURA, rồi tìm tới trang Lời.
 
 ---
 
-## 6. Khung lời nổi và thẻ màn hình khoá
+## 6. Ba mặt của một câu hát: khung nổi, thẻ khoá màn hình, widget
 
 ### Cửa sổ
 
@@ -228,7 +228,7 @@ Câu dài hơn khung thì **thu chữ lại cho vừa**, không xuống dòng. X
 số hàng đổi theo từng câu, khung sẽ phồng lên xẹp xuống suốt bài, và phép đổi
 chạm-thành-số-dòng cũng không còn đúng.
 
-### Ba đường tắt nhanh, xếp theo mức nhanh
+### Bốn đường tắt nhanh, xếp theo mức nhanh
 
 1. **Giữ tay ngay trên khung** — ngón tay đang ở sẵn trên đúng thứ cần tắt. Máy
    rung một cái báo đã nhận. Ngưỡng dài hơn ngưỡng giữ thông thường 250 ms: tắt
@@ -236,7 +236,21 @@ chạm-thành-số-dòng cũng không còn đúng.
 2. **Ô Quick Settings** — với Android 13+ có nút xin thêm ô bằng một chạm
    (`requestAddTileService`). Bản cũ hơn thì Android không cho app tự thêm ô, và
    đúng ra là vậy: bảng đó là chỗ của người dùng.
-3. Nút trong app.
+3. **Lối tắt nhấn giữ biểu tượng** — cùng một việc với ô Quick Settings, chỉ khác
+   chỗ với tới: ô kia nằm trong bảng kéo xuống, cái này ở màn hình chính. Nó mở
+   một Activity trong suốt làm đúng một việc rồi tự đóng ngay trong `onCreate`,
+   nên người dùng thấy khung lời hiện lên trên chính app nhạc họ đang mở.
+
+   Lối tắt phải dựng **bằng mã lúc chạy** (`ShortcutManagerCompat`), không khai
+   được trong `res/xml/shortcuts.xml`: thuộc tính `android:targetPackage` ở đó
+   KHÔNG phân giải tham chiếu tài nguyên, nên `@string/id_app` tới nơi là chuỗi
+   `"@2131624022"` và trình khởi chạy báo "ứng dụng chưa được cài đặt". Mà viết
+   cứng tên gói cũng không xong: bản gỡ lỗi mang đuôi `.debug`.
+
+   *Còn gợn, đã đo:* bảng lối tắt của Pixel Launcher không tự đóng sau khi bấm.
+   Khung lời vẫn bật đúng và hiện ra ngay sau bảng. Đã thử theme trong suốt và
+   thử dời `finish()` xuống `onResume`; không cách nào đổi được.
+4. Nút trong app.
 
 ### Thẻ trên màn hình khoá
 
@@ -259,6 +273,38 @@ Ba chi tiết phải đúng, thiếu một là hỏng:
 - **Dòng trống trong .lrc thì giữ nguyên câu vừa hát.** File .lrc nào cũng có
   dòng trống giữa các đoạn; trả thẻ về tên bài ở đó biến màn hình khoá thành một
   chỗ nhấp nháy.
+
+### Widget trên màn hình chính
+
+Mặt thứ ba cho cùng một câu hát, sau khung nổi và thẻ màn hình khoá.
+
+Widget nhạc của Zing và của NCT đều là bìa album cộng mấy nút bấm — đúng với họ,
+vì sản phẩm của họ là bài nhạc. Sản phẩm của AURA là con chữ, nên widget của nó
+bày con chữ: **câu đang hát, cỡ lớn, không nút bấm nào**. Bày lại một bộ điều
+khiển thứ hai chỉ tổ chia đôi chỗ mà không thêm được gì.
+
+Viết bằng `RemoteViews` với một layout XML, không dùng Glance: widget do hệ thống
+vẽ trong tiến trình **của nó**, và kéo cả một thư viện về chỉ để bày hai dòng chữ
+là không đáng.
+
+Ba chỗ phải đúng:
+
+- **AURA tự đẩy, không để hệ thống hỏi.** `updatePeriodMillis` thưa nhất Android
+  nhận là 30 phút, mà một câu lời sống vài giây — chờ 30 phút thì widget luôn
+  hiện câu của bài trước. Nên khai `0` và đẩy `updateAppWidget` mỗi lần **đổi
+  câu**, từ chính cái nhịp đang chạy sẵn cho khung nổi (§4).
+- **Nhịp phải sống thêm.** Trước đây nhịp dừng khi khung nổi tắt và AURA không
+  phải bên phát. Giờ có thêm một vế cho widget, và vế đó cần **ba** điều kiện,
+  thiếu một là sai: có widget trên màn hình, đang có nhạc, **và** màn hình đang
+  sáng. Đây là chi phí thật của widget — bằng đúng chi phí của khung nổi, đổi
+  lại đúng một thứ: câu đang hát trên màn hình chính.
+- **Đếm widget thì phải nhớ lấy.** `getAppWidgetIds` là một cú gọi sang tiến
+  trình hệ thống, mà câu hỏi "có widget nào không" bị hỏi mỗi giây suốt cả bài.
+  Số widget chỉ đổi lúc người dùng thêm hoặc gỡ, và cả hai lúc đó hệ thống đều
+  gọi vào `KhungLoiWidget` — nên chỉ cần quên con số đã nhớ ở đúng hai chỗ đó.
+
+Dòng trống giữa hai đoạn thì **giữ nguyên câu vừa hát**, cùng lý do với thẻ màn
+hình khoá ở trên.
 
 ---
 
@@ -501,33 +547,43 @@ lệch với cỡ đo được, chính con số ấy mọc thêm mũi tên và b
 
 ```
 com.mittohoa.lyra
-├── service/       AURA (trạng thái chung), AURANotificationListener, AURATileService
+├── service/       Lyra (trạng thái chung), LyraNotificationListener, LyraTileService
 ├── media/         MediaSessionWatcher, NowPlaying
-├── lyrics/        Identify, LrcParser, Lyrics, LyricsRepository
-├── sources/       Catalog, ZingClient, NctClient, LrclibClient, LocalLibrary, Http, Crypto
-├── player/        AURAPlaybackService, Playback, StreamResolver, Artwork
+├── lyrics/        Identify, LrcParser, Lyrics, LyricsRepository,
+│                  LrcCanhTep (.lrc cạnh tệp nhạc), LoiTrongTep (ID3), DocChuTuAnh
+├── sources/       Catalog, ZingClient, NctClient, LrclibClient, Http, Crypto,
+│                  LocalLibrary (MediaStore), ThuVienNgoai (quét thẳng thư mục SAF)
+├── player/        LyraPlaybackService, Playback, StreamResolver, Artwork
 ├── translate/     OnDeviceTranslator, TranslationRepository, Languages
-├── data/          LyricCache, OffsetStore, ManualLyricStore, OverlayPrefs,
-│                  TranslatePrefs, TranslationCache, PlaylistStore
 ├── overlay/       OverlayHost, OverlayView
+├── widget/        KhungLoiWidget
+├── share/         TheLoi, VideoLoi, MauThe
+├── data/          ThuMucNhac (thư mục được phép đọc), DemTheNhac (thẻ đã đọc),
+│                  LyricCache, OffsetStore, ManualLyricStore, SaoLuuLoi,
+│                  OverlayPrefs, TranslatePrefs, TranslationCache, PlaylistStore
 ├── download/      DownloadResult · Downloads (mỗi biến thể một bản)
-└── ui/            MainActivity, HomeScreen, PlayerPane, SearchPane, Playlists,
-                   LyricEditor, AURAMark
+└── ui/            MainActivity, HomeScreen, BaiPane, SearchPane, Playlists,
+                   LyricEditor, LoiNoiActivity, LoiTat, TheLoiManHinh, LyraMark
 ```
 
 | Gói | File | Dòng |
 |---|---:|---:|
-| `ui` | 8 | 2.849 |
-| `sources` | 9 | 1.119 |
-| `lyrics` | 6 | 977 |
-| `service` | 3 | 721 |
-| `player` | 5 | 625 |
-| `data` | 8 | 596 |
-| `overlay` | 2 | 580 |
-| `download` | 5 | 409 |
+| `ui` | 20 | 7.125 |
+| `sources` | 10 | 2.060 |
+| `lyrics` | 8 | 1.733 |
+| `service` | 3 | 1.642 |
+| `data` | 14 | 1.262 |
+| `overlay` | 2 | 1.019 |
+| `player` | 4 | 719 |
+| `share` | 3 | 695 |
 | `translate` | 3 | 390 |
-| `media` | 2 | 227 |
-| **Tổng** | **51** | **~8.500** |
+| `media` | 2 | 261 |
+| `widget` | 1 | 175 |
+| `download` | 1 | 12 |
+| **Tổng** (`src/main`) | **71** | **~17.100** |
+
+Chưa tính phần riêng của từng biến thể: `sideload` thêm 6 file (~770 dòng) cho
+`Downloader`, `Id3`, `NguonNgoai` và `ApkInstaller`.
 
 Phần chuyển thẳng từ bản Windows: `Identify` và `LrcParser` (dịch cú pháp, giữ
 nguyên thuật toán và cả bộ kiểm tra), ý tưởng ba nguồn lời, bảng diễn giải lỗi.
@@ -554,7 +610,10 @@ nguyên thuật toán và cả bộ kiểm tra), ý tưởng ba nguồn lời, b
 
 ## 15. Đã nghiệm thu tới đâu
 
-Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, `sw411dp`), không phải máy ảo:
+Bảng dưới gộp hai đợt đo, và **ghi rõ máy nào** — vì có lần đã ghi nhầm tên máy
+vào lịch sử commit rồi phải sửa lại sau.
+
+Đợt đầu, tới `0.3.11`, trên **Pixel 6 Pro** (Android 14, `sw411dp`):
 
 | | |
 |---|---|
@@ -573,5 +632,20 @@ Tất cả đều chạy thật trên Pixel 6 Pro (Android 14, `sw411dp`), khôn
 | Tải nhạc | file 4,08 MB, `USLT` 42 dòng lời có mốc, `fffb` ngay sau thẻ |
 | Hai biến thể | bản Play không có `Id3`/`Downloader` trong mã dex |
 
+Đợt sau, `0.3.20`–`0.3.24`, trên **Samsung SM-A507FN** (Android 13):
+
+| | |
+|---|---|
+| Bìa nằm đầu danh sách lời | cuộn xuống bìa trôi lên; bài chưa có lời vẫn còn bìa |
+| Tấm hàng đợi | không cho chạm lọt xuống lời bên dưới; đổi bài thì tự đóng |
+| Thu gọn dải lời nhắc | trả về hơn 300 điểm ảnh; sang bài mới tự hiện lại |
+| Widget khung lời | `HOURS / "Let's go for hours and hours"`, sau 24 giây tự đổi câu; kéo rộng hẹp được |
+| Lối tắt nhấn giữ | logcat ghi `launchLocation=deep-shortcuts`; khung nổi bật đúng; "Tìm bài" mở đúng trang |
+| Đệm thẻ nhạc trên đĩa | mở lần đầu ghi ra `the-nhac.json`; mở lại `Nap 1 the tu dia` và **không đọc lại thẻ nào** |
+| Ghi `.lrc` vào thư mục SAF | tạo mới → hỏi trước khi đè → đè vào chính tệp cũ (không đẻ ra `(1)`) → bản ngắn hơn co 102 → 72 byte |
+| Chỗ ghi của trình tải | hai bài kiểm chạy trên máy: gọi hai lần vẫn ra đúng một thư mục `Lyra`; tệp tạo ra ghi/đọc lại đủ 1024 byte |
+
 **Chưa nghiệm thu:** đường tải gói ngôn ngữ rồi dịch thật — cần một bài tiếng
-nước ngoài đang phát.
+nước ngoài đang phát. Và widget bám nhạc phát ở **app khác** (Zing, NCT): nó
+dùng chung đúng luồng `NowPlaying` với khung nổi — thứ đã chạy — nhưng chưa mở
+Zing lên đo thật lần nào.
