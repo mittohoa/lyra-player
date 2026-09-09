@@ -1,6 +1,3 @@
-| **Nghe gần đây** — ghi cả nhạc phát ở app khác, xoá được bất cứ lúc nào | làm ở Android 0.3.26, Windows chưa theo |
-| **Nhớ chỗ nghe dở** cho video và bài dài | như trên |
-| **Sửa thẻ nhạc trong app**, không đụng tới tệp | như trên |
 # AURA — tài liệu toàn app
 
 > Trạng thái: đang chạy được, 133 phép kiểm tra tự động đều đạt.
@@ -114,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.26, Windows 0.1.10.
+Đối chiếu: Android 0.3.27, Windows 0.1.10.
 
 ### Cả hai đều có
 
@@ -144,7 +141,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Chạm để căn giờ** — bật nhạc, tới câu nào chạm một cái | làm ở Android 0.3.3, Windows chưa theo |
 | **Góp lời ngược lại cho LRCLIB** | như trên |
 | **Sao lưu lời tự nhập ra tệp** | như trên |
-| **Nghe gần đây** — ghi cả nhạc phát ở app khác, xoá được bất cứ lúc nào | làm ở Android 0.3.26, Windows chưa theo |
+| **Nghe gần đây** — ghi cả nhạc ở app khác, sao lưu ra tệp được | làm ở Android 0.3.26, Windows chưa theo |
 | **Nhớ chỗ nghe dở** cho video và bài dài | như trên |
 | **Sửa thẻ nhạc trong app**, không đụng tới tệp | như trên |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
