@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.27, Windows 0.1.10.
+Đối chiếu: Android 0.3.28, Windows 0.1.10.
 
 ### Cả hai đều có
 
@@ -144,6 +144,8 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Nghe gần đây** — ghi cả nhạc ở app khác, sao lưu ra tệp được | làm ở Android 0.3.26, Windows chưa theo |
 | **Nhớ chỗ nghe dở** cho video và bài dài | như trên |
 | **Sửa thẻ nhạc trong app**, không đụng tới tệp | như trên |
+| **Hẹn giờ tắt nhạc**, tắt được cả nhạc ở app khác | làm ở Android 0.3.28, Windows chưa theo |
+| **Tìm trong lời bài hát** ở ô tìm | như trên |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
 
 ### Chỉ Windows có
