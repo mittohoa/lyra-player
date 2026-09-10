@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.31, Windows 0.1.10.
+Đối chiếu: Android 0.3.32, Windows 0.1.10.
 
 ### Cả hai đều có
 
@@ -149,6 +149,8 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Tải sẵn lời cho cả thư viện** để tìm được trong lời | làm ở Android 0.3.29, Windows chưa theo |
 | **Yêu thích** một chạm, và **nghe nhiều nhất** | như trên |
 | **Cân bằng âm** theo bộ mẫu của máy | như trên |
+| **Hình trong hình** cho video | làm ở Android 0.3.32, Windows chưa theo |
+| **Android Auto** — duyệt và phát nhạc trong máy trên xe | như trên |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
 
 ### Chỉ Windows có
