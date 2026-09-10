@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.29, Windows 0.1.10.
+Đối chiếu: Android 0.3.30, Windows 0.1.10.
 
 ### Cả hai đều có
 
