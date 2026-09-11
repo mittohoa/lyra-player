@@ -54,6 +54,7 @@ import {
 } from './ai'
 import { clearLogs, log, logFolder, notify, recentLogs, reportError } from './logger'
 import { setThumbarPlaying } from './thumbar'
+import { chonVaNhap, chonVaXuat } from './saoluu-cau'
 import { getSettings, patchSettings, playlistStore } from './store'
 import {
   applyClickThrough,
@@ -117,6 +118,10 @@ const ipc = {
 }
 
 export function registerIpc(): void {
+  // ---- Cau noi voi ban Android ----------------------------------------
+  ipc.handle(IPC.saoLuuNhap, () => chonVaNhap())
+  ipc.handle(IPC.saoLuuXuat, () => chonVaXuat())
+
   // ---- Cai dat ---------------------------------------------------------
   ipc.handle(IPC.settingsGet, (): AppSettings => getSettings())
 

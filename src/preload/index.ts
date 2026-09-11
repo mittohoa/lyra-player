@@ -16,6 +16,7 @@ import {
 } from '@shared/ipc'
 import type {
   AppSettings,
+  KetQuaNhapSaoLuu,
   Lyrics,
   LyricLine,
   LyricsQuery,
@@ -73,6 +74,16 @@ const api = {
     /** Doc chu trong mot tam anh da biet duong dan. Nem loi khi doc hong. */
     read: (duongAnh: string): Promise<{ chu: string; doTin: number }> =>
       invoke(IPC.ocrRead, duongAnh)
+  },
+
+  saoLuu: {
+    /**
+     * Doc mot tep sao luu cua AURA Android vao kho loi tu nhap.
+     * `null` = nguoi dung bam Huy.
+     */
+    nhap: (): Promise<KetQuaNhapSaoLuu | null> => invoke(IPC.saoLuuNhap),
+    /** Ghi mot tep sao luu ban Android doc duoc. Tra duong dan, hoac null. */
+    xuat: (): Promise<string | null> => invoke(IPC.saoLuuXuat)
   },
 
   share: {

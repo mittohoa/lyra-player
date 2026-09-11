@@ -1,0 +1,18 @@
+LYRA-TATCA	1
+=== LYRA-LOI
+LYRA-LOI	1
+===	3	lyra://may/1000005468	Sơn Tùng M-TP	Chúng Ta Của Hiện Tại
+[00:12.30]câu thứ nhất
+=== dòng này KHÔNG phải đầu khối
+[00:20.00]câu cuối
+===	1	lyra://may/1000005469	Mỹ Tâm	Đúng Cũng Thành Sai
+[00:01.00]một dòng duy nhất
+=== LYRA-NGHE
+LYRA-NGHE	1
+1789057997795	lyra://may/1000005468		Sơn Tùng M-TP	Chúng Ta Của Hiện Tại	3	2026-09-10 23:33
+1789057783732		com.zing.mp3	Ai Đó	Bài ở app khác	1	2026-09-10 23:29
+=== LYRA-THICH
+lyra://may/1000005468
+=== LYRA-CANBANG
+bat=1
+mau=2

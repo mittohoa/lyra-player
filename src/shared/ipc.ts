@@ -3,6 +3,10 @@ export const IPC = {
   settingsGet: 'settings:get',
   settingsPatch: 'settings:patch',
 
+  // Cau noi voi ban Android: doc va ghi dung dinh dang tep sao luu ben ay.
+  saoLuuNhap: 'saoluu:nhap',
+  saoLuuXuat: 'saoluu:xuat',
+
   shareSaveCard: 'share:save-card',
   ocrPick: 'ocr:pick',
   ocrRead: 'ocr:read',

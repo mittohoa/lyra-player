@@ -201,3 +201,21 @@ export interface Playlist {
   createdAt: number
   updatedAt: number
 }
+
+/**
+ * Ket qua doc mot tep sao luu cua AURA Android.
+ *
+ * BA CON SO chu khong phai mot: mot tep hai muoi bai loi ma thu vien ben nay
+ * chi co ba bai thi bao "da nhap 3" la dung nhung noi hep - nguoi dung can
+ * biet muoi bay bai kia khong mat, chi la khong ghep duoc vao bai nao.
+ */
+export interface KetQuaNhapSaoLuu {
+  /** So bai loi da nhan vao kho. */
+  them: number
+  /** Da co san ban loi cho bai do; khong ghi de. */
+  daCo: number
+  /** Co trong tep nhung thu vien ben nay khong co bai tuong ung. */
+  khongKhop: number
+  /** Tep khong phai ban sao luu cua AURA. */
+  hong: boolean
+}

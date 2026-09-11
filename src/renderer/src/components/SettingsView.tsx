@@ -1,6 +1,6 @@
 import { useEffect, useState, type JSX, type ReactNode } from 'react'
 import type { LogEntry } from '@shared/ipc'
-import type { OverlaySettings } from '@shared/types'
+import type { KetQuaNhapSaoLuu, OverlaySettings } from '@shared/types'
 import { suggestOverlayFontSize } from '@shared/overlay-size'
 import { useApp } from '@/store/app'
 import { useExternal } from '@/store/external'
@@ -459,6 +459,23 @@ function LogSection(): JSX.Element {
   )
 }
 
+/**
+ * Ke ra tung con so sau khi doc tep sao luu cua dien thoai.
+ *
+ * BA CON SO chu khong phai mot. Mot tep hai muoi bai ma thu vien ben nay chi
+ * co ba bai thi bao "da nhap 3" la dung nhung noi hep: nguoi dung nhin con so
+ * ay roi tuong muoi bay bai kia mat. Chung khong mat - chung con nguyen trong
+ * tep, chi la o day khong co bai nao de gan vao.
+ */
+function keChuyen(kq: KetQuaNhapSaoLuu): string {
+  const phan: string[] = []
+  if (kq.them > 0) phan.push(`${kq.them} bài lời`)
+  if (kq.daCo > 0) phan.push(`${kq.daCo} bài máy này đã có lời`)
+  if (kq.khongKhop > 0) phan.push(`${kq.khongKhop} bài không có trong thư viện máy này`)
+  if (!phan.length) return 'Tệp đọc được, nhưng trong đó không có lời tự nhập nào.'
+  if (kq.them === 0) return 'Không nhận thêm bài nào: ' + phan.join(', ') + '.'
+  return 'Đã nhận ' + phan.join(', ') + '.'
+}
 export function SettingsView(): JSX.Element {
   const { settings, patchSettings, scan, addFolder, removeFolder, scanning, toast } = useApp()
   const setSourceStatus = useApp.setState
@@ -816,6 +833,53 @@ export function SettingsView(): JSX.Element {
               onChange={(v) => void patchSettings({ autoFetchLyrics: v })}
             />
           </Field>
+        </section>
+
+        {/* ---- Cau noi voi ban Android ---- */}
+        <section className="card">
+          <h3>Chuyển lời qua lại với điện thoại</h3>
+          <p className="card__hint">
+            Đọc thẳng tệp sao lưu của AURA trên Android. Chép tệp từ điện thoại sang rồi mở ở
+            đây — không cần tài khoản, không qua máy chủ nào.
+          </p>
+          <p className="card__hint">
+            Ghép bài theo <b>tên bài và ca sĩ</b>, vì khoá của hai bên không bao giờ trùng nhau.
+            Bài nào máy này không có thì bỏ qua. Lời bạn đã tự nhập ở đây <b>không bị ghi đè</b>.
+          </p>
+          <p className="card__hint">
+            Chỉ phần <b>lời tự nhập</b> dùng được ở đây — bản Windows không có chỗ cất lịch sử
+            nghe, yêu thích hay cân bằng âm. Ba phần đó vẫn đi qua nguyên vẹn: xuất lại là
+            chúng còn đủ để mang ngược về điện thoại.
+          </p>
+          <div className="row" style={{ gap: 8 }}>
+            <button
+              className="btn"
+              onClick={() => {
+                void (async () => {
+                  const kq = await window.api.saoLuu.nhap()
+                  if (!kq) return
+                  if (kq.hong) {
+                    toast('Tệp này không phải bản sao lưu của AURA.', 'error')
+                    return
+                  }
+                  toast(keChuyen(kq), kq.them > 0 ? 'success' : 'info')
+                })()
+              }}
+            >
+              Đọc tệp từ điện thoại
+            </button>
+            <button
+              className="btn"
+              onClick={() => {
+                void (async () => {
+                  const duong = await window.api.saoLuu.xuat()
+                  if (duong) toast('Đã lưu ' + duong, 'success')
+                })()
+              }}
+            >
+              Ghi tệp cho điện thoại
+            </button>
+          </div>
         </section>
 
         {/* ---- YouTube ---- */}
