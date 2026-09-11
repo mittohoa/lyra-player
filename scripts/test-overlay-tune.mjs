@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { doiCho } from './_doi.mjs'
 
 const PORT = 9414
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -106,8 +107,11 @@ try {
       return 'da bam'
     })()
   `)
-  await sleep(300)
-  check('bam nut thi bang hien ra', await ev(`!!document.querySelector('.ov__tune')`), opened)
+  check(
+    'bam nut thi bang hien ra',
+    await doiCho(() => ev(`!!document.querySelector('.ov__tune')`), (v) => v === true),
+    opened
+  )
 
   // ---- 3. Co du cac muc nguoi dung hoi ----
   const rows = await ev(`
@@ -201,8 +205,10 @@ try {
 
   // ---- 7. Esc dong bang ----
   await ev(`window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))`)
-  await sleep(250)
-  check('bam Esc thi bang dong lai', !(await ev(`!!document.querySelector('.ov__tune')`)))
+  check(
+    'bam Esc thi bang dong lai',
+    !(await doiCho(() => ev(`!!document.querySelector('.ov__tune')`), (v) => v === false))
+  )
 } catch (err) {
   failed++
   console.error('  FAIL  ', err.message)

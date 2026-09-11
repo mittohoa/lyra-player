@@ -8,6 +8,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { doiCho, nghi } from './_doi.mjs'
 
 const PORT = 9355
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
@@ -122,9 +123,14 @@ try {
     stdio: 'ignore',
     detached: false
   })
-  await sleep(14000)
-
-  const now = await evaluate('window.api.smtc.now()')
+  // CHO TOI KHI THAY, khong cho mot so giay roi khang dinh. Edge khoi dong
+  // lan dau phai dung ho so moi, va bao len SMTC cham hon han nhung lan sau -
+  // dung luc do thi con so cung khong bao gio du.
+  const now = await doiCho(
+    () => evaluate('window.api.smtc.now()'),
+    (v) => !!v && typeof v.title === 'string' && v.title.includes('Bai Hat Ngoai App'),
+    { han: 45000 }
+  )
   check('Lyra nhin thay nhac phat o app khac', !!now, now ? `${now.app} — "${now.title}"` : 'khong thay gi')
 
   if (now) {
@@ -135,19 +141,25 @@ try {
 
   // Vi tri phai TU CHAY - day la cho de sai nhat: SMTC chi tra ve anh chup
   const p1 = (await evaluate('window.api.smtc.now()'))?.position ?? 0
-  await sleep(4000)
-  const p2 = (await evaluate('window.api.smtc.now()'))?.position ?? 0
+  const p2 = await doiCho(
+    async () => (await evaluate('window.api.smtc.now()'))?.position ?? 0,
+    (v) => v - p1 > 2.5,
+    { han: 15000 }
+  )
   check('vi tri phat tu chay (da bu thoi gian troi)', p2 - p1 > 2.5, `${p1.toFixed(1)}s -> ${p2.toFixed(1)}s`)
 
   // Giao dien phai hien dung bai do trong muc Cai dat
   await evaluate(
     `[...document.querySelectorAll('.nav-item')].find(b => b.textContent.includes('Cài đặt')).click()`
   )
-  await sleep(1500)
-  const shown = await evaluate(`
-    [...document.querySelectorAll('.card')]
-      .find(c => c.textContent.includes('Lyric cho nhạc ở app khác'))?.textContent ?? ''
-  `)
+  const shown = await doiCho(
+    () => evaluate(`
+      [...document.querySelectorAll('.card')]
+        .find(c => c.textContent.includes('Lyric cho nhạc ở app khác'))?.textContent ?? ''
+    `),
+    (v) => v.includes('Bai Hat Ngoai App'),
+    { han: 15000 }
+  )
   check(
     'muc Cai dat hien dung bai app khac dang phat',
     shown.includes('Bai Hat Ngoai App'),
@@ -159,10 +171,31 @@ try {
   console.error('  FAIL  ', err.message)
 } finally {
   ws?.close()
-  edge?.kill('SIGKILL')
   app.kill('SIGKILL')
-  spawn('taskkill', ['/IM', 'msedge.exe', '/F'], { stdio: 'ignore' })
-  await sleep(1500)
+
+  // GIET DUNG CAY TIEN TRINH MINH DA MO, khong giet moi Edge tren may.
+  //
+  // Truoc day cho la `taskkill /IM msedge.exe /F` - no dong sach ca nhung cua
+  // so Edge NGUOI DUNG dang mo, giua luc chay bo kiem tra. Mat tab cua nguoi
+  // ta de sua mot bai kiem la cai gia khong dang tra, va no con lam ban kiem
+  // tiep theo khoi dong trong mot may vua bi giet sach trinh duyet.
+  //
+  // `/T` de lay ca tien trinh con: Edge tach ra vai tien trinh, giet moi cai
+  // cha thi may cai con van giu phien SMTC va bai sau nhin thay nhac "dang
+  // phat" tu lan chay truoc.
+  if (edge?.pid) {
+    await new Promise((res) => {
+      spawn('taskkill', ['/PID', String(edge.pid), '/T', '/F'], { stdio: 'ignore' })
+        .on('close', res)
+        .on('error', res)
+    })
+  }
+  edge?.kill('SIGKILL')
+
+  // Doi phien SMTC that su tat. Bai sau doc cung mot nguon he thong, nen tra
+  // quyen dieu khien lai roi moi di la viec cua bai nay chu khong phai viec
+  // cua bai sau.
+  await nghi(2000)
   for (let i = 0; i < 5; i++) {
     try { rmSync(root, { recursive: true, force: true }); break } catch { await sleep(500) }
   }

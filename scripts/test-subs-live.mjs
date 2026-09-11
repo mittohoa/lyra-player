@@ -153,9 +153,19 @@ try {
   console.error('  FAIL  ', err.message)
 } finally {
   ws?.close()
-  edge?.kill('SIGKILL')
   app.kill('SIGKILL')
-  spawn('taskkill', ['/IM', 'msedge.exe', '/F'], { stdio: 'ignore' })
+
+  // GIET DUNG CAY TIEN TRINH MINH DA MO, khong giet moi Edge tren may - cung
+  // le voi `test-smtc.mjs`. `/T` de lay ca tien trinh con, vi Edge tach ra vai
+  // tien trinh va giet moi cai cha thi may cai con van song.
+  if (edge?.pid) {
+    await new Promise((res) => {
+      spawn('taskkill', ['/PID', String(edge.pid), '/T', '/F'], { stdio: 'ignore' })
+        .on('close', res)
+        .on('error', res)
+    })
+  }
+  edge?.kill('SIGKILL')
   await sleep(1500)
   for (let i = 0; i < 5; i++) {
     try {

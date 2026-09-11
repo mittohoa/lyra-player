@@ -10,6 +10,7 @@ import { spawn } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { doiCho } from './_doi.mjs'
 
 const PORT = 9333
 let failed = 0
@@ -149,17 +150,14 @@ try {
     return r.result.value
   }
 
-  /** Cho den khi bieu thuc trong renderer tra ve gia tri that (khong cho cung). */
-  const waitFor = async (expression, timeoutMs = 15000) => {
-    const deadline = Date.now() + timeoutMs
-    let value
-    while (Date.now() < deadline) {
-      value = await evaluate(expression)
-      if (value) return value
-      await sleep(300)
-    }
-    return value
-  }
+  /**
+   * Cho den khi bieu thuc trong renderer tra ve gia tri that (khong cho cung).
+   *
+   * Chi con la mot lop mong tren `doiCho`: cach cho nay dung o nhieu bai kiem,
+   * va hai ban chep tay thi mot ban duoc sua con ban kia thi khong.
+   */
+  const waitFor = (expression, timeoutMs = 15000) =>
+    doiCho(() => evaluate(expression), (v) => !!v, { han: timeoutMs, nhip: 300 })
 
   await evaluate('1')
   check('app bat len va noi duoc vao renderer', true)
@@ -185,14 +183,21 @@ try {
     `document.querySelector('.track-row [title="Phát"]')
        .dispatchEvent(new MouseEvent('click', { bubbles: true }))`
   )
-  await sleep(4000)
-
-  // 4. Dong ho chi nhich khi <audio> that su giai ma duoc file
-  const elapsed = await evaluate('document.querySelector(".seek__time")?.textContent')
-  const seconds = (() => {
-    const m = /^(\d+):(\d{2})$/.exec(elapsed ?? '')
+  // 4. Dong ho chi nhich khi <audio> that su giai ma duoc file.
+  //
+  // CHO TOI KHI DONG HO NHICH, khong cho bon giay roi khang dinh. Thiet bi am
+  // thanh co the dang ban - nhat la ngay sau mot bai kiem khac vua dong mot
+  // trinh duyet dang phat - va luc do bon giay khong du de <audio> bat dau.
+  const docDongHo = (t) => {
+    const m = /^(\d+):(\d{2})$/.exec(t ?? '')
     return m ? Number(m[1]) * 60 + Number(m[2]) : -1
-  })()
+  }
+  const elapsed = await doiCho(
+    () => evaluate('document.querySelector(".seek__time")?.textContent'),
+    (t) => docDongHo(t) > 0,
+    { han: 20000 }
+  )
+  const seconds = docDongHo(elapsed)
   check('nhac that su dang phat (dong ho chay)', seconds > 0, `dong ho hien ${elapsed}`)
 
   const isPause = await evaluate(
