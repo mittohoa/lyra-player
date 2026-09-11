@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.33, Windows 0.1.10.
+Đối chiếu: Android 0.3.34, Windows 0.1.10.
 
 ### Cả hai đều có
 
@@ -151,6 +151,9 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Cân bằng âm** theo bộ mẫu của máy | như trên |
 | **Hình trong hình** cho video | làm ở Android 0.3.32, Windows chưa theo |
 | **Android Auto** — duyệt và phát nhạc trong máy trên xe | như trên |
+| **Tự lưu ra thư mục bạn chọn** mỗi vài ngày, giữ năm bản | làm ở Android 0.3.34, Windows chưa theo |
+| **Mờ dần khi đổi bài** và **bỏ khoảng lặng** | như trên |
+| **Bảy ngày qua** — tách nhạc AURA phát với nhạc ở app khác | như trên |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
 
 ### Chỉ Windows có
@@ -161,6 +164,20 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **YouTube** tìm và phát; **Spotify** tra cứu; dán thẳng URL | Android chỉ có Zing MP3 và NhacCuaTui |
 | **Lấy phụ đề YouTube** cho video đang xem trong trình duyệt | cần `yt-dlp`, một tệp nhị phân bên ngoài |
 | Thanh nút điều khiển ở ô xem trước dưới taskbar | riêng của Windows |
+
+### Một chỗ hai bên vừa chạm được vào nhau
+
+Bản Windows đọc và ghi được tệp sao lưu của Android. Chép tệp qua là chuyển
+được lời tự nhập — thứ tốn nhiều phút gõ tay nhất — mà không cần tài khoản hay
+máy chủ nào. Ghép bài theo tên bài và ca sĩ, vì khoá hai bên không bao giờ
+trùng.
+
+**Mã đã xong, chưa ra bản cài.** Cần một bản Windows mới thì nó mới tới tay ai
+được. Phía Android không phải đổi gì — định dạng tệp đã có sẵn từ trước.
+
+Ba phần Windows không có chỗ cất (lịch sử nghe, yêu thích, cân bằng âm) đi qua
+nguyên vẹn và được ghi trả lại đủ, nên một vòng điện thoại → máy tính → điện
+thoại không làm rơi gì.
 
 ### Hai chỗ Windows còn thua
 
