@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.34, Windows 0.1.10.
+Đối chiếu: Android 0.3.34, Windows 0.1.11.
 
 ### Cả hai đều có
 
@@ -172,8 +172,9 @@ Bản Windows đọc và ghi được tệp sao lưu của Android. Chép tệp 
 máy chủ nào. Ghép bài theo tên bài và ca sĩ, vì khoá hai bên không bao giờ
 trùng.
 
-**Mã đã xong, chưa ra bản cài.** Cần một bản Windows mới thì nó mới tới tay ai
-được. Phía Android không phải đổi gì — định dạng tệp đã có sẵn từ trước.
+Ra ở **Windows 0.1.11**. Phía Android không phải đổi gì — định dạng tệp đã có
+sẵn từ trước, nên mọi bản Android từ 0.3.32 trở đi đều ghi ra tệp bên này đọc
+được.
 
 Ba phần Windows không có chỗ cất (lịch sử nghe, yêu thích, cân bằng âm) đi qua
 nguyên vẹn và được ghi trả lại đủ, nên một vòng điện thoại → máy tính → điện
