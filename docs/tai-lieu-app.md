@@ -111,7 +111,7 @@ Hai bản **đã đi lệch nhau**, không phải bản này là tập con của
 chạy trước ở mảng công cụ lời suốt tháng 9; Windows giữ phần AI nặng mà điện
 thoại không kham nổi. Bảng này để nhìn một cái là biết bên nào đang thiếu gì.
 
-Đối chiếu: Android 0.3.34, Windows 0.1.11.
+Đối chiếu: Android 0.3.35, Windows 0.1.11.
 
 ### Cả hai đều có
 
@@ -154,6 +154,7 @@ thoại không kham nổi. Bảng này để nhìn một cái là biết bên n�
 | **Tự lưu ra thư mục bạn chọn** mỗi vài ngày, giữ năm bản | làm ở Android 0.3.34, Windows chưa theo |
 | **Mờ dần khi đổi bài** và **bỏ khoảng lặng** | như trên |
 | **Bảy ngày qua** — tách nhạc AURA phát với nhạc ở app khác | như trên |
+| **Nhật ký sự cố** đọc được và tự gửi đi bằng tay | làm ở Android 0.3.35, Windows có sẵn trang nhật ký riêng |
 | Thẻ điều khiển màn hình khoá, ô cài đặt nhanh | không có thứ tương đương trên Windows |
 
 ### Chỉ Windows có
